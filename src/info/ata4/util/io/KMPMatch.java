@@ -55,25 +55,7 @@ public class KMPMatch {
      * Finds the first occurrence of the pattern in the byte array.
      */
     public int indexOf(byte[] data, byte[] pattern) {
-        if (data.length < pattern.length) {
-            return -1;
-        }
-        
-        int[] failure = computeFailure(pattern);
-        int j = 0;
-
-        for (int i = 0; i < data.length; i++) {
-            while (j > 0 && pattern[j] != data[i]) {
-                j = failure[j - 1];
-            }
-            if (pattern[j] == data[i]) {
-                j++;
-            }
-            if (j == pattern.length) {
-                return i - pattern.length + 1;
-            }
-        }
-        return -1;
+        return indexOf(ByteBuffer.wrap(data), pattern);
     }
     
     /**
