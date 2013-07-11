@@ -50,7 +50,9 @@ public class NIOFileUtils {
             fc = new FileInputStream(file).getChannel();
             fc.read(dest, offset);
         } finally {
-            fc.close();
+            if (fc != null) {
+                fc.close();
+            }
         }
     }
     
@@ -67,7 +69,9 @@ public class NIOFileUtils {
             // map entire file as byte buffer
             bb = fc.map(FileChannel.MapMode.READ_ONLY, offset, length > 0 ? length : fc.size());
         } finally {
-            fc.close();
+            if (fc != null) {
+                fc.close();
+            }
         }
         
         return bb;
@@ -100,7 +104,9 @@ public class NIOFileUtils {
             // map file as byte buffer
             bb = fc.map(FileChannel.MapMode.READ_WRITE, offset, size);
         } finally {
-            raf.close();
+            if (raf != null) {
+                raf.close();
+            }
         }
         
         return bb;
