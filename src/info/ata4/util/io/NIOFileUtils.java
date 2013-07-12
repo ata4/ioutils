@@ -92,7 +92,7 @@ public class NIOFileUtils {
             int fileSize = offset + size;
             
             // reset file if a new size is set
-            if (size > 0 && fileSize != raf.length()) {
+            if (size > 0) {
                 raf.setLength(0);
                 raf.setLength(fileSize);
             } else {
