@@ -89,12 +89,10 @@ public class NIOFileUtils {
             // open random access file
             raf = new RandomAccessFile(file, "rw");
             
-            int fileSize = offset + size;
-            
             // reset file if a new size is set
             if (size > 0) {
                 raf.setLength(0);
-                raf.setLength(fileSize);
+                raf.setLength(offset + size);
             } else {
                 size = (int) raf.length() - offset;
             }
