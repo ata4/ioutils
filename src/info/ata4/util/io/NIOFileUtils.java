@@ -11,6 +11,7 @@ package info.ata4.util.io;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -49,6 +50,19 @@ public class NIOFileUtils {
             // fill the buffer with the file channel
             fc = new FileInputStream(file).getChannel();
             fc.read(dest, offset);
+        } finally {
+            if (fc != null) {
+                fc.close();
+            }
+        }
+    }
+    
+    public static void save(File file, ByteBuffer bb) throws IOException {
+        FileChannel fc = null;
+        
+        try {
+            fc = new FileOutputStream(file).getChannel();
+            fc.write(bb);
         } finally {
             if (fc != null) {
                 fc.close();
