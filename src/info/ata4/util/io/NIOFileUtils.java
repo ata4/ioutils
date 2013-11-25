@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Utility class to open files via NIO buffers.
@@ -51,9 +52,7 @@ public class NIOFileUtils {
             fc = new FileInputStream(file).getChannel();
             fc.read(dest, offset);
         } finally {
-            if (fc != null) {
-                fc.close();
-            }
+            IOUtils.closeQuietly(fc);
         }
     }
     
@@ -64,9 +63,7 @@ public class NIOFileUtils {
             fc = new FileOutputStream(file).getChannel();
             fc.write(bb);
         } finally {
-            if (fc != null) {
-                fc.close();
-            }
+            IOUtils.closeQuietly(fc);
         }
     }
     
@@ -83,9 +80,7 @@ public class NIOFileUtils {
             // map entire file as byte buffer
             bb = fc.map(FileChannel.MapMode.READ_ONLY, offset, length > 0 ? length : fc.size());
         } finally {
-            if (fc != null) {
-                fc.close();
-            }
+            IOUtils.closeQuietly(fc);
         }
         
         return bb;
@@ -116,9 +111,7 @@ public class NIOFileUtils {
             // map file as byte buffer
             bb = fc.map(FileChannel.MapMode.READ_WRITE, offset, size);
         } finally {
-            if (raf != null) {
-                raf.close();
-            }
+            IOUtils.closeQuietly(raf);
         }
         
         return bb;
