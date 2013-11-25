@@ -16,6 +16,8 @@ import org.apache.commons.io.EndianUtils;
 /**
  * DataOutput extension for more data access methods.
  * 
+ * TODO: add missing corresponding DataInputReader methods
+ * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
 public class DataOutputWriter extends DataOutputWrapper {
