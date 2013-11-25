@@ -128,12 +128,14 @@ public class DataInputReader extends DataInputWrapper {
             throw new IllegalArgumentException("Invalid limit");
         }
         
+        // read raw byte array until the size is equal to limit or the byte is null
         byte[] raw = new byte[limit];
         int length = 0;
         for (byte b; length < raw.length && (b = readByte()) != 0; length++) {
             raw[length] = b;
         }
         
+        // skip padding bytes
         if (padded) {
             skipBytes(limit - length - 1);
         }
