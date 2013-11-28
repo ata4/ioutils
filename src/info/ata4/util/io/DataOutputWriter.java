@@ -10,7 +10,10 @@
 package info.ata4.util.io;
 
 import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import org.apache.commons.io.EndianUtils;
 
 /**
@@ -27,6 +30,14 @@ public class DataOutputWriter extends DataOutputWrapper {
     
     public DataOutputWriter(DataOutput out) {
         super(out);
+    }
+    
+    public DataOutputWriter(OutputStream is) {
+        super(new DataOutputStream(is));
+    }
+    
+    public DataOutputWriter(ByteBuffer bb) {
+        super(new ByteBufferOutput(bb));
     }
     
     public boolean isSwap() {

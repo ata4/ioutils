@@ -10,8 +10,11 @@
 package info.ata4.util.io;
 
 import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import org.apache.commons.io.EndianUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -29,6 +32,14 @@ public class DataInputReader extends DataInputWrapper {
         super(in);
     }
     
+    public DataInputReader(InputStream is) {
+        super(new DataInputStream(is));
+    }
+    
+    public DataInputReader(ByteBuffer bb) {
+        super(new ByteBufferInput(bb));
+    }
+    
     public boolean isSwap() {
         return swap;
     }
@@ -39,56 +50,56 @@ public class DataInputReader extends DataInputWrapper {
     
     @Override
     public short readShort() throws IOException {
+        short r = super.readShort();
         if (swap) {
-            return EndianUtils.swapShort(super.readShort());
-        } else {
-            return super.readShort();
+            r = EndianUtils.swapShort(r);
         }
+        return r;
     }
     
     @Override
     public int readUnsignedShort() throws IOException {
+        int r = super.readUnsignedShort();
         if (swap) {
-            return EndianUtils.swapInteger(super.readUnsignedShort());
-        } else {
-            return super.readUnsignedShort();
+            r = EndianUtils.swapInteger(r);
         }
+        return r;
     }
 
     @Override
     public int readInt() throws IOException {
+        int r = super.readInt();
         if (swap) {
-            return EndianUtils.swapInteger(super.readInt());
-        } else {
-            return super.readInt();
+            r = EndianUtils.swapInteger(r);
         }
+        return r;
     }
     
     @Override
     public long readLong() throws IOException {
+        long r = super.readLong();
         if (swap) {
-            return EndianUtils.swapLong(super.readLong());
-        } else {
-            return super.readLong();
+            r = EndianUtils.swapLong(r);
         }
+        return r;
     }
     
     @Override
     public float readFloat() throws IOException {
+        float r = super.readFloat();
         if (swap) {
-            return EndianUtils.swapFloat(super.readFloat());
-        } else {
-            return super.readFloat();
+            r = EndianUtils.swapFloat(r);
         }
+        return r;
     }
     
     @Override
     public double readDouble() throws IOException {
+        double r = super.readDouble();
         if (swap) {
-            return EndianUtils.swapDouble(super.readDouble());
-        } else {
-            return super.readDouble();
+            r = EndianUtils.swapDouble(r);
         }
+        return r;
     }
 
     /*
@@ -104,11 +115,9 @@ public class DataInputReader extends DataInputWrapper {
     public BigInteger readUnsignedLong() throws IOException {
         byte[] raw = new byte[8];
         readFully(raw);
-        
         if (swap) {
             ArrayUtils.reverse(raw);
         }
-        
         return new BigInteger(raw);
     }
     
