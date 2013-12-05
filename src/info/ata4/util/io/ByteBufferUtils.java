@@ -22,17 +22,21 @@ public class ByteBufferUtils {
     }
     
     public static ByteBuffer getSlice(ByteBuffer bb, int offset, int length) {
+        // get current position and limit
         int pos = bb.position();
         int limit = bb.limit();
         
         bb.position(offset);
         
+        // set new limit if length is provided, use current limit otherwise
         if (length > 0) {
             bb.limit(offset + length);
         }
         
+        // do the actual slicing
         ByteBuffer bbSlice = bb.slice();
         
+        // restore original limit and position
         bb.limit(limit);
         bb.position(pos);
         
@@ -40,6 +44,6 @@ public class ByteBufferUtils {
     }
     
     public static ByteBuffer getSlice(ByteBuffer bb, int offset) {
-        return getSlice(bb, offset, -1);
+        return getSlice(bb, offset, 0);
     }
 }
