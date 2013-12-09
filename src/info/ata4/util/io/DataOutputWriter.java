@@ -88,6 +88,18 @@ public class DataOutputWriter extends DataOutputWrapper {
         super.writeLong(v);
     }
     
+    /**
+     * Writes a float as half-precision 16 bit floating-point number according to
+     * IEEE 754-2008.
+     * 
+     * @param f float value
+     * @throws IOException 
+     */
+    public void writeHalf(float f) throws IOException {
+        int sval = HalfFloat.floatToIntBits(f);
+        writeShort(sval);
+    }
+    
     public void writeStringFixed(String str, String charset) throws IOException {
         write(str.getBytes(charset));
     }

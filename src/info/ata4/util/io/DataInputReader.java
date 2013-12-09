@@ -122,6 +122,18 @@ public class DataInputReader extends DataInputWrapper {
     }
     
     /**
+     * Reads a half-precision 16 bit floating-point number according to
+     * IEEE 754-2008. The result is returned as normal 32 bit float.
+     * 
+     * @return half-precision float as full-precision float
+     * @throws IOException 
+     */
+    public float readHalf() throws IOException {
+        int hbits = readUnsignedShort();
+        return HalfFloat.intBitsToFloat(hbits);
+    }
+    
+    /**
      * Reads a null-terminated string.
      * 
      * @param limit maximum amount of bytes to read before truncation
