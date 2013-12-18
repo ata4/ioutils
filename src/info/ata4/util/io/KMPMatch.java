@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
 /**
  * Knuth-Morris-Pratt algorithm for pattern matching.
  * 
- * Based on http://stackoverflow.com/questions/1507780/searching-for-a-sequence-of-bytes-in-a-binary-file-with-java
+ * Based on http://stackoverflow.com/a/1507813
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
