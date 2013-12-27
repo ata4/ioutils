@@ -23,7 +23,7 @@ import org.apache.commons.lang3.ArrayUtils;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataInputReader extends DataInputWrapper {
+public class DataInputReader extends DataInputWrapper implements Swappable {
     
     private static final String DEFAULT_CHARSET = "ASCII";
     private boolean swap;
@@ -40,12 +40,24 @@ public class DataInputReader extends DataInputWrapper {
         super(new ByteBufferInput(bb));
     }
     
+    @Override
     public boolean isSwap() {
-        return swap;
+        DataInput in = getDataInput();
+        if (in instanceof Swappable) {
+            return ((Swappable) in).isSwap();
+        } else {
+            return swap;
+        }
     }
 
+    @Override
     public void setSwap(boolean swap) {
-        this.swap = swap;
+        DataInput in = getDataInput();
+        if (in instanceof Swappable) {
+            ((Swappable) in).setSwap(swap);
+        } else {
+            this.swap = swap;
+        }
     }
     
     @Override

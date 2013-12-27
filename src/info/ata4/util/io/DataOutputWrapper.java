@@ -23,6 +23,10 @@ public class DataOutputWrapper implements DataOutput {
     public DataOutputWrapper(DataOutput out) {
         this.out = out;
     }
+    
+    public DataOutput getDataOutput() {
+        return out;
+    }
 
     @Override
     public void write(int b) throws IOException {

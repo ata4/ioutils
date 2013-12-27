@@ -23,6 +23,10 @@ public class DataInputWrapper implements DataInput {
     public DataInputWrapper(DataInput in) {
         this.in = in;
     }
+    
+    public DataInput getDataInput() {
+        return in;
+    }
  
     @Override
     public void readFully(byte[] b) throws IOException {

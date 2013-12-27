@@ -11,12 +11,13 @@ package info.ata4.util.io;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class ByteBufferWrapper {
+public abstract class ByteBufferWrapper implements Swappable {
     
     protected final ByteBuffer buf;
 
@@ -77,5 +78,15 @@ public class ByteBufferWrapper {
      */
     public void seek(int pos) throws IOException {
         position(position() + pos);
+    }
+    
+    @Override
+    public boolean isSwap() {
+        return buf.order() != ByteOrder.BIG_ENDIAN;
+    }
+
+    @Override
+    public void setSwap(boolean swap) {
+        buf.order(swap ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
     }
 }

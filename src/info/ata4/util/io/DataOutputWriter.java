@@ -23,7 +23,7 @@ import org.apache.commons.io.EndianUtils;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataOutputWriter extends DataOutputWrapper {
+public class DataOutputWriter extends DataOutputWrapper implements Swappable {
     
     private static final String DEFAULT_CHARSET = "ASCII";
     private boolean swap;
@@ -40,12 +40,24 @@ public class DataOutputWriter extends DataOutputWrapper {
         super(new ByteBufferOutput(bb));
     }
     
+    @Override
     public boolean isSwap() {
-        return swap;
+        DataOutput in = getDataOutput();
+        if (in instanceof Swappable) {
+            return ((Swappable) in).isSwap();
+        } else {
+            return swap;
+        }
     }
 
+    @Override
     public void setSwap(boolean swap) {
-        this.swap = swap;
+        DataOutput in = getDataOutput();
+        if (in instanceof Swappable) {
+            ((Swappable) in).setSwap(swap);
+        } else {
+            this.swap = swap;
+        }
     }
     
     @Override
