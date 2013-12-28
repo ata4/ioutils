@@ -13,6 +13,7 @@ import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import org.apache.commons.io.EndianUtils;
@@ -23,13 +24,17 @@ import org.apache.commons.lang3.ArrayUtils;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataInputReader extends DataInputWrapper implements Swappable {
+public class DataInputReader extends DataInputWrapper {
     
     private static final String DEFAULT_CHARSET = "ASCII";
     private boolean swap;
     
     public DataInputReader(DataInput in) {
         super(in);
+    }
+    
+    public DataInputReader(RandomAccessFile raf) {
+        super(new RandomAccessFileWrapper(raf));
     }
     
     public DataInputReader(InputStream is) {
@@ -42,9 +47,8 @@ public class DataInputReader extends DataInputWrapper implements Swappable {
     
     @Override
     public boolean isSwap() {
-        DataInput in = getDataInput();
-        if (in instanceof Swappable) {
-            return ((Swappable) in).isSwap();
+        if (super.isSwappable()) {
+            return super.isSwap();
         } else {
             return swap;
         }
@@ -52,12 +56,17 @@ public class DataInputReader extends DataInputWrapper implements Swappable {
 
     @Override
     public void setSwap(boolean swap) {
-        DataInput in = getDataInput();
-        if (in instanceof Swappable) {
-            ((Swappable) in).setSwap(swap);
+        if (super.isSwappable()) {
+            super.setSwap(swap);
         } else {
             this.swap = swap;
         }
+    }
+
+    @Override
+    public boolean isSwappable() {
+        // supports manual swapping using EndianUtils if required
+        return true;
     }
     
     @Override

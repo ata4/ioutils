@@ -16,18 +16,15 @@ import java.io.IOException;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataOutputWrapper implements DataOutput {
+public class DataOutputWrapper extends IOWrapper<DataOutput> implements DataOutput {
     
     private final DataOutput out;
 
     public DataOutputWrapper(DataOutput out) {
+        super(out);
         this.out = out;
     }
     
-    public DataOutput getDataOutput() {
-        return out;
-    }
-
     @Override
     public void write(int b) throws IOException {
         out.write(b);

@@ -13,6 +13,7 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import org.apache.commons.io.EndianUtils;
 
@@ -32,6 +33,10 @@ public class DataOutputWriter extends DataOutputWrapper implements Swappable {
         super(out);
     }
     
+    public DataOutputWriter(RandomAccessFile raf) {
+        super(new RandomAccessFileWrapper(raf));
+    }
+    
     public DataOutputWriter(OutputStream is) {
         super(new DataOutputStream(is));
     }
@@ -42,9 +47,8 @@ public class DataOutputWriter extends DataOutputWrapper implements Swappable {
     
     @Override
     public boolean isSwap() {
-        DataOutput in = getDataOutput();
-        if (in instanceof Swappable) {
-            return ((Swappable) in).isSwap();
+        if (super.isSwappable()) {
+            return super.isSwap();
         } else {
             return swap;
         }
@@ -52,12 +56,17 @@ public class DataOutputWriter extends DataOutputWrapper implements Swappable {
 
     @Override
     public void setSwap(boolean swap) {
-        DataOutput in = getDataOutput();
-        if (in instanceof Swappable) {
-            ((Swappable) in).setSwap(swap);
+        if (super.isSwappable()) {
+            super.setSwap(swap);
         } else {
             this.swap = swap;
         }
+    }
+
+    @Override
+    public boolean isSwappable() {
+        // supports manual swapping using EndianUtils if required
+        return true;
     }
     
     @Override

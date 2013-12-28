@@ -17,7 +17,7 @@ import java.nio.ByteOrder;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public abstract class ByteBufferWrapper implements Swappable {
+public abstract class ByteBufferWrapper implements Swappable, Seekable {
     
     protected final ByteBuffer buf;
 
@@ -29,57 +29,6 @@ public abstract class ByteBufferWrapper implements Swappable {
         return buf;
     }
     
-    /**
-     * Same as {@link java.nio.ByteBuffer}.hasRemaining()
-     *
-     * @return true, if there are remaining bytes in the byte buffer
-     */
-    public boolean hasRemaining() {
-        return buf.hasRemaining();
-    }
-
-    /**
-     * Same as {@link java.nio.ByteBuffer}.remaining()
-     *
-     * @return remaining bytes in the byte buffer
-     */
-    public int remaining() {
-        return buf.remaining();
-    }
-
-    /**
-     * Same as {@link java.nio.ByteBuffer}.position()
-     *
-     * @return position in the byte buffer
-     */
-    public int position() {
-        return buf.position();
-    }
-
-    /**
-     * Same as {@link java.nio.ByteBuffer}.position(int newPosition)
-     * 
-     * @param pos new buffer position
-     * @throws IOException 
-     */
-    public void position(int pos) throws IOException {
-        try {
-            buf.position(pos);
-        } catch (IllegalArgumentException ex) {
-            throw new IOException(ex);
-        }
-    }
-
-    /**
-     * Sets the buffer's position relative to the current one. 
-     * 
-     * @param pos new relative buffer position
-     * @throws IOException 
-     */
-    public void seek(int pos) throws IOException {
-        position(position() + pos);
-    }
-    
     @Override
     public boolean isSwap() {
         return buf.order() != ByteOrder.BIG_ENDIAN;
@@ -88,5 +37,33 @@ public abstract class ByteBufferWrapper implements Swappable {
     @Override
     public void setSwap(boolean swap) {
         buf.order(swap ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+    }
+    
+    @Override
+    public void seek(long pos) throws IOException {
+        if (pos > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Pointer is too large (> " + Integer.MAX_VALUE + ")");
+        }
+        buf.position((int) pos);
+    }
+
+    @Override
+    public long tell() throws IOException {
+        return buf.position();
+    }
+
+    @Override
+    public long length() throws IOException {
+        return buf.capacity();
+    }
+
+    @Override
+    public boolean hasRemaining() throws IOException {
+        return buf.hasRemaining();
+    }
+
+    @Override
+    public long remaining() throws IOException {
+        return buf.remaining();
     }
 }
