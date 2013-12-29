@@ -27,34 +27,34 @@ public class NIOFileUtils {
     }
     
     public static ByteBuffer load(File file) throws IOException {
-        return ByteBufferUtils.load(file);
+        return ByteBufferUtils.load(file.toPath());
     }
     
     public static ByteBuffer load(File file, int offset, int length) throws IOException {
-        return ByteBufferUtils.load(file, offset, length);
+        return ByteBufferUtils.load(file.toPath(), offset, length);
     }
     
     public static void load(File file, int offset, int length, ByteBuffer dest) throws IOException {
-        ByteBufferUtils.load(file, offset, length, dest);
+        ByteBufferUtils.load(file.toPath(), offset, length, dest);
     }
     
     public static void save(File file, ByteBuffer bb) throws IOException {
-        ByteBufferUtils.save(file, bb);
+        ByteBufferUtils.save(file.toPath(), bb);
     }
     
     public static ByteBuffer openReadOnly(File file) throws IOException {
-        return ByteBufferUtils.openReadOnly(file);
+        return ByteBufferUtils.openReadOnly(file.toPath());
     }
     
     public static ByteBuffer openReadOnly(File file, int offset, int length) throws IOException {
-        return ByteBufferUtils.openReadOnly(file, offset, length);
+        return ByteBufferUtils.openReadOnly(file.toPath(), offset, length);
     }
     
     public static ByteBuffer openReadWrite(File file) throws IOException {
-        return ByteBufferUtils.openReadWrite(file);
+        return ByteBufferUtils.openReadWrite(file.toPath());
     }
     
     public static ByteBuffer openReadWrite(File file, int offset, int size) throws IOException {
-        return ByteBufferUtils.openReadWrite(file, offset, size);
+        return ByteBufferUtils.openReadWrite(file.toPath(), offset, size);
     }
 }

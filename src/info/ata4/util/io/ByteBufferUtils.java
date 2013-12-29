@@ -9,12 +9,15 @@
  */
 package info.ata4.util.io;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * ByteBuffer utility class.
@@ -28,15 +31,56 @@ public class ByteBufferUtils {
     private ByteBufferUtils() {
     }
     
-    public static ByteBuffer load(File file) throws IOException {
-        return load(file, 0, 0);
+    public static void load(Path path, int offset, int length, ByteBuffer dest) throws IOException {
+        try (FileChannel fc = FileChannel.open(path, StandardOpenOption.READ)) {
+            fc.read(dest, offset);
+        }
     }
     
-    public static ByteBuffer load(File file, int offset, int length) throws IOException {
-        ByteBuffer bb = ByteBuffer.allocateDirect(length > 0 ? length : (int) file.length());
+    public static ByteBuffer load(Path path, int offset, int length) throws IOException {
+        long size = length > 0 ? length : (int) Files.size(path);
+        
+        if (size > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("File " + path + " is too large for memory mapping");
+        }
+        
+        ByteBuffer bb = ByteBuffer.allocateDirect((int) size);
         
         // read file into the buffer
-        load(file, offset, length, bb);
+        load(path, offset, length, bb);
+        
+        // prepare buffer to be read from the start
+        bb.rewind();
+        
+        return bb;
+    }
+
+    public static ByteBuffer load(Path path) throws IOException {
+        return load(path, 0, 0);
+    }
+    
+    public static ByteBuffer load(List<Path> paths) throws IOException {
+        long size = 0;
+        Map<Path, Integer> sizeMap = new HashMap<>();
+        
+        for (Path path : paths) {
+            long fileSize = Files.size(path);
+            if (fileSize > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException("File " + path + " is too large for memory mapping");
+            }
+            sizeMap.put(path, (int) fileSize);
+            size += fileSize;
+        }
+        
+        if (size > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Files are too large for memory mapping");
+        }
+        
+        ByteBuffer bb = ByteBuffer.allocateDirect((int) size);
+        
+        for (Path path : paths) {
+            load(path, 0, sizeMap.get(path), bb);
+        }
         
         // prepare buffer to be read from the start
         bb.rewind();
@@ -44,24 +88,10 @@ public class ByteBufferUtils {
         return bb;
     }
     
-    public static void load(Path path, int offset, int length, ByteBuffer dest) throws IOException {
-        try (FileChannel fc = FileChannel.open(path, StandardOpenOption.READ)) {
-            fc.read(dest, offset);
-        }
-    }
-    
-    public static void load(File file, int offset, int length, ByteBuffer dest) throws IOException {
-        load(file.toPath(), offset, length, dest);
-    }
-    
     public static void save(Path path, ByteBuffer bb) throws IOException {
         try (FileChannel fc = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             fc.write(bb);
         }
-    }
-    
-    public static void save(File file, ByteBuffer bb) throws IOException {
-        save(file.toPath(), bb);
     }
         
     public static ByteBuffer openReadOnly(Path path, int offset, int length) throws IOException {
@@ -75,16 +105,8 @@ public class ByteBufferUtils {
         return bb;
     }
     
-    public static ByteBuffer openReadOnly(File file, int offset, int length) throws IOException {
-        return openReadOnly(file.toPath(), offset, length);
-    }
-    
     public static ByteBuffer openReadOnly(Path path) throws IOException {
         return openReadOnly(path, 0, 0);
-    }
-    
-    public static ByteBuffer openReadOnly(File file) throws IOException {
-        return openReadOnly(file.toPath());
     }
     
     public static ByteBuffer openReadWrite(Path path, int offset, int size) throws IOException {
@@ -103,16 +125,8 @@ public class ByteBufferUtils {
         return bb;
     }
     
-    public static ByteBuffer openReadWrite(File file, int offset, int size) throws IOException {
-        return openReadWrite(file.toPath(), offset, size);
-    }
-    
     public static ByteBuffer openReadWrite(Path path) throws IOException {
         return openReadWrite(path, 0, 0);
-    }
-    
-    public static ByteBuffer openReadWrite(File file) throws IOException {
-        return openReadWrite(file.toPath());
     }
     
     public static ByteBuffer getSlice(ByteBuffer bb, int offset, int length) {
