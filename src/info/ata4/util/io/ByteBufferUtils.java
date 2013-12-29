@@ -10,13 +10,11 @@
 package info.ata4.util.io;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import org.apache.commons.io.IOUtils;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 /**
  * ByteBuffer utility class.
@@ -46,77 +44,75 @@ public class ByteBufferUtils {
         return bb;
     }
     
-    public static void load(File file, int offset, int length, ByteBuffer dest) throws IOException {
-        FileChannel fc = null;
-
-        try {
-            // fill the buffer with the file channel
-            fc = new FileInputStream(file).getChannel();
+    public static void load(Path path, int offset, int length, ByteBuffer dest) throws IOException {
+        try (FileChannel fc = FileChannel.open(path, StandardOpenOption.READ)) {
             fc.read(dest, offset);
-        } finally {
-            IOUtils.closeQuietly(fc);
+        }
+    }
+    
+    public static void load(File file, int offset, int length, ByteBuffer dest) throws IOException {
+        load(file.toPath(), offset, length, dest);
+    }
+    
+    public static void save(Path path, ByteBuffer bb) throws IOException {
+        try (FileChannel fc = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+            fc.write(bb);
         }
     }
     
     public static void save(File file, ByteBuffer bb) throws IOException {
-        FileChannel fc = null;
-        
-        try {
-            fc = new FileOutputStream(file).getChannel();
-            fc.write(bb);
-        } finally {
-            IOUtils.closeQuietly(fc);
-        }
+        save(file.toPath(), bb);
     }
-    
-    public static ByteBuffer openReadOnly(File file) throws IOException {
-        return openReadOnly(file, 0, 0);
+        
+    public static ByteBuffer openReadOnly(Path path, int offset, int length) throws IOException {
+        ByteBuffer bb;
+        
+        try (FileChannel fc = FileChannel.open(path, StandardOpenOption.READ)) {
+            // map entire file as byte buffer
+            bb = fc.map(FileChannel.MapMode.READ_ONLY, offset, length > 0 ? length : fc.size());
+        }
+        
+        return bb;
     }
     
     public static ByteBuffer openReadOnly(File file, int offset, int length) throws IOException {
+        return openReadOnly(file.toPath(), offset, length);
+    }
+    
+    public static ByteBuffer openReadOnly(Path path) throws IOException {
+        return openReadOnly(path, 0, 0);
+    }
+    
+    public static ByteBuffer openReadOnly(File file) throws IOException {
+        return openReadOnly(file.toPath());
+    }
+    
+    public static ByteBuffer openReadWrite(Path path, int offset, int size) throws IOException {
         ByteBuffer bb;
-        FileChannel fc = null;
         
-        try {
-            fc = new FileInputStream(file).getChannel();
-            // map entire file as byte buffer
-            bb = fc.map(FileChannel.MapMode.READ_ONLY, offset, length > 0 ? length : fc.size());
-        } finally {
-            IOUtils.closeQuietly(fc);
+        try (FileChannel fc = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+            if (size > 0 && size != fc.size()) {
+                // reset file if a new size is set
+                fc.truncate(0);
+            }
+            
+            // map file as byte buffer
+            bb = fc.map(FileChannel.MapMode.READ_WRITE, offset, size);
         }
         
         return bb;
-    }
-    
-    public static ByteBuffer openReadWrite(File file) throws IOException {
-        return openReadWrite(file, 0, 0);
     }
     
     public static ByteBuffer openReadWrite(File file, int offset, int size) throws IOException {
-        ByteBuffer bb;
-        RandomAccessFile raf = null;
-        
-        try {
-            // open random access file
-            raf = new RandomAccessFile(file, "rw");
-            
-            // reset file if a new size is set
-            if (size > 0) {
-                raf.setLength(0);
-                raf.setLength(offset + size);
-            } else {
-                size = (int) raf.length() - offset;
-            }
-            
-            // get file channel
-            FileChannel fc = raf.getChannel();
-            // map file as byte buffer
-            bb = fc.map(FileChannel.MapMode.READ_WRITE, offset, size);
-        } finally {
-            IOUtils.closeQuietly(raf);
-        }
-        
-        return bb;
+        return openReadWrite(file.toPath(), offset, size);
+    }
+    
+    public static ByteBuffer openReadWrite(Path path) throws IOException {
+        return openReadWrite(path, 0, 0);
+    }
+    
+    public static ByteBuffer openReadWrite(File file) throws IOException {
+        return openReadWrite(file.toPath());
     }
     
     public static ByteBuffer getSlice(ByteBuffer bb, int offset, int length) {
