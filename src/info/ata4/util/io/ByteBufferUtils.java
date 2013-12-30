@@ -11,6 +11,7 @@ package info.ata4.util.io;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -94,8 +95,8 @@ public class ByteBufferUtils {
         }
     }
         
-    public static ByteBuffer openReadOnly(Path path, int offset, int length) throws IOException {
-        ByteBuffer bb;
+    public static MappedByteBuffer openReadOnly(Path path, int offset, int length) throws IOException {
+        MappedByteBuffer bb;
         
         try (FileChannel fc = FileChannel.open(path, StandardOpenOption.READ)) {
             // map entire file as byte buffer
@@ -105,12 +106,12 @@ public class ByteBufferUtils {
         return bb;
     }
     
-    public static ByteBuffer openReadOnly(Path path) throws IOException {
+    public static MappedByteBuffer openReadOnly(Path path) throws IOException {
         return openReadOnly(path, 0, 0);
     }
     
-    public static ByteBuffer openReadWrite(Path path, int offset, int size) throws IOException {
-        ByteBuffer bb;
+    public static MappedByteBuffer openReadWrite(Path path, int offset, int size) throws IOException {
+        MappedByteBuffer bb;
         
         try (FileChannel fc = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             if (size > 0 && size != fc.size()) {
@@ -125,7 +126,7 @@ public class ByteBufferUtils {
         return bb;
     }
     
-    public static ByteBuffer openReadWrite(Path path) throws IOException {
+    public static MappedByteBuffer openReadWrite(Path path) throws IOException {
         return openReadWrite(path, 0, 0);
     }
     
