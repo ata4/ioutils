@@ -86,19 +86,23 @@ public class DataOutputWriter extends DataOutputWrapper implements Swappable {
     }
     
     @Override
-    public void writeDouble(double v) throws IOException {
-        if (swap) {
-            v = EndianUtils.swapDouble(v);
-        }
-        super.writeDouble(v);
-    }
-
-    @Override
     public void writeFloat(float v) throws IOException {
         if (swap) {
-            v = EndianUtils.swapFloat(v);
+            // NOTE: don't use writeFloat() plus EndianUtils.swapFloat() here!
+            writeInt(Float.floatToRawIntBits(v));
+        } else {
+            super.writeFloat(v);
         }
-        super.writeFloat(v);
+    }
+    
+    @Override
+    public void writeDouble(double v) throws IOException {
+        if (swap) {
+            // NOTE: don't use writeDouble() plus EndianUtils.swapDouble() here!
+            writeLong(Double.doubleToRawLongBits(v));
+        } else {
+            super.writeDouble(v);
+        }
     }
 
     @Override

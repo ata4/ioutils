@@ -107,20 +107,22 @@ public class DataInputReader extends DataInputWrapper {
     
     @Override
     public float readFloat() throws IOException {
-        float r = super.readFloat();
         if (swap) {
-            r = EndianUtils.swapFloat(r);
+            // NOTE: don't use readFloat() plus EndianUtils.swapFloat() here!
+            return Float.intBitsToFloat(readInt());
+        } else {
+            return super.readFloat();
         }
-        return r;
     }
     
     @Override
     public double readDouble() throws IOException {
-        double r = super.readDouble();
         if (swap) {
-            r = EndianUtils.swapDouble(r);
+            // NOTE: don't use readDouble() plus EndianUtils.swapDouble() here!
+            return Double.longBitsToDouble(readLong());
+        } else {
+            return super.readDouble();
         }
-        return r;
     }
 
     /*
