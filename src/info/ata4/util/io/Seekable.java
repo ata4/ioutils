@@ -43,7 +43,8 @@ public interface Seekable {
     public long length() throws IOException;
     
     /**
-     * Returns amount of remaining bytes that are available for reading.
+     * Returns amount of remaining bytes that are available for reading or
+     * writing.
      * 
      * @return
      * @throws IOException 
@@ -51,7 +52,7 @@ public interface Seekable {
     public long remaining() throws IOException;
 
     /**
-     * Return true if there are remaining bytes to read.
+     * Return true if there are remaining bytes to read or write.
      * 
      * @return
      * @throws IOException 
