@@ -23,6 +23,10 @@ public class ByteBufferOutput extends ByteBufferWrapper implements DataOutput {
     
     public ByteBufferOutput(ByteBuffer buf) {
         super(buf);
+        
+        if (buf.isReadOnly()) {
+            throw new IllegalArgumentException("Buffer is read-only");
+        }
     }
     
     public void write(ByteBuffer bb) {
