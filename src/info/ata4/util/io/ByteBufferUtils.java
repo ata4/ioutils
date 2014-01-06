@@ -28,6 +28,7 @@ import java.util.Map;
 public class ByteBufferUtils {
     
     private static final ByteBuffer EMPTY = ByteBuffer.allocate(0);
+    private static final int DIRECT_THRESHOLD = 1024 * 1024; // 1MB
 
     private ByteBufferUtils() {
     }
@@ -45,7 +46,15 @@ public class ByteBufferUtils {
             throw new IllegalArgumentException("File " + path + " is too large for memory mapping");
         }
         
-        ByteBuffer bb = ByteBuffer.allocateDirect((int) size);
+        ByteBuffer bb;
+        
+        // allocateDirect is pretty slow when used frequently, use it for larger
+        // files only
+        if (size > DIRECT_THRESHOLD) {
+            bb = ByteBuffer.allocateDirect((int) size);
+        } else {
+            bb = ByteBuffer.allocate((int) size);
+        }
         
         // read file into the buffer
         load(path, offset, length, bb);
