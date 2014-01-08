@@ -15,7 +15,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import static java.nio.file.StandardOpenOption.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class ByteBufferUtils {
     }
     
     public static void load(Path path, int offset, int length, ByteBuffer dest) throws IOException {
-        try (FileChannel fc = FileChannel.open(path, StandardOpenOption.READ)) {
+        try (FileChannel fc = FileChannel.open(path, READ)) {
             fc.read(dest, offset);
         }
     }
@@ -99,7 +99,7 @@ public class ByteBufferUtils {
     }
     
     public static void save(Path path, ByteBuffer bb) throws IOException {
-        try (FileChannel fc = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+        try (FileChannel fc = FileChannel.open(path, WRITE, CREATE)) {
             fc.write(bb);
         }
     }
@@ -107,7 +107,7 @@ public class ByteBufferUtils {
     public static MappedByteBuffer openReadOnly(Path path, int offset, int length) throws IOException {
         MappedByteBuffer bb;
         
-        try (FileChannel fc = FileChannel.open(path, StandardOpenOption.READ)) {
+        try (FileChannel fc = FileChannel.open(path, READ)) {
             // map entire file as byte buffer
             bb = fc.map(FileChannel.MapMode.READ_ONLY, offset, length > 0 ? length : fc.size());
         }
@@ -122,7 +122,7 @@ public class ByteBufferUtils {
     public static MappedByteBuffer openReadWrite(Path path, int offset, int size) throws IOException {
         MappedByteBuffer bb;
         
-        try (FileChannel fc = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+        try (FileChannel fc = FileChannel.open(path, READ, WRITE, CREATE)) {
             if (size > 0 && size != fc.size()) {
                 // reset file if a new size is set
                 fc.truncate(0);
