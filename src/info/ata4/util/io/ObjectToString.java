@@ -11,6 +11,7 @@ package info.ata4.util.io;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -73,6 +74,32 @@ public class ObjectToString {
             Iterator<?> it = coll.iterator();
             while (it.hasNext()) {
                 appendObject(buffer, it.next());
+                
+                if (it.hasNext()) {
+                    buffer.append(getArraySeparator());
+                    buffer.append(getFieldSeparator());
+                }
+            }
+
+            unindent();
+            buffer.append(getFieldSeparator());
+            buffer.append(getArrayEnd());
+        }
+        
+        @Override
+        protected void appendDetail(StringBuffer buffer, String fieldName, Map<?, ?> map) {
+            indent();
+            buffer.append(getArrayStart());
+            buffer.append(getFieldSeparator());
+            
+            Iterator<? extends Map.Entry> it = map.entrySet().iterator();
+            
+            while(it.hasNext()) {
+                Map.Entry entry = it.next();
+                
+                appendObject(buffer, entry.getKey());
+                buffer.append(getFieldNameValueSeparator());
+                appendObject(buffer, entry.getValue());
                 
                 if (it.hasNext()) {
                     buffer.append(getArraySeparator());
