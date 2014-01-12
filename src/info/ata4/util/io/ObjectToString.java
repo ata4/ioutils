@@ -9,6 +9,8 @@
  */
 package info.ata4.util.io;
 
+import java.util.Collection;
+import java.util.Iterator;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -59,13 +61,50 @@ public class ObjectToString {
 
         @Override
         protected void appendDetail(StringBuffer buffer, String fieldName, Object value) {
-            String defaultToString = value.getClass().getName() + "@" + Integer.toHexString(value.hashCode());
-            if (value.toString().equals(defaultToString)) {
+            appendObject(buffer, value);
+        }
+        
+        @Override
+        protected void appendDetail(StringBuffer buffer, String fieldName, Collection<?> coll) {
+            indent();
+            buffer.append(getArrayStart());
+            buffer.append(getFieldSeparator());
+            
+            Iterator<?> it = coll.iterator();
+            while (it.hasNext()) {
+                appendObject(buffer, it.next());
+                
+                if (it.hasNext()) {
+                    buffer.append(getArraySeparator());
+                    buffer.append(getFieldSeparator());
+                }
+            }
+
+            unindent();
+            buffer.append(getFieldSeparator());
+            buffer.append(getArrayEnd());
+        }
+        
+        private void appendObject(StringBuffer buffer, Object obj) {
+            if (hasDefaultToString(obj)) {
                 indent();
-                buffer.append(ReflectionToStringBuilder.toString(value, this));
+                buffer.append(ReflectionToStringBuilder.toString(obj, this));
                 unindent();
             } else {
-                super.appendDetail(buffer, fieldName, value);
+                buffer.append(obj);
+            }
+        }
+        
+        private boolean hasDefaultToString(Object obj) {
+            try {
+                // check if the declaring class of toString() is java.lang.Object
+                return obj.getClass().getMethod("toString").getDeclaringClass() == Object.class;
+            } catch (SecurityException ex) {
+                // class with security manager?
+                return false;
+            } catch (NoSuchMethodException ex) {
+                // wat
+                return true;
             }
         }
 
