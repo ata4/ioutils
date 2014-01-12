@@ -20,11 +20,9 @@ import org.apache.commons.io.EndianUtils;
 /**
  * DataOutput extension for more data access methods.
  * 
- * TODO: add missing corresponding DataInputReader methods
- * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataOutputWriter extends DataOutputWrapper implements Swappable {
+public class DataOutputWriter extends DataOutputWrapper implements DataOutputExtended {
     
     private static final String DEFAULT_CHARSET = "ASCII";
     private boolean swap;
@@ -113,39 +111,56 @@ public class DataOutputWriter extends DataOutputWrapper implements Swappable {
         super.writeLong(v);
     }
     
-    /**
-     * Writes a float as half-precision 16 bit floating-point number according to
-     * IEEE 754-2008.
-     * 
-     * @param f float value
-     * @throws IOException 
-     */
+    @Override
+    public void write(ByteBuffer bb) throws IOException {
+        DataOutput out = getWrapped();
+        if (out instanceof ByteBufferOutput) {
+            // write natively
+            ((ByteBufferOutput) out).write(bb);
+        } else if (bb.hasArray()) {
+            // write as byte array
+            write(bb.array());
+        } else {
+            // write byte by byte
+            while (bb.hasRemaining()) {
+                write(bb.get());
+            }
+        }
+    }
+    
+    @Override
     public void writeHalf(float f) throws IOException {
         int sval = HalfFloat.floatToIntBits(f);
         writeShort(sval);
     }
     
+    @Override
     public void writeStringFixed(String str, String charset) throws IOException {
         write(str.getBytes(charset));
     }
     
+    @Override
     public void writeStringFixed(String str) throws IOException {
         writeStringFixed(str, DEFAULT_CHARSET);
     }
 
+    @Override
     public void writeStringNull(String str, String charset) throws IOException {
         writeStringFixed(str, charset);
         writeByte(0);
     }
     
+    @Override
     public void writeStringNull(String str) throws IOException {
         writeStringNull(str, DEFAULT_CHARSET);
     }
     
+    @Override
     public void skipBytes(int n) throws IOException {
         write(new byte[n]);
     }
 
+    @Override
     public void align(int length, int align) throws IOException {
         int rem = length % align;
         if (align > 0 && rem != 0) {
