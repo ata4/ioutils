@@ -272,9 +272,11 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     
     @Override
     public void align(int length, int align) throws IOException {
-        int rem = length % align;
-        if (align > 0 && rem != 0) {
-            skipBytes(align - rem);
+        if (align > 0) {
+            int rem = length % align;
+            if (rem != 0) {
+                skipBytes(align - rem);
+            }
         }
     }
 }
