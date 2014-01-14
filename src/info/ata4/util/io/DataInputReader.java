@@ -82,7 +82,7 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     public int readUnsignedShort() throws IOException {
         int r = super.readUnsignedShort();
         if (swap) {
-            r = EndianUtils.swapInteger(r);
+            r = EndianUtils.swapShort((short) r) & 0xff;
         }
         return r;
     }

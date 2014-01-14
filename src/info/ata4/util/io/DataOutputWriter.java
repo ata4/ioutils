@@ -70,7 +70,7 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     @Override
     public void writeShort(int v) throws IOException {
         if (swap) {
-            v = EndianUtils.swapInteger(v);
+            v = EndianUtils.swapShort((short) v);
         }
         super.writeShort(v);
     }
