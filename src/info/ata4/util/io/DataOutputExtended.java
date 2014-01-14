@@ -11,7 +11,6 @@ package info.ata4.util.io;
 
 import java.io.DataOutput;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  * Interface for extended DataOutput methods.
@@ -22,8 +21,6 @@ import java.nio.ByteBuffer;
  */
 public interface DataOutputExtended extends DataOutput {
     
-    public void write(ByteBuffer bb) throws IOException;
-
     /**
      * Writes a float as half-precision 16 bit floating-point number according to
      * IEEE 754-2008.

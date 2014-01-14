@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import org.apache.commons.io.EndianUtils;
 
 /**
@@ -124,23 +126,6 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
             v = EndianUtils.swapLong(v);
         }
         super.writeLong(v);
-    }
-    
-    @Override
-    public void write(ByteBuffer bb) throws IOException {
-        DataOutput out = getWrapped();
-        if (out instanceof ByteBufferOutput) {
-            // write natively
-            ((ByteBufferOutput) out).write(bb);
-        } else if (bb.hasArray()) {
-            // write as byte array
-            write(bb.array());
-        } else {
-            // write byte by byte
-            while (bb.hasRemaining()) {
-                write(bb.get());
-            }
-        }
     }
     
     @Override

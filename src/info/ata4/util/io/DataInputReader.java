@@ -11,11 +11,14 @@ package info.ata4.util.io;
 
 import java.io.DataInput;
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import org.apache.commons.io.EndianUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -138,7 +141,7 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
             return super.readDouble();
         }
     }
-
+    
     @Override
     public long readUnsignedInt() throws IOException {
         return readInt() & 0xffffffffL;
