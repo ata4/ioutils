@@ -12,6 +12,7 @@ package info.ata4.util.io;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -41,6 +42,20 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     
     public DataOutputWriter(ByteBuffer bb) {
         super(new ByteBufferOutput(bb));
+    }
+    
+    public OutputStream getOutputStream() {
+        DataOutput out = getWrapped();
+        
+        // try to find the most direct way to stream the wrapped object
+        if (out instanceof InputStream) {
+            return (OutputStream) out;
+        } else if (out instanceof ByteBufferInput) {
+            ByteBuffer bb = ((ByteBufferOutput) out).getBuffer();
+            return new ByteBufferOutputStream(bb);
+        } else {
+            return new InverseDataOutputStream(this);
+        }
     }
     
     @Override

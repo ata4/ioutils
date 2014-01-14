@@ -45,6 +45,20 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
         super(new ByteBufferInput(bb));
     }
     
+    public InputStream getInputStream() {
+        DataInput in = getWrapped();
+        
+        // try to find the most direct way to stream the wrapped object
+        if (in instanceof InputStream) {
+            return (InputStream) in;
+        } else if (in instanceof ByteBufferInput) {
+            ByteBuffer bb = ((ByteBufferInput) in).getBuffer();
+            return new ByteBufferInputStream(bb);
+        } else {
+            return new InverseDataInputStream(this);
+        }
+    }
+    
     @Override
     public boolean isSwap() {
         if (super.isSwappable()) {
