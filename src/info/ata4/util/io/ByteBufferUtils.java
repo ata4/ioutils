@@ -43,7 +43,7 @@ public class ByteBufferUtils {
         long size = length > 0 ? length : (int) Files.size(path);
         
         if (size > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("File " + path + " is too large for memory mapping");
+            throw new IllegalArgumentException("File " + path + " is too large to be load");
         }
         
         ByteBuffer bb;
@@ -76,14 +76,14 @@ public class ByteBufferUtils {
         for (Path path : paths) {
             long fileSize = Files.size(path);
             if (fileSize > Integer.MAX_VALUE) {
-                throw new IllegalArgumentException("File " + path + " is too large for memory mapping");
+                throw new IllegalArgumentException("File " + path + " is too large to be load");
             }
             sizeMap.put(path, (int) fileSize);
             size += fileSize;
         }
         
         if (size > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("Files are too large for memory mapping");
+            throw new IllegalArgumentException("Files are too large to be load");
         }
         
         ByteBuffer bb = ByteBuffer.allocateDirect((int) size);
