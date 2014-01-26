@@ -16,8 +16,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
 import org.apache.commons.io.EndianUtils;
 
 /**
@@ -156,8 +154,26 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     }
     
     @Override
+    public void writeStringNull(String str, int padding, String charset) throws IOException {
+        int nullBytes = padding - str.length();
+        if (nullBytes < 0) {
+            throw new IllegalArgumentException("Invalid padding");
+        }
+        
+        writeStringFixed(str, charset);
+        skipBytes(nullBytes);
+    }
+
+    @Override
+    public void writeStringNull(String str, int padding) throws IOException {
+        writeStringNull(str, padding, DEFAULT_CHARSET);
+    }
+    
+    @Override
     public void skipBytes(int n) throws IOException {
-        write(new byte[n]);
+        for (int i = 0; i < n; i++) {
+            writeByte(0);
+        }
     }
 
     @Override

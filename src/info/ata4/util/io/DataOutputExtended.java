@@ -33,6 +33,10 @@ public interface DataOutputExtended extends DataOutput {
     public void writeStringNull(String str, String charset) throws IOException;
 
     public void writeStringNull(String str) throws IOException;
+    
+    public void writeStringNull(String str, int padding, String charset) throws IOException;
+    
+    public void writeStringNull(String str, int padding) throws IOException;
 
     public void writeStringFixed(String str, String charset) throws IOException;
 
