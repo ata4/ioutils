@@ -46,19 +46,6 @@ public interface DataInputExtended extends DataInput {
     public float readHalf() throws IOException;
 
     /**
-     * Reads a null-terminated string.
-     * 
-     * @param limit maximum amount of bytes to read before truncation
-     * @param charset character set to use when converting the bytes to string
-     * @param padded if set to true, always read "limit" bytes and skip anything
-     *               after the null char. Otherwise, stop reading after the null
-     *               char.
-     * @return string
-     * @throws IOException 
-     */
-    public String readStringNull(int limit, String charset, boolean padded) throws IOException;
-
-    /**
      * Reads a null-terminated string without byte padding.
      * 
      * @param limit maximum amount of bytes to read before truncation
@@ -88,6 +75,26 @@ public interface DataInputExtended extends DataInput {
      * @throws IOException 
      */
     public String readStringNull() throws IOException;
+    
+    /**
+     * Reads a null-terminated string with byte padding.
+     * 
+     * @param limit maximum amount of bytes to read before truncation
+     * @param charset character set to use when converting the bytes to string
+     * @return string
+     * @throws IOException 
+     */
+    public String readStringPadded(int limit, String charset) throws IOException;
+    
+    /**
+     * Reads a null-terminated string with byte padding, using the ASCII charset.
+     * 
+     * @param limit maximum amount of bytes to read before truncation
+     * @param charset character set to use when converting the bytes to string
+     * @return string
+     * @throws IOException 
+     */
+    public String readStringPadded(int limit) throws IOException;
 
    /**
      * Reads a fixed size string.
@@ -108,19 +115,6 @@ public interface DataInputExtended extends DataInput {
      * @throws IOException 
      */
     public String readStringFixed(int length) throws IOException;
-
-    /**
-     * Reads an integer length-prefixed string.
-     * 
-     * @param limit if greater than zero, return null if the string is longer
-     *              than this limit
-     * @param charset character set to use when converting the bytes to string
-     * @param align if greater than 0, read additional padding bytes so the total
-     *              amount of bytes read is a multiple of this value
-     * @return string
-     * @throws IOException 
-     */
-    public String readStringInt(int limit, String charset, int align) throws IOException;
 
     /**
      * Reads an integer length-prefixed string without alignment.
@@ -154,19 +148,6 @@ public interface DataInputExtended extends DataInput {
     public String readStringInt() throws IOException;
 
     /**
-     * Reads a short length-prefixed string.
-     * 
-     * @param limit if greater than zero, return null if the string is longer
-     *              than this limit
-     * @param charset character set to use when converting the bytes to string
-     * @param align if greater than 0, read additional padding bytes so the total
-     *              amount of bytes read is a multiple of this value
-     * @return string
-     * @throws IOException 
-     */
-    public String readStringShort(int limit, String charset, int align) throws IOException;
-
-    /**
      * Reads a short length-prefixed string without alignment.
      * 
      * @param limit if greater than zero, return null if the string is longer
@@ -196,17 +177,6 @@ public interface DataInputExtended extends DataInput {
      * @throws IOException 
      */
     public String readStringShort() throws IOException;
-
-    /**
-     * Reads a byte length-prefixed string.
-     * 
-     * @param charset character set to use when converting the bytes to string
-     * @param align if greater than 0, read additional padding bytes so the total
-     *              amount of bytes read is a multiple of this value
-     * @return string
-     * @throws IOException 
-     */
-    public String readStringByte(String charset, int align) throws IOException;
 
     /**
      * Reads a byte length-prefixed string without alignment.

@@ -17,6 +17,8 @@ import java.io.IOException;
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
 public interface Seekable {
+    
+    public void seek(long where, SeekOrigin dir) throws IOException;
 
     /**
      * Seek to the specified position.

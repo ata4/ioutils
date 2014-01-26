@@ -176,6 +176,25 @@ public class RandomAccessFileWrapper implements DataInput, DataOutput, Closeable
     public void close() throws IOException {
         raf.close();
     }
+    
+    @Override
+    public void seek(long where, SeekOrigin whence) throws IOException {
+        long pos = 0;
+        switch (whence) {
+            case BEGINNING:
+                pos = where;
+                break;
+            
+            case CURRENT:
+                pos = tell() + where;
+                break;
+                
+            case END:
+                pos = length() - where;
+                break;
+        }
+        raf.seek(pos);
+    }
 
     @Override
     public void seek(long pos) throws IOException {

@@ -34,13 +34,25 @@ public interface DataOutputExtended extends DataOutput {
 
     public void writeStringNull(String str) throws IOException;
     
-    public void writeStringNull(String str, int padding, String charset) throws IOException;
+    public void writeStringPadded(String str, int padding, String charset) throws IOException;
     
-    public void writeStringNull(String str, int padding) throws IOException;
+    public void writeStringPadded(String str, int padding) throws IOException;
 
     public void writeStringFixed(String str, String charset) throws IOException;
 
     public void writeStringFixed(String str) throws IOException;
+    
+    public void writeStringInt(String str, String charset) throws IOException;
+    
+    public void writeStringInt(String str) throws IOException;
+    
+    public void writeStringShort(String str, String charset) throws IOException;
+    
+    public void writeStringShort(String str) throws IOException;
+    
+    public void writeStringByte(String str, String charset) throws IOException;
+    
+    public void writeStringByte(String str) throws IOException;
 
     /**
      * Makes an attempt to skip over

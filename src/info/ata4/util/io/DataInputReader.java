@@ -160,8 +160,7 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
         return HalfFloat.intBitsToFloat(hbits);
     }
     
-    @Override
-    public String readStringNull(int limit, String charset, boolean padded) throws IOException {
+    private String readStringInt(int limit, String charset, boolean padded) throws IOException {
         if (limit <= 0) {
             throw new IllegalArgumentException("Invalid limit");
         }
@@ -183,7 +182,7 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     
     @Override
     public String readStringNull(int limit, String charset) throws IOException {
-        return readStringNull(limit, charset, false);
+        return readStringInt(limit, charset, false);
     }
     
     @Override
@@ -194,6 +193,16 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     @Override
     public String readStringNull() throws IOException {
         return readStringNull(256);
+    }
+    
+    @Override
+    public String readStringPadded(int limit, String charset) throws IOException {
+        return readStringInt(limit, charset, true);
+    }
+
+    @Override
+    public String readStringPadded(int limit) throws IOException {
+        return readStringPadded(limit, DEFAULT_CHARSET);
     }
     
     @Override
@@ -209,21 +218,13 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     }
     
     @Override
-    public String readStringInt(int limit, String charset, int align) throws IOException {
+    public String readStringInt(int limit, String charset) throws IOException {
         int length = readInt();
         if (limit > 0 && length > limit) {
             return null;
         }
         
-        String str = readStringFixed(length, charset);
-        align(length, align);
-        
-        return str;
-    }
-    
-    @Override
-    public String readStringInt(int limit, String charset) throws IOException {
-        return readStringInt(limit, charset, 0);
+        return readStringFixed(length, charset);
     }
     
     @Override
@@ -237,21 +238,13 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     }
     
     @Override
-    public String readStringShort(int limit, String charset, int align) throws IOException {
+    public String readStringShort(int limit, String charset) throws IOException {
         int length = readUnsignedShort();
         if (limit > 0 && length > limit) {
             return null;
         }
         
-        String str = readStringFixed(length, charset);
-        align(length, align);
-        
-        return str;
-    }
-    
-    @Override
-    public String readStringShort(int limit, String charset) throws IOException {
-        return readStringShort(limit, charset, 0);
+        return readStringFixed(length, charset);
     }
     
     @Override
@@ -265,18 +258,9 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     }
     
     @Override
-    public String readStringByte(String charset, int align) throws IOException {
-        int length = readUnsignedByte();
-        
-        String str = readStringFixed(length, charset);
-        align(length, align);
-        
-        return str;
-    }
-    
-    @Override
     public String readStringByte(String charset) throws IOException {
-        return readStringByte(charset, 0);
+        int length = readUnsignedByte();
+        return readStringFixed(length, charset);
     }
     
     @Override

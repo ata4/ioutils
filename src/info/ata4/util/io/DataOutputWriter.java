@@ -131,16 +131,6 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
         int sval = HalfFloat.floatToIntBits(f);
         writeShort(sval);
     }
-    
-    @Override
-    public void writeStringFixed(String str, String charset) throws IOException {
-        write(str.getBytes(charset));
-    }
-    
-    @Override
-    public void writeStringFixed(String str) throws IOException {
-        writeStringFixed(str, DEFAULT_CHARSET);
-    }
 
     @Override
     public void writeStringNull(String str, String charset) throws IOException {
@@ -154,7 +144,7 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     }
     
     @Override
-    public void writeStringNull(String str, int padding, String charset) throws IOException {
+    public void writeStringPadded(String str, int padding, String charset) throws IOException {
         int nullBytes = padding - str.length();
         if (nullBytes < 0) {
             throw new IllegalArgumentException("Invalid padding");
@@ -165,8 +155,59 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     }
 
     @Override
-    public void writeStringNull(String str, int padding) throws IOException {
-        writeStringNull(str, padding, DEFAULT_CHARSET);
+    public void writeStringPadded(String str, int padding) throws IOException {
+        writeStringPadded(str, padding, DEFAULT_CHARSET);
+    }
+    
+    @Override
+    public void writeStringFixed(String str, String charset) throws IOException {
+        write(str.getBytes(charset));
+    }
+    
+    @Override
+    public void writeStringFixed(String str) throws IOException {
+        writeStringFixed(str, DEFAULT_CHARSET);
+    }
+    
+    @Override
+    public void writeStringInt(String str, String charset) throws IOException {
+        writeInt(str.length());
+        writeStringFixed(str, charset);
+    }
+
+    @Override
+    public void writeStringInt(String str) throws IOException {
+        writeStringInt(str, DEFAULT_CHARSET);
+    }
+
+    @Override
+    public void writeStringShort(String str, String charset) throws IOException {
+        if (str.length() > 0xffff) {
+            throw new IllegalArgumentException("String is too long");
+        }
+        
+        writeShort(str.length());
+        writeStringFixed(str, charset);
+    }
+
+    @Override
+    public void writeStringShort(String str) throws IOException {
+        writeStringShort(str, DEFAULT_CHARSET);
+    }
+
+    @Override
+    public void writeStringByte(String str, String charset) throws IOException {
+        if (str.length() > 0xff) {
+            throw new IllegalArgumentException("String is too long");
+        }
+        
+        writeByte(str.length());
+        writeStringFixed(str, charset);
+    }
+
+    @Override
+    public void writeStringByte(String str) throws IOException {
+        writeStringByte(str, DEFAULT_CHARSET);
     }
     
     @Override
