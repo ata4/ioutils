@@ -18,7 +18,13 @@ import java.io.IOException;
  */
 public interface Seekable {
     
-    public void seek(long where, SeekOrigin dir) throws IOException;
+    /**
+     * Seek to the specified position relative to an origin.
+     * 
+     * @param where The position to seek to.
+     * @throws IOException 
+     */
+    public void seek(long where, SeekOrigin whence) throws IOException;
 
     /**
      * Seek to the specified position.
