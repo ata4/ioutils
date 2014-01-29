@@ -159,6 +159,9 @@ public class ByteBufferUtils {
         // do the actual slicing
         ByteBuffer bbSlice = bb.slice();
         
+        // set same byte order
+        bbSlice.order(bb.order());
+        
         // restore original limit and position
         bb.limit(limit);
         bb.position(pos);
