@@ -51,7 +51,7 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
         // try to find the most direct way to stream the wrapped object
         if (out instanceof InputStream) {
             return (OutputStream) out;
-        } else if (out instanceof ByteBufferInput) {
+        } else if (out instanceof ByteBufferOutput) {
             ByteBuffer bb = ((ByteBufferOutput) out).getBuffer();
             return new ByteBufferOutputStream(bb);
         } else {
