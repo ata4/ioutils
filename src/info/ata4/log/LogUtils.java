@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 /**
  * Log configuration utility class.
@@ -25,6 +26,11 @@ import java.util.logging.LogManager;
 public class LogUtils {
     
     private LogUtils() {
+    }
+    
+    public static Logger getLogger() {
+        String className = new Throwable().getStackTrace()[1].getClassName();
+        return Logger.getLogger(className);
     }
     
     public static void configure() {
