@@ -17,6 +17,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import org.apache.commons.io.EndianUtils;
 
 /**
@@ -209,6 +211,20 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     @Override
     public void writeStringByte(String str) throws IOException {
         writeStringByte(str, DEFAULT_CHARSET);
+    }
+    
+    @Override
+    public void writeBuffer(ByteBuffer src) throws IOException {
+        DataOutput out = getWrapped();
+        if (out instanceof ByteBufferOutput) {
+            // write directly
+            ((ByteBufferOutput) out).write(src);
+        } else {
+            // write using channeled output streams
+            try (WritableByteChannel channel = Channels.newChannel(getOutputStream())) {
+                channel.write(src);
+            }
+        }
     }
     
     @Override

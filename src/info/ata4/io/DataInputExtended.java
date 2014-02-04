@@ -12,6 +12,7 @@ package info.ata4.io;
 import java.io.DataInput;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
 /**
  * Interface for extended DataInput methods.
@@ -196,6 +197,14 @@ public interface DataInputExtended extends DataInput {
      * @throws IOException 
      */
     public String readStringByte() throws IOException;
+    
+    /**
+     * Reads a sequence of bytes from this data input into the given buffer.
+     * 
+     * @param dst The buffer into which bytes are to be transferred
+     * @throws IOException 
+     */
+    public void readBuffer(ByteBuffer dst) throws IOException;
 
     /**
      * Skips bytes to fit a specified data structure alignment.

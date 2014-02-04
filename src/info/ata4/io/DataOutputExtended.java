@@ -11,6 +11,7 @@ package info.ata4.io;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * Interface for extended DataOutput methods.
@@ -53,6 +54,14 @@ public interface DataOutputExtended extends DataOutput {
     public void writeStringByte(String str, String charset) throws IOException;
     
     public void writeStringByte(String str) throws IOException;
+    
+    /**
+     * Writes a sequence of bytes to this data output from the given buffer.
+     * 
+     * @param src The buffer from which bytes are to be retrieved
+     * @throws IOException 
+     */
+    public void writeBuffer(ByteBuffer src) throws IOException;
 
     /**
      * Makes an attempt to skip over

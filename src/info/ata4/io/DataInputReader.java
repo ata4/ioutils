@@ -17,6 +17,8 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import org.apache.commons.io.EndianUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -267,6 +269,20 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     @Override
     public String readStringByte() throws IOException {
         return readStringByte(DEFAULT_CHARSET);
+    }
+    
+    @Override
+    public void readBuffer(ByteBuffer dst) throws IOException {
+        DataInput out = getWrapped();
+        if (out instanceof ByteBufferInput) {
+            // read directly
+            dst.put(((ByteBufferInput) out).getBuffer());
+        } else {
+            // read using channeled input streams
+            try (ReadableByteChannel channel = Channels.newChannel(getInputStream())) {
+                channel.read(dst);
+            }
+        }
     }
     
     @Override
