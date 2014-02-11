@@ -39,7 +39,7 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     }
     
     public DataOutputWriter(ByteBuffer bb) {
-        super(new ByteBufferOutput(bb));
+        super(new ByteBufferWrapper(bb));
     }
     
     public OutputStream getOutputStream() {
@@ -48,9 +48,8 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
         // try to find the most direct way to stream the wrapped object
         if (out instanceof InputStream) {
             return (OutputStream) out;
-        } else if (out instanceof ByteBufferOutput) {
-            ByteBuffer bb = ((ByteBufferOutput) out).getBuffer();
-            return new ByteBufferOutputStream(bb);
+        } else if (out instanceof ByteBufferWrapper) {
+            return ((ByteBufferWrapper) out).getOutputStream();
         } else {
             return new InverseDataOutputStream(this);
         }
@@ -211,9 +210,10 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     @Override
     public void writeBuffer(ByteBuffer src) throws IOException {
         DataOutput out = getWrapped();
-        if (out instanceof ByteBufferOutput) {
+        if (out instanceof ByteBufferWrapper) {
             // write directly
-            ((ByteBufferOutput) out).write(src);
+            ByteBuffer dst = ((ByteBufferWrapper) out).getByteBuffer();
+            dst.put(src);
         } else {
             // write using channeled output streams
             try (WritableByteChannel channel = Channels.newChannel(getOutputStream())) {

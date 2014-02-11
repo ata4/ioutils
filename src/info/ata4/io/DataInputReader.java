@@ -40,7 +40,7 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     }
     
     public DataInputReader(ByteBuffer bb) {
-        super(new ByteBufferInput(bb));
+        super(new ByteBufferWrapper(bb));
     }
     
     public InputStream getInputStream() {
@@ -49,9 +49,8 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
         // try to find the most direct way to stream the wrapped object
         if (in instanceof InputStream) {
             return (InputStream) in;
-        } else if (in instanceof ByteBufferInput) {
-            ByteBuffer bb = ((ByteBufferInput) in).getBuffer();
-            return new ByteBufferInputStream(bb);
+        } else if (in instanceof ByteBufferWrapper) {
+            return ((ByteBufferWrapper) in).getInputStream();
         } else {
             return new InverseDataInputStream(this);
         }
@@ -268,10 +267,11 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     
     @Override
     public void readBuffer(ByteBuffer dst) throws IOException {
-        DataInput out = getWrapped();
-        if (out instanceof ByteBufferInput) {
+        DataInput in = getWrapped();
+        if (in instanceof ByteBufferWrapper) {
             // read directly
-            dst.put(((ByteBufferInput) out).getBuffer());
+            ByteBuffer src = ((ByteBufferWrapper) in).getByteBuffer();
+            dst.put(src);
         } else {
             // read using channeled input streams
             try (ReadableByteChannel channel = Channels.newChannel(getInputStream())) {
