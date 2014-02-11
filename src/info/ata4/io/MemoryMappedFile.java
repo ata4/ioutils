@@ -9,6 +9,7 @@
  */
 package info.ata4.io;
 
+import static info.ata4.io.SeekOrigin.*;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -28,7 +29,7 @@ import java.util.List;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class MemoryMappedFile {
+public class MemoryMappedFile implements Swappable, Seekable {
     
     private long position = 0;
     private long capacity;
@@ -37,6 +38,7 @@ public class MemoryMappedFile {
     
     private int PAGE_SIZE = Integer.MAX_VALUE;
     private List<MappedByteBuffer> buffers;
+    private boolean swap;
     
     public MemoryMappedFile(Path file, boolean readOnly, long ofs, long len) throws IOException {
         int pages = (int) (len / PAGE_SIZE) + 1;
@@ -80,23 +82,60 @@ public class MemoryMappedFile {
         bb.position(pos);
         return bb;
     }
+    
+    @Override
+    public boolean isSwap() {
+        return swap;
+    }
 
+    @Override
+    public void setSwap(boolean swap) {
+        this.swap = swap;
+        for (ByteBuffer buffer : buffers) {
+            buffer.order(swap ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+        }
+    }
+    
+    @Override
+    public void seek(long where, SeekOrigin whence) throws IOException {
+        long pos = 0;
+        switch (whence) {
+            case BEGINNING:
+                pos = where;
+                break;
+            
+            case CURRENT:
+                pos = position() + where;
+                break;
+                
+            case END:
+                pos = capacity() - where;
+                break;
+        }
+        position(pos);
+    }
+
+    @Override
     public void position(long newPosition) throws IOException {
         position = newPosition;
     }
 
+    @Override
     public long position() throws IOException {
         return position;
     }
 
+    @Override
     public long capacity() throws IOException {
         return capacity;
     }
 
+    @Override
     public long remaining() {
         return capacity - position;
     }
 
+    @Override
     public boolean hasRemaining() {
         return remaining() > 0;
     }
