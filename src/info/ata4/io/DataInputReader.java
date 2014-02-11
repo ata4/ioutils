@@ -14,7 +14,6 @@ import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -34,10 +33,6 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     
     public DataInputReader(DataInput in) {
         super(in);
-    }
-    
-    public DataInputReader(RandomAccessFile raf) {
-        super(new RandomAccessFileWrapper(raf));
     }
     
     public DataInputReader(InputStream is) {

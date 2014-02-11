@@ -15,7 +15,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
@@ -33,10 +32,6 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     
     public DataOutputWriter(DataOutput out) {
         super(out);
-    }
-    
-    public DataOutputWriter(RandomAccessFile raf) {
-        super(new RandomAccessFileWrapper(raf));
     }
     
     public DataOutputWriter(OutputStream is) {
