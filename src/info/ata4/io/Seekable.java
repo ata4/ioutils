@@ -27,12 +27,12 @@ public interface Seekable {
     public void seek(long where, SeekOrigin whence) throws IOException;
 
     /**
-     * Seek to the specified position.
+     * Sets a new absolute position.
      * 
      * @param where The position to seek to.
      * @throws IOException 
      */
-    public void seek(long where) throws IOException;
+    public void position(long where) throws IOException;
 
     /**
      * Obtain the current position.
@@ -40,7 +40,7 @@ public interface Seekable {
      * @return
      * @throws IOException 
      */
-    public long tell() throws IOException;
+    public long position() throws IOException;
     
     /**
      * Returns the total capacity in bytes.
@@ -48,7 +48,7 @@ public interface Seekable {
      * @return
      * @throws IOException 
      */
-    public long length() throws IOException;
+    public long capacity() throws IOException;
     
     /**
      * Returns amount of remaining bytes that are available for reading or

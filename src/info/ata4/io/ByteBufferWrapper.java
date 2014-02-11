@@ -48,18 +48,18 @@ public abstract class ByteBufferWrapper implements Swappable, Seekable {
                 break;
             
             case CURRENT:
-                pos = tell() + where;
+                pos = position() + where;
                 break;
                 
             case END:
-                pos = length() - where;
+                pos = capacity() - where;
                 break;
         }
-        seek(pos);
+        position(pos);
     }
     
     @Override
-    public void seek(long pos) throws IOException {
+    public void position(long pos) throws IOException {
         if (pos > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("Pointer is too large (> " + Integer.MAX_VALUE + ")");
         }
@@ -67,12 +67,12 @@ public abstract class ByteBufferWrapper implements Swappable, Seekable {
     }
 
     @Override
-    public long tell() throws IOException {
+    public long position() throws IOException {
         return buf.position();
     }
 
     @Override
-    public long length() throws IOException {
+    public long capacity() throws IOException {
         return buf.capacity();
     }
 

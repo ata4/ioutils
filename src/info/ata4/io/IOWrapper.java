@@ -77,18 +77,18 @@ public abstract class IOWrapper<T> implements Swappable, Seekable, Closeable {
     }
     
     @Override
-    public void seek(long where) throws IOException {
-        getSeekable().seek(where);
+    public void position(long where) throws IOException {
+        getSeekable().position(where);
     }
 
     @Override
-    public long tell() throws IOException {
-        return getSeekable().tell();
+    public long position() throws IOException {
+        return getSeekable().position();
     }
 
     @Override
-    public long length() throws IOException {
-        return getSeekable().length();
+    public long capacity() throws IOException {
+        return getSeekable().capacity();
     }
 
     @Override

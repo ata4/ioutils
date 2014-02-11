@@ -186,34 +186,34 @@ public class RandomAccessFileWrapper implements DataInput, DataOutput, Closeable
                 break;
             
             case CURRENT:
-                pos = tell() + where;
+                pos = position() + where;
                 break;
                 
             case END:
-                pos = length() - where;
+                pos = capacity() - where;
                 break;
         }
         raf.seek(pos);
     }
 
     @Override
-    public void seek(long pos) throws IOException {
+    public void position(long pos) throws IOException {
         raf.seek(pos);
     }
 
     @Override
-    public long tell() throws IOException {
+    public long position() throws IOException {
         return raf.getFilePointer();
     }
 
     @Override
-    public long length() throws IOException {
+    public long capacity() throws IOException {
         return raf.length();
     }
 
     @Override
     public long remaining() throws IOException {
-        return length() - tell();
+        return capacity() - position();
     }
 
     @Override
