@@ -17,8 +17,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
 import static java.nio.channels.FileChannel.MapMode.*;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.*;
 import java.util.ArrayList;
@@ -40,31 +42,15 @@ public class MemoryMappedFile implements Swappable, Seekable {
     private List<MappedByteBuffer> buffers;
     private boolean swap;
     
+    public MemoryMappedFile(FileChannel fc, boolean readOnly, long ofs, long len) throws IOException {
+        init(fc, readOnly, ofs, len);
+    }
+    
     public MemoryMappedFile(Path file, boolean readOnly, long ofs, long len) throws IOException {
-        int pages = (int) (len / PAGE_SIZE) + 1;
-        long bufOfs = ofs;
-        buffers = new ArrayList<>(pages);
-
-        if (readOnly) {
-            try (FileChannel fc = FileChannel.open(file, READ)) {
-                for (int i = 0; i < pages; i++) {
-                    int bufLen = (int) Math.min(PAGE_SIZE, len - bufOfs);
-                    buffers.add(fc.map(READ_ONLY, bufOfs, bufLen));
-                    bufOfs += bufLen;
-                }
-            }
-        } else {
-            try (FileChannel fc = FileChannel.open(file, CREATE, WRITE)) {
-                for (int i = 0; i < pages; i++) {
-                    int bufLen = (int) Math.min(PAGE_SIZE, len - bufOfs);
-                    buffers.add(fc.map(READ_WRITE, bufOfs, bufLen));
-                    bufOfs += bufLen;
-                }
-            }
+        OpenOption[] openOptions = readOnly ? new OpenOption[] {READ} : new OpenOption[] {CREATE, WRITE};
+        try (FileChannel fc = FileChannel.open(file, openOptions)) {
+            init(fc, readOnly, ofs, len);
         }
-        
-        this.readOnly = readOnly;
-        this.capacity = len;
     }
     
     public MemoryMappedFile(Path file, boolean readOnly) throws IOException {
@@ -73,6 +59,22 @@ public class MemoryMappedFile implements Swappable, Seekable {
     
     public MemoryMappedFile(Path file) throws IOException {
         this(file, true);
+    }
+    
+    private void init(FileChannel fc, boolean readOnly, long ofs, long len) throws IOException {
+        int pages = (int) (len / PAGE_SIZE) + 1;
+        long bufOfs = ofs;
+        buffers = new ArrayList<>(pages);
+
+        MapMode mapMode = readOnly ? READ_ONLY : READ_WRITE;
+        for (int i = 0; i < pages; i++) {
+            int bufLen = (int) Math.min(PAGE_SIZE, len - bufOfs);
+            buffers.add(fc.map(mapMode, bufOfs, bufLen));
+            bufOfs += bufLen;
+        }
+        
+        this.readOnly = readOnly;
+        this.capacity = len;
     }
     
     private MappedByteBuffer current() {
