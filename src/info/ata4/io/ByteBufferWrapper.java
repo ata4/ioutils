@@ -20,6 +20,9 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 
 /**
  * Wrapper for ByteBuffers to implement various IO interfaces.
@@ -44,6 +47,14 @@ public class ByteBufferWrapper implements Swappable, Seekable, DataInput, DataOu
     
     public OutputStream getOutputStream() {
         return new ByteBufferOutputStream(buf);
+    }
+    
+    public ReadableByteChannel getReadChannel() {
+        return Channels.newChannel(getInputStream());
+    }
+    
+    public WritableByteChannel getWriteChannel() {
+        return Channels.newChannel(getOutputStream());
     }
     
     @Override

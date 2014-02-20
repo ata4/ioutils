@@ -10,6 +10,7 @@
 package info.ata4.io;
 
 import info.ata4.io.util.HalfFloat;
+import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -17,7 +18,10 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Path;
+import static java.nio.file.StandardOpenOption.*;
 import org.apache.commons.io.EndianUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -29,31 +33,48 @@ import org.apache.commons.lang3.ArrayUtils;
 public class DataInputReader extends DataInputWrapper implements DataInputExtended {
     
     private static final String DEFAULT_CHARSET = "ASCII";
+    
+    public static DataInputReader newReader(InputStream is) {
+        DataInput in = new DataInputStream(is);
+        ReadableByteChannel channel = Channels.newChannel(is);
+        return new DataInputReader(in, channel, is, null);
+    }
+    
+    public static DataInputReader newReader(ByteBuffer bb) {
+        ByteBufferWrapper in = new ByteBufferWrapper(bb);
+        InputStream is = in.getInputStream();
+        ReadableByteChannel channel = in.getReadChannel();
+        return new DataInputReader(in, channel, is, bb);
+    }
+    
+    public static DataInputReader newReader(ReadableByteChannel fc) {
+        InputStream is = new BufferedInputStream(Channels.newInputStream(fc));
+        DataInput in = new DataInputStream(is);
+        return new DataInputReader(in, fc, is, null);
+    }
+    
+    public static DataInputReader newReader(Path file) throws IOException {        
+        return newReader(FileChannel.open(file, READ));
+    }
+
+    private ReadableByteChannel channel;
+    private InputStream stream;
+    private ByteBuffer buffer;
     private boolean swap;
     
     public DataInputReader(DataInput in) {
         super(in);
     }
     
-    public DataInputReader(InputStream is) {
-        super(new DataInputStream(is));
-    }
-    
-    public DataInputReader(ByteBuffer bb) {
-        super(new ByteBufferWrapper(bb));
+    private DataInputReader(DataInput out, ReadableByteChannel channel, InputStream stream, ByteBuffer buffer) {
+        this(out);
+        this.channel = channel;
+        this.stream = stream;
+        this.buffer = buffer;
     }
     
     public InputStream getInputStream() {
-        DataInput in = getWrapped();
-        
-        // try to find the most direct way to stream the wrapped object
-        if (in instanceof InputStream) {
-            return (InputStream) in;
-        } else if (in instanceof ByteBufferWrapper) {
-            return ((ByteBufferWrapper) in).getInputStream();
-        } else {
-            return new InverseDataInputStream(this);
-        }
+        return stream;
     }
     
     @Override
@@ -267,16 +288,10 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     
     @Override
     public void readBuffer(ByteBuffer dst) throws IOException {
-        DataInput in = getWrapped();
-        if (in instanceof ByteBufferWrapper) {
-            // read directly
-            ByteBuffer src = ((ByteBufferWrapper) in).getByteBuffer();
-            dst.put(src);
+        if (buffer != null) {
+            dst.put(buffer);
         } else {
-            // read using channeled input streams
-            try (ReadableByteChannel channel = Channels.newChannel(getInputStream())) {
-                channel.read(dst);
-            }
+            channel.read(dst);
         }
     }
     
@@ -287,6 +302,17 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
             if (rem != 0) {
                 skipBytes(align - rem);
             }
+        }
+    }
+    
+    @Override
+    public void close() throws IOException {
+        super.close();
+        if (stream != null) {
+            stream.close();
+        }
+        if (channel != null) {
+            channel.close();
         }
     }
 }

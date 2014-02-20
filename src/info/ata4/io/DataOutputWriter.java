@@ -10,14 +10,17 @@
 package info.ata4.io;
 
 import info.ata4.io.util.HalfFloat;
+import java.io.BufferedOutputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Path;
+import static java.nio.file.StandardOpenOption.*;
 import org.apache.commons.io.EndianUtils;
 
 /**
@@ -28,31 +31,48 @@ import org.apache.commons.io.EndianUtils;
 public class DataOutputWriter extends DataOutputWrapper implements DataOutputExtended {
     
     private static final String DEFAULT_CHARSET = "ASCII";
+    
+    public static DataOutputWriter newWriter(OutputStream os) {
+        DataOutput out = new DataOutputStream(os);
+        WritableByteChannel channel = Channels.newChannel(os);
+        return new DataOutputWriter(out, channel, os, null);
+    }
+    
+    public static DataOutputWriter newWriter(ByteBuffer bb) {
+        ByteBufferWrapper out = new ByteBufferWrapper(bb);
+        OutputStream os = out.getOutputStream();
+        WritableByteChannel channel = out.getWriteChannel();
+        return new DataOutputWriter(out, channel, os, bb);
+    }
+    
+    public static DataOutputWriter newWriter(WritableByteChannel fc) {
+        OutputStream os = new BufferedOutputStream(Channels.newOutputStream(fc));
+        DataOutput out = new DataOutputStream(os);
+        return new DataOutputWriter(out, fc, os, null);
+    }
+    
+    public static DataOutputWriter newWriter(Path file) throws IOException {
+        return newWriter(FileChannel.open(file, CREATE, WRITE));
+    }
+    
+    private WritableByteChannel channel;
+    private OutputStream stream;
+    private ByteBuffer buffer;
     private boolean swap;
     
     public DataOutputWriter(DataOutput out) {
         super(out);
     }
-    
-    public DataOutputWriter(OutputStream is) {
-        super(new DataOutputStream(is));
-    }
-    
-    public DataOutputWriter(ByteBuffer bb) {
-        super(new ByteBufferWrapper(bb));
+ 
+    private DataOutputWriter(DataOutput out, WritableByteChannel channel, OutputStream stream, ByteBuffer buffer) {
+        this(out);
+        this.channel = channel;
+        this.stream = stream;
+        this.buffer = buffer;
     }
     
     public OutputStream getOutputStream() {
-        DataOutput out = getWrapped();
-        
-        // try to find the most direct way to stream the wrapped object
-        if (out instanceof InputStream) {
-            return (OutputStream) out;
-        } else if (out instanceof ByteBufferWrapper) {
-            return ((ByteBufferWrapper) out).getOutputStream();
-        } else {
-            return new InverseDataOutputStream(this);
-        }
+        return stream;
     }
     
     @Override
@@ -209,16 +229,10 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     
     @Override
     public void writeBuffer(ByteBuffer src) throws IOException {
-        DataOutput out = getWrapped();
-        if (out instanceof ByteBufferWrapper) {
-            // write directly
-            ByteBuffer dst = ((ByteBufferWrapper) out).getByteBuffer();
-            dst.put(src);
+        if (buffer != null) {
+            buffer.put(src);
         } else {
-            // write using channeled output streams
-            try (WritableByteChannel channel = Channels.newChannel(getOutputStream())) {
-                channel.write(src);
-            }
+            channel.write(src);
         }
     }
     
@@ -236,6 +250,17 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
             if (rem != 0) {
                 skipBytes(align - rem);
             }
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        super.close();
+        if (stream != null) {
+            stream.close();
+        }
+        if (channel != null) {
+            channel.close();
         }
     }
 }
