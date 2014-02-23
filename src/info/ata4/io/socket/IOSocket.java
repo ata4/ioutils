@@ -13,8 +13,6 @@ import info.ata4.io.InverseDataInputStream;
 import info.ata4.io.InverseDataOutputStream;
 import info.ata4.io.Seekable;
 import info.ata4.io.Swappable;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -115,7 +113,7 @@ public class IOSocket implements Closeable {
     protected DataInput newDataInput() {
         InputStream stream = getInputStream();
         if (stream != null) {
-            return new DataInputStream(new BufferedInputStream(stream));
+            return new DataInputStream(stream);
         } else {
             return null;
         }
@@ -135,7 +133,7 @@ public class IOSocket implements Closeable {
     protected DataOutput newDataOutput() {
         OutputStream stream = getOutputStream();
         if (stream != null) {
-            return new DataOutputStream(new BufferedOutputStream(stream));
+            return new DataOutputStream(stream);
         } else {
             return null;
         }
