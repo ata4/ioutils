@@ -9,14 +9,14 @@
  */
 package info.ata4.io;
 
+import info.ata4.io.socket.ByteBufferSocket;
+import info.ata4.io.socket.FileChannelSocket;
+import info.ata4.io.socket.IOSocket;
 import info.ata4.io.util.HalfFloat;
-import java.io.BufferedOutputStream;
 import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Path;
@@ -32,47 +32,40 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     
     private static final String DEFAULT_CHARSET = "ASCII";
     
+    public static DataOutputWriter newWriter(DataOutput out) {
+        IOSocket socket = new IOSocket();
+        socket.setDataOutput(out);
+        return new DataOutputWriter(socket);
+    }
+    
     public static DataOutputWriter newWriter(OutputStream os) {
-        DataOutput out = new DataOutputStream(os);
-        WritableByteChannel channel = Channels.newChannel(os);
-        return new DataOutputWriter(out, channel, os, null);
+        IOSocket socket = new IOSocket();
+        socket.setOutputStream(os);
+        return new DataOutputWriter(socket);
     }
     
     public static DataOutputWriter newWriter(ByteBuffer bb) {
-        ByteBufferWrapper out = new ByteBufferWrapper(bb);
-        OutputStream os = out.getOutputStream();
-        WritableByteChannel channel = out.getWriteChannel();
-        return new DataOutputWriter(out, channel, os, bb);
+        return new DataOutputWriter(new ByteBufferSocket(bb));
     }
     
     public static DataOutputWriter newWriter(WritableByteChannel fc) {
-        OutputStream os = new BufferedOutputStream(Channels.newOutputStream(fc));
-        DataOutput out = new DataOutputStream(os);
-        return new DataOutputWriter(out, fc, os, null);
+        IOSocket socket = new IOSocket();
+        socket.setWritableByteChannel(fc);
+        return new DataOutputWriter(socket);
+    }
+    
+    public static DataOutputWriter newWriter(FileChannel fc) throws IOException {
+        return new DataOutputWriter(new FileChannelSocket(fc));
     }
     
     public static DataOutputWriter newWriter(Path file) throws IOException {
         return newWriter(FileChannel.open(file, CREATE, WRITE));
     }
     
-    private WritableByteChannel channel;
-    private OutputStream stream;
-    private ByteBuffer buffer;
     private boolean swap;
     
-    public DataOutputWriter(DataOutput out) {
-        super(out);
-    }
- 
-    private DataOutputWriter(DataOutput out, WritableByteChannel channel, OutputStream stream, ByteBuffer buffer) {
-        this(out);
-        this.channel = channel;
-        this.stream = stream;
-        this.buffer = buffer;
-    }
-    
-    public OutputStream getOutputStream() {
-        return stream;
+    public DataOutputWriter(IOSocket socket) {
+        super(socket);
     }
     
     @Override
@@ -229,10 +222,17 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     
     @Override
     public void writeBuffer(ByteBuffer src) throws IOException {
+        ByteBuffer buffer = getSocket().getByteBuffer();
         if (buffer != null) {
             buffer.put(src);
         } else {
-            channel.write(src);
+            WritableByteChannel channel = getSocket().getWritableByteChannel();
+
+            if (channel != null) {
+                channel.write(src);
+            } else {
+                throw new UnsupportedOperationException();
+            }
         }
     }
     
@@ -250,17 +250,6 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
             if (rem != 0) {
                 skipBytes(align - rem);
             }
-        }
-    }
-
-    @Override
-    public void close() throws IOException {
-        super.close();
-        if (stream != null) {
-            stream.close();
-        }
-        if (channel != null) {
-            channel.close();
         }
     }
 }

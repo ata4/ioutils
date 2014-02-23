@@ -7,7 +7,7 @@
  **    May you find forgiveness for yourself and forgive others.
  **    May you share freely, never taking more than you give.
  */
-package info.ata4.io.util;
+package info.ata4.io.buffer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

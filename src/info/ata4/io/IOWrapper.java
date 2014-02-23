@@ -9,6 +9,7 @@
  */
 package info.ata4.io;
 
+import info.ata4.io.socket.IOSocket;
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -19,30 +20,25 @@ import java.io.IOException;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public abstract class IOWrapper<T> implements Swappable, Seekable, Closeable {
+public abstract class IOWrapper implements Swappable, Seekable, Closeable {
     
-    private final T wrapped;
-    private final Swappable swappable;
-    private final Seekable seekable;
-    private final Closeable closeable;
+    private final IOSocket socket;
 
-    public IOWrapper(T wrapped) {
-        this.wrapped = wrapped;
-        swappable = wrapped instanceof Swappable ? (Swappable) wrapped : null;
-        seekable = wrapped instanceof Seekable ? (Seekable) wrapped : null;
-        closeable = wrapped instanceof Closeable ? (Closeable) wrapped : null;
+    public IOWrapper(IOSocket socket) {
+        this.socket = socket;
     }
     
-    public T getWrapped() {
-        return wrapped;
+    public IOSocket getSocket() {
+        return socket;
     }
     
     public boolean isSwappable() {
-        return swappable != null;
+        return socket.getSwappable() != null;
     }
     
     public Swappable getSwappable() {
-        if (isSwappable()) {
+        Swappable swappable = socket.getSwappable();
+        if (swappable != null) {
             return swappable;
         } else {
             throw new UnsupportedOperationException("Byte swapping not supported");
@@ -60,11 +56,12 @@ public abstract class IOWrapper<T> implements Swappable, Seekable, Closeable {
     }
     
     public boolean isSeekable() {
-        return seekable != null;
+        return socket.getSeekable() != null;
     }
     
     public Seekable getSeekable() {
-        if (isSeekable()) {
+        Seekable seekable = socket.getSeekable();
+        if (seekable != null) {
             return seekable;
         } else {
             throw new UnsupportedOperationException("Seeking not supported");
@@ -101,20 +98,8 @@ public abstract class IOWrapper<T> implements Swappable, Seekable, Closeable {
         return getSeekable().hasRemaining();
     }
     
-    public boolean isCloseable() {
-        return closeable != null;
-    }
-    
-    public Closeable getCloseable() {
-        if (isCloseable()) {
-            return closeable;
-        } else {
-            throw new UnsupportedOperationException("Closing not supported");
-        }
-    }
-    
     @Override
     public void close() throws IOException {
-        getCloseable().close();
+        socket.close();
     }
 }

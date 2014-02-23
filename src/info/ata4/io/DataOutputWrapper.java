@@ -9,6 +9,7 @@
  */
 package info.ata4.io;
 
+import info.ata4.io.socket.IOSocket;
 import java.io.DataOutput;
 import java.io.IOException;
 
@@ -16,13 +17,13 @@ import java.io.IOException;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataOutputWrapper extends IOWrapper<DataOutput> implements DataOutput {
+public class DataOutputWrapper extends IOWrapper implements DataOutput {
     
     private final DataOutput out;
 
-    public DataOutputWrapper(DataOutput out) {
-        super(out);
-        this.out = out;
+    public DataOutputWrapper(IOSocket socket) {
+        super(socket);
+        this.out = socket.getDataOutput();
     }
     
     @Override

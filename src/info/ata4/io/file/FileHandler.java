@@ -9,7 +9,7 @@
  */
 package info.ata4.io.file;
 
-import info.ata4.io.util.ByteBufferUtils;
+import info.ata4.io.buffer.ByteBufferUtils;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;

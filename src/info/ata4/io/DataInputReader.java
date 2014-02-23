@@ -9,15 +9,15 @@
  */
 package info.ata4.io;
 
+import info.ata4.io.socket.ByteBufferSocket;
+import info.ata4.io.socket.FileChannelSocket;
+import info.ata4.io.socket.IOSocket;
 import info.ata4.io.util.HalfFloat;
-import java.io.BufferedInputStream;
 import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Path;
@@ -34,47 +34,40 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     
     private static final String DEFAULT_CHARSET = "ASCII";
     
+    public static DataInputReader newReader(DataInput in) {
+        IOSocket socket = new IOSocket();
+        socket.setDataInput(in);
+        return new DataInputReader(socket);
+    }
+    
     public static DataInputReader newReader(InputStream is) {
-        DataInput in = new DataInputStream(is);
-        ReadableByteChannel channel = Channels.newChannel(is);
-        return new DataInputReader(in, channel, is, null);
+        IOSocket socket = new IOSocket();
+        socket.setInputStream(is);
+        return new DataInputReader(socket);
     }
     
     public static DataInputReader newReader(ByteBuffer bb) {
-        ByteBufferWrapper in = new ByteBufferWrapper(bb);
-        InputStream is = in.getInputStream();
-        ReadableByteChannel channel = in.getReadChannel();
-        return new DataInputReader(in, channel, is, bb);
+        return new DataInputReader(new ByteBufferSocket(bb));
     }
     
     public static DataInputReader newReader(ReadableByteChannel fc) {
-        InputStream is = new BufferedInputStream(Channels.newInputStream(fc));
-        DataInput in = new DataInputStream(is);
-        return new DataInputReader(in, fc, is, null);
+        IOSocket socket = new IOSocket();
+        socket.setReadableByteChannel(fc);
+        return new DataInputReader(socket);
     }
     
-    public static DataInputReader newReader(Path file) throws IOException {        
+    public static DataInputReader newReader(FileChannel fc) throws IOException {
+        return new DataInputReader(new FileChannelSocket(fc));
+    }
+    
+    public static DataInputReader newReader(Path file) throws IOException {
         return newReader(FileChannel.open(file, READ));
     }
 
-    private ReadableByteChannel channel;
-    private InputStream stream;
-    private ByteBuffer buffer;
     private boolean swap;
     
-    public DataInputReader(DataInput in) {
-        super(in);
-    }
-    
-    private DataInputReader(DataInput out, ReadableByteChannel channel, InputStream stream, ByteBuffer buffer) {
-        this(out);
-        this.channel = channel;
-        this.stream = stream;
-        this.buffer = buffer;
-    }
-    
-    public InputStream getInputStream() {
-        return stream;
+    public DataInputReader(IOSocket socket) {
+        super(socket);
     }
     
     @Override
@@ -94,7 +87,7 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
             this.swap = swap;
         }
     }
-
+    
     @Override
     public boolean isSwappable() {
         // supports manual swapping using EndianUtils if required
@@ -288,10 +281,17 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     
     @Override
     public void readBuffer(ByteBuffer dst) throws IOException {
+        ByteBuffer buffer = getSocket().getByteBuffer();
         if (buffer != null) {
             dst.put(buffer);
         } else {
-            channel.read(dst);
+            ReadableByteChannel channel = getSocket().getReadableByteChannel();
+
+            if (channel != null) {
+                channel.read(dst);
+            } else {
+                throw new UnsupportedOperationException();
+            }
         }
     }
     
@@ -302,17 +302,6 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
             if (rem != 0) {
                 skipBytes(align - rem);
             }
-        }
-    }
-    
-    @Override
-    public void close() throws IOException {
-        super.close();
-        if (stream != null) {
-            stream.close();
-        }
-        if (channel != null) {
-            channel.close();
         }
     }
 }
