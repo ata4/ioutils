@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
 import java.nio.channels.Channels;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import org.apache.commons.io.input.CloseShieldInputStream;
@@ -58,7 +60,7 @@ public class IOSocket implements Closeable {
         return null;
     }
     
-    protected CloseShieldInputStream getCloseShieldInputStream(InputStream is) {
+    protected InputStream getCloseShield(InputStream is) {
         if (is == null) {
             return null;
         } else {
@@ -70,7 +72,7 @@ public class IOSocket implements Closeable {
         if (is == null) {
             is = newInputStream();
         }
-        return getCloseShieldInputStream(is);
+        return getCloseShield(is);
     }
 
     public void setInputStream(InputStream is) {
@@ -91,7 +93,7 @@ public class IOSocket implements Closeable {
         return null;
     }
     
-    protected CloseShieldOutputStream getCloseShieldOutputStream(OutputStream os) {
+    protected OutputStream getCloseShield(OutputStream os) {
         if (os == null) {
             return null;
         } else {
@@ -103,7 +105,7 @@ public class IOSocket implements Closeable {
         if (os == null) {
             os = newOutputStream();
         }
-        return getCloseShieldOutputStream(os);
+        return getCloseShield(os);
     }
     
     public void setOutputStream(OutputStream os) {
@@ -159,11 +161,19 @@ public class IOSocket implements Closeable {
         }
     }
     
+    protected ReadableByteChannel getCloseShield(ReadableByteChannel chan) {
+        if (chan == null) {
+            return null;
+        } else {
+            return new CloseShieldReadableByteChannel(chan);
+        }
+    }
+    
     public ReadableByteChannel getReadableByteChannel() {
         if (rchan == null) {
             rchan = newReadableByteChannel();
         }
-        return rchan;
+        return getCloseShield(rchan);
     }
     
     public void setReadableByteChannel(ReadableByteChannel rchan) {
@@ -179,11 +189,19 @@ public class IOSocket implements Closeable {
         }
     }
     
+    protected WritableByteChannel getCloseShield(WritableByteChannel chan) {
+        if (chan == null) {
+            return null;
+        } else {
+            return new CloseShieldWritableByteChannel(chan);
+        }
+    }
+    
     public WritableByteChannel getWritableByteChannel() {
         if (wchan == null) {
             wchan = newWritableByteChannel();
         }
-        return wchan;
+        return getCloseShield(wchan);
     }
     
     public void setWritableByteChannel(WritableByteChannel wchan) {
@@ -238,6 +256,55 @@ public class IOSocket implements Closeable {
     protected void close(Closeable c) throws IOException {
         if (c != null) {
             c.close();
+        }
+    }
+    
+    private class CloseShieldChannel implements Channel {
+        
+        private boolean open;
+
+        @Override
+        public boolean isOpen() {
+            return open;
+        }
+
+        @Override
+        public void close() throws IOException {
+            open = false;
+        }
+    }
+    
+    private class CloseShieldReadableByteChannel extends CloseShieldChannel implements ReadableByteChannel {
+        
+        private final ReadableByteChannel chan;
+
+        private CloseShieldReadableByteChannel(ReadableByteChannel chan) {
+            this.chan = chan;
+        }
+
+        @Override
+        public int read(ByteBuffer dst) throws IOException {
+            if (!isOpen()) {
+                throw new ClosedChannelException();
+            }
+            return chan.read(dst);
+        }
+    }
+    
+    private class CloseShieldWritableByteChannel extends CloseShieldChannel implements WritableByteChannel {
+        
+        private final WritableByteChannel chan;
+
+        private CloseShieldWritableByteChannel(WritableByteChannel chan) {
+            this.chan = chan;
+        }
+
+        @Override
+        public int write(ByteBuffer src) throws IOException {
+            if (!isOpen()) {
+                throw new ClosedChannelException();
+            }
+            return chan.write(src);
         }
     }
 }
