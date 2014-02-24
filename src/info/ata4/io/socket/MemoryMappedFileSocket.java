@@ -27,6 +27,8 @@ public class MemoryMappedFileSocket extends IOSocket {
 
     public MemoryMappedFileSocket(MemoryMappedFile mmfile) {
         this.mmfile = mmfile;
+        setCanRead(true);
+        setCanWrite(!mmfile.isReadOnly());
     }
 
     @Override

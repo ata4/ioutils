@@ -10,8 +10,8 @@
 package info.ata4.io.buffer;
 
 import info.ata4.io.SeekOrigin;
-import static info.ata4.io.SeekOrigin.*;
 import info.ata4.io.Seekable;
+import info.ata4.io.Swappable;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -33,23 +33,19 @@ import java.util.List;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class MemoryMappedFile implements Seekable {
+public class MemoryMappedFile implements Swappable, Seekable {
     
+    private static final int PAGE_SIZE = Integer.MAX_VALUE;
+    
+    private List<MappedByteBuffer> buffers;
     private long position = 0;
     private long capacity;
     private ByteOrder order;
     private boolean readOnly;
-    
-    private int PAGE_SIZE = Integer.MAX_VALUE;
-    private List<MappedByteBuffer> buffers;
-    private FileChannel fc;
-    
-    public MemoryMappedFile(FileChannel fc, boolean readOnly, long ofs, long len) throws IOException {
-        init(fc, readOnly, ofs, len);
-    }
+    private boolean swap;
     
     public MemoryMappedFile(Path file, boolean readOnly, long ofs, long len) throws IOException {
-        OpenOption[] openOptions = readOnly ? new OpenOption[] {READ} : new OpenOption[] {CREATE, WRITE};
+        OpenOption[] openOptions = readOnly ? new OpenOption[] {READ} : new OpenOption[] {CREATE, READ, WRITE};
         try (FileChannel fc = FileChannel.open(file, openOptions)) {
             init(fc, readOnly, ofs, len);
         }
@@ -71,21 +67,35 @@ public class MemoryMappedFile implements Seekable {
         MapMode mapMode = readOnly ? READ_ONLY : READ_WRITE;
         for (int i = 0; i < pages; i++) {
             int bufLen = (int) Math.min(PAGE_SIZE, len - bufOfs);
-            buffers.add(fc.map(mapMode, bufOfs, bufLen));
+            buffers.set(i, fc.map(mapMode, bufOfs, bufLen));
             bufOfs += bufLen;
         }
         
         this.readOnly = readOnly;
         this.capacity = len;
-        this.fc = fc;
     }
     
     private MappedByteBuffer current() {
         int page = (int) (position / PAGE_SIZE);
         int pos = (int) (position % PAGE_SIZE);
         MappedByteBuffer bb = buffers.get(page);
-        bb.position(pos);
+        if (bb.position() != pos) {
+            bb.position(pos);
+        }
         return bb;
+    }
+    
+    @Override
+    public boolean isSwap() {
+        return swap;
+    }
+
+    @Override
+    public void setSwap(boolean swap) {
+        this.swap = swap;
+        for (ByteBuffer buffer : buffers) {
+            buffer.order(swap ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+        }
     }
     
     @Override
@@ -109,6 +119,9 @@ public class MemoryMappedFile implements Seekable {
 
     @Override
     public void position(long newPosition) throws IOException {
+        if (newPosition > capacity) {
+            throw new IllegalArgumentException();
+        }
         position = newPosition;
     }
 
@@ -130,10 +143,6 @@ public class MemoryMappedFile implements Seekable {
     @Override
     public boolean hasRemaining() {
         return remaining() > 0;
-    }
-    
-    public FileChannel getFileChannel() {
-        return fc;
     }
     
     public void order(ByteOrder bo) {
@@ -180,6 +189,37 @@ public class MemoryMappedFile implements Seekable {
         get(dst, 0, dst.length);
     }
     
+    public void get(ByteBuffer dst) {
+        MappedByteBuffer src = current();
+        
+        int remainingSrc = src.remaining();
+        int remainingDst = dst.remaining();
+        
+        if (remaining() < remainingDst) {
+            throw new BufferUnderflowException();
+        }
+        
+        if (remainingSrc >= remainingDst) {
+            // read from page directly
+            dst.put(src);
+        } else {
+            // read from first page
+            int remaining = remainingSrc;
+            for (int i = 0; i < remaining; i++) {
+                dst.put(src.get());
+                position++;
+            }
+            
+            // read from second page
+            remaining = remainingDst - remainingSrc;
+            src = current();
+            for (int i = 0; i < remaining; i++) {
+                dst.put(src.get());
+                position++;
+            }
+        }
+    }
+    
     public void put(byte dst) {
         current().put(dst);
         position++;
@@ -209,13 +249,14 @@ public class MemoryMappedFile implements Seekable {
     }
     
     public void put(ByteBuffer src) {
+        MappedByteBuffer dst = current();
+        
         int remainingSrc = src.remaining();
-        if (remainingSrc > remaining()) {
+        int remainingDst = dst.remaining();
+        
+        if (remaining() < remainingSrc) {
             throw new BufferOverflowException();
         }
-        
-        MappedByteBuffer dst = current();
-        int remainingDst = dst.remaining();
         
         if (remainingDst >= remainingSrc) {
             // write to page directly
@@ -229,7 +270,7 @@ public class MemoryMappedFile implements Seekable {
             }
             
             // write to second page
-            remaining = remainingSrc - remaining;
+            remaining = remainingSrc - remainingDst;
             dst = current();
             for (int i = 0; i < remaining; i++) {
                 dst.put(src.get());
