@@ -10,9 +10,8 @@
 package info.ata4.io.buffer;
 
 import info.ata4.io.SeekOrigin;
-import info.ata4.io.Seekable;
-import info.ata4.io.Swappable;
 import static info.ata4.io.SeekOrigin.*;
+import info.ata4.io.Seekable;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -34,7 +33,7 @@ import java.util.List;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class MemoryMappedFile implements Swappable, Seekable {
+public class MemoryMappedFile implements Seekable {
     
     private long position = 0;
     private long capacity;
@@ -43,7 +42,7 @@ public class MemoryMappedFile implements Swappable, Seekable {
     
     private int PAGE_SIZE = Integer.MAX_VALUE;
     private List<MappedByteBuffer> buffers;
-    private boolean swap;
+    private FileChannel fc;
     
     public MemoryMappedFile(FileChannel fc, boolean readOnly, long ofs, long len) throws IOException {
         init(fc, readOnly, ofs, len);
@@ -78,6 +77,7 @@ public class MemoryMappedFile implements Swappable, Seekable {
         
         this.readOnly = readOnly;
         this.capacity = len;
+        this.fc = fc;
     }
     
     private MappedByteBuffer current() {
@@ -86,19 +86,6 @@ public class MemoryMappedFile implements Swappable, Seekable {
         MappedByteBuffer bb = buffers.get(page);
         bb.position(pos);
         return bb;
-    }
-    
-    @Override
-    public boolean isSwap() {
-        return swap;
-    }
-
-    @Override
-    public void setSwap(boolean swap) {
-        this.swap = swap;
-        for (ByteBuffer buffer : buffers) {
-            buffer.order(swap ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
-        }
     }
     
     @Override
@@ -143,6 +130,10 @@ public class MemoryMappedFile implements Swappable, Seekable {
     @Override
     public boolean hasRemaining() {
         return remaining() > 0;
+    }
+    
+    public FileChannel getFileChannel() {
+        return fc;
     }
     
     public void order(ByteOrder bo) {

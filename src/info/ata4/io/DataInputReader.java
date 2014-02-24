@@ -10,13 +10,17 @@
 package info.ata4.io;
 
 import info.ata4.io.socket.ByteBufferSocket;
+import info.ata4.io.socket.ChannelSocket;
+import info.ata4.io.socket.DataSocket;
 import info.ata4.io.socket.FileChannelSocket;
 import info.ata4.io.socket.IOSocket;
+import info.ata4.io.socket.StreamSocket;
 import info.ata4.io.util.HalfFloat;
 import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -37,15 +41,11 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     private static final String DEFAULT_CHARSET = "ASCII";
     
     public static DataInputReader newReader(DataInput in) {
-        IOSocket socket = new IOSocket();
-        socket.setDataInput(in);
-        return new DataInputReader(socket);
+        return new DataInputReader(new DataSocket(in));
     }
     
     public static DataInputReader newReader(InputStream is) {
-        IOSocket socket = new IOSocket();
-        socket.setInputStream(is);
-        return new DataInputReader(socket);
+        return new DataInputReader(new StreamSocket(is));
     }
     
     public static DataInputReader newReader(ByteBuffer bb) {
@@ -53,9 +53,7 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     }
     
     public static DataInputReader newReader(ReadableByteChannel fc) {
-        IOSocket socket = new IOSocket();
-        socket.setReadableByteChannel(fc);
-        return new DataInputReader(socket);
+        return new DataInputReader(new ChannelSocket(fc));
     }
     
     public static DataInputReader newReader(FileChannel fc) throws IOException {
@@ -72,6 +70,10 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     
     public static DataInputReader newReader(Path file) throws IOException {
         return newReader(file, false);
+    }
+    
+    public static DataInputReader newReader(RandomAccessFile raf) throws IOException {
+        return newReader(raf.getChannel());
     }
 
     private boolean swap;

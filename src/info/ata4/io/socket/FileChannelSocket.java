@@ -26,6 +26,11 @@ public class FileChannelSocket extends IOSocket {
     
     public FileChannelSocket(FileChannel fc) {
         this.fc = fc;
+        
+        // FileChannels may be read only or write only, but there's no interface
+        // to check it
+        setCanRead(true);
+        setCanWrite(true);
     }
 
     @Override

@@ -10,13 +10,17 @@
 package info.ata4.io;
 
 import info.ata4.io.socket.ByteBufferSocket;
+import info.ata4.io.socket.ChannelSocket;
+import info.ata4.io.socket.DataSocket;
 import info.ata4.io.socket.FileChannelSocket;
 import info.ata4.io.socket.IOSocket;
+import info.ata4.io.socket.StreamSocket;
 import info.ata4.io.util.HalfFloat;
 import java.io.BufferedOutputStream;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
@@ -35,15 +39,11 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     private static final String DEFAULT_CHARSET = "ASCII";
     
     public static DataOutputWriter newWriter(DataOutput out) {
-        IOSocket socket = new IOSocket();
-        socket.setDataOutput(out);
-        return new DataOutputWriter(socket);
+        return new DataOutputWriter(new DataSocket(out));
     }
     
     public static DataOutputWriter newWriter(OutputStream os) {
-        IOSocket socket = new IOSocket();
-        socket.setOutputStream(os);
-        return new DataOutputWriter(socket);
+        return new DataOutputWriter(new StreamSocket(os));
     }
     
     public static DataOutputWriter newWriter(ByteBuffer bb) {
@@ -51,9 +51,7 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     }
     
     public static DataOutputWriter newWriter(WritableByteChannel fc) {
-        IOSocket socket = new IOSocket();
-        socket.setWritableByteChannel(fc);
-        return new DataOutputWriter(socket);
+        return new DataOutputWriter(new ChannelSocket(fc));
     }
     
     public static DataOutputWriter newWriter(FileChannel fc) throws IOException {
@@ -70,6 +68,10 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     
     public static DataOutputWriter newWriter(Path file) throws IOException {
         return newWriter(file, false);
+    }
+    
+    public static DataOutputWriter newReader(RandomAccessFile raf) throws IOException {
+        return newWriter(raf.getChannel());
     }
     
     private boolean swap;

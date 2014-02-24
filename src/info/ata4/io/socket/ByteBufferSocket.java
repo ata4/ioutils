@@ -9,13 +9,13 @@
  */
 package info.ata4.io.socket;
 
+import info.ata4.io.Seekable;
+import info.ata4.io.SeekableImpl;
+import info.ata4.io.Swappable;
 import info.ata4.io.buffer.ByteBufferInput;
 import info.ata4.io.buffer.ByteBufferInputStream;
 import info.ata4.io.buffer.ByteBufferOutput;
 import info.ata4.io.buffer.ByteBufferOutputStream;
-import info.ata4.io.Seekable;
-import info.ata4.io.SeekableImpl;
-import info.ata4.io.Swappable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -33,6 +33,8 @@ public class ByteBufferSocket extends IOSocket {
     
     public ByteBufferSocket(ByteBuffer buf) {
         setByteBuffer(buf);
+        setCanRead(true);
+        setCanWrite(!buf.isReadOnly());
     }
 
     @Override

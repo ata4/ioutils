@@ -45,6 +45,24 @@ public class IOSocket implements Closeable {
     private ByteBuffer buf;
     private Swappable swappable;
     private Seekable seekable;
+    private boolean canRead;
+    private boolean canWrite;
+    
+    public boolean canRead() {
+        return canRead;
+    }
+    
+    protected void setCanRead(boolean canRead) {
+        this.canRead = canRead;
+    }
+    
+    public boolean canWrite() {
+        return canWrite;
+    }
+    
+    protected void setCanWrite(boolean canWrite) {
+        this.canWrite = canWrite;
+    }
     
     protected InputStream newInputStream() {
         ReadableByteChannel chan = getReadableByteChannel();
@@ -75,7 +93,7 @@ public class IOSocket implements Closeable {
         return getCloseShield(is);
     }
 
-    public void setInputStream(InputStream is) {
+    protected void setInputStream(InputStream is) {
         this.is = is;
     }
     
@@ -108,7 +126,7 @@ public class IOSocket implements Closeable {
         return getCloseShield(os);
     }
     
-    public void setOutputStream(OutputStream os) {
+    protected void setOutputStream(OutputStream os) {
         this.os = os;
     }
     
@@ -128,7 +146,7 @@ public class IOSocket implements Closeable {
         return in;
     }
     
-    public void setDataInput(DataInput in) {
+    protected void setDataInput(DataInput in) {
         this.in = in;
     }
     
@@ -148,7 +166,7 @@ public class IOSocket implements Closeable {
         return out;
     }
     
-    public void setDataOutput(DataOutput out) {
+    protected void setDataOutput(DataOutput out) {
         this.out = out;
     }
     
@@ -176,7 +194,7 @@ public class IOSocket implements Closeable {
         return getCloseShield(rchan);
     }
     
-    public void setReadableByteChannel(ReadableByteChannel rchan) {
+    protected void setReadableByteChannel(ReadableByteChannel rchan) {
         this.rchan = rchan;
     }
     
@@ -204,7 +222,7 @@ public class IOSocket implements Closeable {
         return getCloseShield(wchan);
     }
     
-    public void setWritableByteChannel(WritableByteChannel wchan) {
+    protected void setWritableByteChannel(WritableByteChannel wchan) {
         this.wchan = wchan;
     }
     
@@ -219,7 +237,7 @@ public class IOSocket implements Closeable {
         return buf;
     }
     
-    public void setByteBuffer(ByteBuffer buf) {
+    protected void setByteBuffer(ByteBuffer buf) {
         this.buf = buf;
     }
     
