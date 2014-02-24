@@ -24,13 +24,13 @@ public abstract class FileHandler {
     private Path sourceFile;
     
     public void open(Path file) throws IOException {
-        load(ByteBufferUtils.openReadOnly(file));
         sourceFile = file;
+        load(ByteBufferUtils.openReadOnly(file));
     }
 
     public void load(Path file) throws IOException {
-        load(ByteBufferUtils.load(file));
         sourceFile = file;
+        load(ByteBufferUtils.load(file));
     }
     
     public abstract void load(ByteBuffer bb) throws IOException;
