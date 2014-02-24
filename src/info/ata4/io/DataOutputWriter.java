@@ -13,12 +13,14 @@ import info.ata4.io.socket.ByteBufferSocket;
 import info.ata4.io.socket.FileChannelSocket;
 import info.ata4.io.socket.IOSocket;
 import info.ata4.io.util.HalfFloat;
+import java.io.BufferedOutputStream;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.*;
 import org.apache.commons.io.EndianUtils;
@@ -58,8 +60,16 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
         return new DataOutputWriter(new FileChannelSocket(fc));
     }
     
+    public static DataOutputWriter newWriter(Path file, boolean seekable) throws IOException {
+        if (seekable) {
+            return newWriter(FileChannel.open(file, CREATE, WRITE));
+        } else {
+            return newWriter(new BufferedOutputStream(Files.newOutputStream(file, CREATE, WRITE), 4096));
+        }
+    }
+    
     public static DataOutputWriter newWriter(Path file) throws IOException {
-        return newWriter(FileChannel.open(file, CREATE, WRITE));
+        return newWriter(file, false);
     }
     
     private boolean swap;

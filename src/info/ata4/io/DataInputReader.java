@@ -13,6 +13,7 @@ import info.ata4.io.socket.ByteBufferSocket;
 import info.ata4.io.socket.FileChannelSocket;
 import info.ata4.io.socket.IOSocket;
 import info.ata4.io.util.HalfFloat;
+import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +21,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.*;
 import org.apache.commons.io.EndianUtils;
@@ -59,9 +61,17 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     public static DataInputReader newReader(FileChannel fc) throws IOException {
         return new DataInputReader(new FileChannelSocket(fc));
     }
+ 
+    public static DataInputReader newReader(Path file, boolean seekable) throws IOException {
+        if (seekable) {
+            return newReader(FileChannel.open(file, READ));
+        } else {
+            return newReader(new BufferedInputStream(Files.newInputStream(file, READ), 4096));
+        }
+    }
     
     public static DataInputReader newReader(Path file) throws IOException {
-        return newReader(FileChannel.open(file, READ));
+        return newReader(file, false);
     }
 
     private boolean swap;
