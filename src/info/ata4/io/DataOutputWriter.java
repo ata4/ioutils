@@ -27,7 +27,6 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.*;
-import org.apache.commons.io.EndianUtils;
 
 /**
  * DataOutput extension for more data access methods.
@@ -73,79 +72,9 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     public static DataOutputWriter newReader(RandomAccessFile raf) throws IOException {
         return newWriter(raf.getChannel());
     }
-    
-    private boolean swap;
-    
+
     public DataOutputWriter(IOSocket socket) {
         super(socket);
-    }
-    
-    @Override
-    public boolean isSwap() {
-        if (super.isSwappable()) {
-            return super.isSwap();
-        } else {
-            return swap;
-        }
-    }
-
-    @Override
-    public void setSwap(boolean swap) {
-        if (super.isSwappable()) {
-            super.setSwap(swap);
-        } else {
-            this.swap = swap;
-        }
-    }
-
-    @Override
-    public boolean isSwappable() {
-        // supports manual swapping using EndianUtils if required
-        return true;
-    }
-    
-    @Override
-    public void writeShort(int v) throws IOException {
-        if (swap) {
-            v = EndianUtils.swapShort((short) v);
-        }
-        super.writeShort(v);
-    }
-    
-    @Override
-    public void writeInt(int v) throws IOException {
-        if (swap) {
-            v = EndianUtils.swapInteger(v);
-        }
-        super.writeInt(v);
-    }
-    
-    @Override
-    public void writeFloat(float v) throws IOException {
-        if (swap) {
-            // NOTE: don't use writeFloat() plus EndianUtils.swapFloat() here!
-            writeInt(Float.floatToRawIntBits(v));
-        } else {
-            super.writeFloat(v);
-        }
-    }
-    
-    @Override
-    public void writeDouble(double v) throws IOException {
-        if (swap) {
-            // NOTE: don't use writeDouble() plus EndianUtils.swapDouble() here!
-            writeLong(Double.doubleToRawLongBits(v));
-        } else {
-            super.writeDouble(v);
-        }
-    }
-
-    @Override
-    public void writeLong(long v) throws IOException {
-        if (swap) {
-            v = EndianUtils.swapLong(v);
-        }
-        super.writeLong(v);
     }
     
     @Override

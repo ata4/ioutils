@@ -12,6 +12,7 @@ package info.ata4.io;
 import info.ata4.io.socket.IOSocket;
 import java.io.DataInput;
 import java.io.IOException;
+import org.apache.commons.io.EndianUtils;
 
 /**
  *
@@ -20,10 +21,35 @@ import java.io.IOException;
 public class DataInputWrapper extends IOWrapper implements DataInput {
     
     private final DataInput in;
+    protected boolean swap;
     
     public DataInputWrapper(IOSocket socket) {
         super(socket);
         in = socket.getDataInput();
+    }
+    
+    @Override
+    public boolean isSwap() {
+        if (super.isSwappable()) {
+            return super.isSwap();
+        } else {
+            return swap;
+        }
+    }
+
+    @Override
+    public void setSwap(boolean swap) {
+        if (super.isSwappable()) {
+            super.setSwap(swap);
+        } else {
+            this.swap = swap;
+        }
+    }
+    
+    @Override
+    public boolean isSwappable() {
+        // supports manual swapping using EndianUtils if required
+        return true;
     }
  
     @Override
@@ -58,12 +84,20 @@ public class DataInputWrapper extends IOWrapper implements DataInput {
 
     @Override
     public short readShort() throws IOException {
-        return in.readShort();
+        short r = in.readShort();
+        if (swap) {
+            r = EndianUtils.swapShort(r);
+        }
+        return r;
     }
 
     @Override
     public int readUnsignedShort() throws IOException {
-        return in.readUnsignedShort();
+        int r = in.readUnsignedShort();
+        if (swap) {
+            r = EndianUtils.swapShort((short) r) & 0xff;
+        }
+        return r;
     }
 
     @Override
@@ -73,22 +107,40 @@ public class DataInputWrapper extends IOWrapper implements DataInput {
 
     @Override
     public int readInt() throws IOException {
-        return in.readInt();
+        int r = in.readInt();
+        if (swap) {
+            r = EndianUtils.swapInteger(r);
+        }
+        return r;
     }
 
     @Override
     public long readLong() throws IOException {
-        return in.readLong();
+        long r = in.readLong();
+        if (swap) {
+            r = EndianUtils.swapLong(r);
+        }
+        return r;
     }
 
     @Override
     public float readFloat() throws IOException {
-        return in.readFloat();
+        if (swap) {
+            // NOTE: don't use readFloat() plus EndianUtils.swapFloat() here!
+            return Float.intBitsToFloat(readInt());
+        } else {
+            return in.readFloat();
+        }
     }
 
     @Override
     public double readDouble() throws IOException {
-        return in.readDouble();
+        if (swap) {
+            // NOTE: don't use readDouble() plus EndianUtils.swapDouble() here!
+            return Double.longBitsToDouble(readLong());
+        } else {
+            return in.readDouble();
+        }
     }
 
     @Override

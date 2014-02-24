@@ -12,6 +12,7 @@ package info.ata4.io;
 import info.ata4.io.socket.IOSocket;
 import java.io.DataOutput;
 import java.io.IOException;
+import org.apache.commons.io.EndianUtils;
 
 /**
  *
@@ -20,10 +21,35 @@ import java.io.IOException;
 public class DataOutputWrapper extends IOWrapper implements DataOutput {
     
     private final DataOutput out;
+    protected boolean swap;
 
     public DataOutputWrapper(IOSocket socket) {
         super(socket);
         this.out = socket.getDataOutput();
+    }
+    
+    @Override
+    public boolean isSwap() {
+        if (super.isSwappable()) {
+            return super.isSwap();
+        } else {
+            return swap;
+        }
+    }
+
+    @Override
+    public void setSwap(boolean swap) {
+        if (super.isSwappable()) {
+            super.setSwap(swap);
+        } else {
+            this.swap = swap;
+        }
+    }
+
+    @Override
+    public boolean isSwappable() {
+        // supports manual swapping using EndianUtils if required
+        return true;
     }
     
     @Override
@@ -53,6 +79,9 @@ public class DataOutputWrapper extends IOWrapper implements DataOutput {
 
     @Override
     public void writeShort(int v) throws IOException {
+        if (swap) {
+            v = EndianUtils.swapShort((short) v);
+        }
         out.writeShort(v);
     }
 
@@ -63,22 +92,38 @@ public class DataOutputWrapper extends IOWrapper implements DataOutput {
 
     @Override
     public void writeInt(int v) throws IOException {
+        if (swap) {
+            v = EndianUtils.swapInteger(v);
+        }
         out.writeInt(v);
     }
 
     @Override
     public void writeLong(long v) throws IOException {
+        if (swap) {
+            v = EndianUtils.swapLong(v);
+        }
         out.writeLong(v);
     }
 
     @Override
     public void writeFloat(float v) throws IOException {
-        out.writeFloat(v);
+        if (swap) {
+            // NOTE: don't use writeFloat() plus EndianUtils.swapFloat() here!
+            writeInt(Float.floatToRawIntBits(v));
+        } else {
+            out.writeFloat(v);
+        }
     }
 
     @Override
     public void writeDouble(double v) throws IOException {
-        out.writeDouble(v);
+        if (swap) {
+            // NOTE: don't use writeDouble() plus EndianUtils.swapDouble() here!
+            writeLong(Double.doubleToRawLongBits(v));
+        } else {
+            out.writeDouble(v);
+        }
     }
 
     @Override

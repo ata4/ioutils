@@ -28,7 +28,6 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.*;
-import org.apache.commons.io.EndianUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 /**
@@ -76,92 +75,10 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
         return newReader(raf.getChannel());
     }
 
-    private boolean swap;
-    
     public DataInputReader(IOSocket socket) {
         super(socket);
     }
-    
-    @Override
-    public boolean isSwap() {
-        if (super.isSwappable()) {
-            return super.isSwap();
-        } else {
-            return swap;
-        }
-    }
 
-    @Override
-    public void setSwap(boolean swap) {
-        if (super.isSwappable()) {
-            super.setSwap(swap);
-        } else {
-            this.swap = swap;
-        }
-    }
-    
-    @Override
-    public boolean isSwappable() {
-        // supports manual swapping using EndianUtils if required
-        return true;
-    }
-    
-    @Override
-    public short readShort() throws IOException {
-        short r = super.readShort();
-        if (swap) {
-            r = EndianUtils.swapShort(r);
-        }
-        return r;
-    }
-    
-    @Override
-    public int readUnsignedShort() throws IOException {
-        int r = super.readUnsignedShort();
-        if (swap) {
-            r = EndianUtils.swapShort((short) r) & 0xff;
-        }
-        return r;
-    }
-
-    @Override
-    public int readInt() throws IOException {
-        int r = super.readInt();
-        if (swap) {
-            r = EndianUtils.swapInteger(r);
-        }
-        return r;
-    }
-    
-    @Override
-    public long readLong() throws IOException {
-        long r = super.readLong();
-        if (swap) {
-            r = EndianUtils.swapLong(r);
-        }
-        return r;
-    }
-    
-    @Override
-    public float readFloat() throws IOException {
-        if (swap) {
-            // NOTE: don't use readFloat() plus EndianUtils.swapFloat() here!
-            return Float.intBitsToFloat(readInt());
-        } else {
-            return super.readFloat();
-        }
-    }
-    
-    @Override
-    public double readDouble() throws IOException {
-        if (swap) {
-            // NOTE: don't use readDouble() plus EndianUtils.swapDouble() here!
-            return Double.longBitsToDouble(readLong());
-        } else {
-            return super.readDouble();
-        }
-    }
-    
     @Override
     public long readUnsignedInt() throws IOException {
         return readInt() & 0xffffffffL;
