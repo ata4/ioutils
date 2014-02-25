@@ -64,7 +64,7 @@ public class ByteBufferInput implements DataInput {
     @Override
     public boolean readBoolean() throws IOException {
         try {
-            return buf.get() == 1;
+            return buf.get() != 0;
         } catch (BufferUnderflowException ex) {
             throw new EOFException();
         }
