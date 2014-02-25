@@ -28,7 +28,7 @@ import java.util.Map;
 public class ByteBufferUtils {
     
     private static final ByteBuffer EMPTY = ByteBuffer.allocate(0);
-    private static final int DIRECT_THRESHOLD = 1024 * 1024; // 1MB
+    private static final int DIRECT_THRESHOLD = 10240; // 10 KB
 
     private ByteBufferUtils() {
     }
@@ -62,7 +62,12 @@ public class ByteBufferUtils {
         if (size > DIRECT_THRESHOLD) {
             bb = ByteBuffer.allocateDirect((int) size);
         } else {
-            bb = ByteBuffer.allocate((int) size);
+            try {
+                bb = ByteBuffer.allocate((int) size);
+            } catch (OutOfMemoryError ex) {
+                // not enough space in the heap, try direct allocation instead
+                bb = ByteBuffer.allocateDirect((int) size);
+            }
         }
         
         // read file into the buffer
