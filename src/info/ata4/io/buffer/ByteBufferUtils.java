@@ -33,14 +33,23 @@ public class ByteBufferUtils {
     private ByteBufferUtils() {
     }
     
-    public static void load(Path path, int offset, int length, ByteBuffer dest) throws IOException {
+    public static int load(Path path, int offset, int length, ByteBuffer dest) throws IOException {
+        // don't modify position when reading the file
+        dest = dest.duplicate();
+        
+        // limit buffer if it's too large
+        if (dest.remaining() > length) {
+            dest.limit(dest.position() + length);
+        }
+        
+        // fill buffer from channel
         try (FileChannel fc = FileChannel.open(path, READ)) {
-            fc.read(dest, offset);
+            return fc.read(dest, offset);
         }
     }
     
     public static ByteBuffer load(Path path, int offset, int length) throws IOException {
-        long size = length > 0 ? length : (int) Files.size(path);
+        long size = length > 0 ? length : Files.size(path);
         
         if (size > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("File " + path + " is too large to be load");
@@ -58,9 +67,6 @@ public class ByteBufferUtils {
         
         // read file into the buffer
         load(path, offset, length, bb);
-        
-        // prepare buffer to be read from the start
-        bb.rewind();
         
         return bb;
     }
