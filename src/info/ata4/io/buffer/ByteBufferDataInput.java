@@ -17,7 +17,8 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 /**
- *
+ * DataInput wrapper for byte buffers.
+ * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
 public class ByteBufferDataInput implements DataInput {

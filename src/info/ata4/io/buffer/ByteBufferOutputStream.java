@@ -15,7 +15,7 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 /**
- * OutputStream wrapper for a ByteBuffer object.
+ * OutputStream wrapper for byte buffers.
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */

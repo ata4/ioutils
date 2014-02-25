@@ -15,7 +15,8 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 /**
- *
+ * DataOutput wrapper for byte buffers.
+ * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
 public class ByteBufferDataOutput implements DataOutput {
