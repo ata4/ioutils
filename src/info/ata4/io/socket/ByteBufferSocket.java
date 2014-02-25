@@ -12,9 +12,9 @@ package info.ata4.io.socket;
 import info.ata4.io.Seekable;
 import info.ata4.io.SeekableImpl;
 import info.ata4.io.Swappable;
-import info.ata4.io.buffer.ByteBufferInput;
+import info.ata4.io.buffer.ByteBufferDataInput;
+import info.ata4.io.buffer.ByteBufferDataOutput;
 import info.ata4.io.buffer.ByteBufferInputStream;
-import info.ata4.io.buffer.ByteBufferOutput;
 import info.ata4.io.buffer.ByteBufferOutputStream;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -49,12 +49,12 @@ public class ByteBufferSocket extends IOSocket {
 
     @Override
     protected DataInput newDataInput() {
-        return new ByteBufferInput(getByteBuffer());
+        return new ByteBufferDataInput(getByteBuffer());
     }
 
     @Override
     protected DataOutput newDataOutput() {
-        return new ByteBufferOutput(getByteBuffer());
+        return new ByteBufferDataOutput(getByteBuffer());
     }
 
     @Override

@@ -18,11 +18,11 @@ import java.nio.ByteBuffer;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class ByteBufferOutput implements DataOutput {
+public class ByteBufferDataOutput implements DataOutput {
     
     private final ByteBuffer buf;
     
-    public ByteBufferOutput(ByteBuffer buf) {
+    public ByteBufferDataOutput(ByteBuffer buf) {
         this.buf = buf;
     }
     

@@ -20,11 +20,11 @@ import java.nio.ByteBuffer;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class ByteBufferInput implements DataInput {
+public class ByteBufferDataInput implements DataInput {
     
     private final ByteBuffer buf;
 
-    public ByteBufferInput(ByteBuffer buf) {
+    public ByteBufferDataInput(ByteBuffer buf) {
         this.buf = buf;
     }
     
