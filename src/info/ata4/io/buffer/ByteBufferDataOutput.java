@@ -84,7 +84,7 @@ public class ByteBufferDataOutput implements DataOutput {
     @Override
     public void writeChar(int v) throws IOException {
         try {
-            buf.putChar((char) (v & 0xff));
+            buf.putChar((char) (v & 0xffff));
         } catch (BufferOverflowException ex) {
             throw new IOException(ex);
         }
