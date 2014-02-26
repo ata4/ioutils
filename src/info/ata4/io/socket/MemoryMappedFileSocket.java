@@ -9,13 +9,19 @@
  */
 package info.ata4.io.socket;
 
+import info.ata4.io.SeekOrigin;
 import info.ata4.io.Seekable;
+import info.ata4.io.SeekableImpl;
+import info.ata4.io.Swappable;
 import info.ata4.io.buffer.MemoryMappedFile;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.nio.ByteOrder;
 
 /**
  *
@@ -42,10 +48,25 @@ public class MemoryMappedFileSocket extends IOSocket {
     }
 
     @Override
-    protected Seekable newSeekable() {
+    public DataInput getDataInput() {
+        return mmfile;
+    }
+
+    @Override
+    public DataOutput getDataOutput() {
         return mmfile;
     }
     
+    @Override
+    protected Swappable newSwappable() {
+        return new ByteBufferSwappable();
+    }
+
+    @Override
+    protected Seekable newSeekable() {
+        return new MemoryMappedSeekable();
+    }
+
     private class MemoryMappedInputStream extends InputStream {
 
         @Override
@@ -100,5 +121,37 @@ public class MemoryMappedFileSocket extends IOSocket {
                 throw new IOException(ex);
             }
         }
+    }
+    
+    private class ByteBufferSwappable implements Swappable {
+
+        @Override
+        public boolean isSwap() {
+            return mmfile.order() != ByteOrder.BIG_ENDIAN;
+        }
+
+        @Override
+        public void setSwap(boolean swap) {
+            mmfile.order(swap ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+        }
+    }
+    
+    private class MemoryMappedSeekable extends SeekableImpl {
+
+        @Override
+        public void position(long where) throws IOException {
+            mmfile.position(where);
+        }
+
+        @Override
+        public long position() throws IOException {
+            return mmfile.position();
+        }
+
+        @Override
+        public long capacity() throws IOException {
+            return mmfile.capacity();
+        }
+
     }
 }
