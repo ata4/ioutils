@@ -148,7 +148,7 @@ public class ByteBufferDataInput implements DataInput {
     public String readLine() throws IOException {
         try {
             StringBuilder sb = new StringBuilder();
-            for (byte c = 0; buf.hasRemaining() && c != '\n'; c = readByte()) {
+            for (byte c = 0; buf.hasRemaining() && c != '\n'; c = buf.get()) {
                 sb.append((char) c);
             }
             return sb.toString();
@@ -159,11 +159,7 @@ public class ByteBufferDataInput implements DataInput {
 
     @Override
     public String readUTF() throws IOException {
-        try {
-            return DataInputStream.readUTF(this);
-        } catch (BufferUnderflowException ex) {
-            throw new EOFException();
-        }
+        return DataInputStream.readUTF(this);
     }
     
 }
