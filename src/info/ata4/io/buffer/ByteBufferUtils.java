@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import static java.nio.channels.FileChannel.MapMode.*;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.*;
 import java.util.HashMap;
@@ -107,7 +108,7 @@ public class ByteBufferUtils {
         
     public static MappedByteBuffer openReadOnly(Path path, int offset, int length) throws IOException {
         try (FileChannel fc = FileChannel.open(path, READ)) {
-            return fc.map(FileChannel.MapMode.READ_ONLY, offset, getLength(fc, length));
+            return fc.map(READ_ONLY, offset, getLength(fc, length));
         }
     }
     
@@ -117,7 +118,7 @@ public class ByteBufferUtils {
     
     public static MappedByteBuffer openReadWrite(Path path, int offset, int length) throws IOException {
         try (FileChannel fc = FileChannel.open(path, READ, WRITE, CREATE)) {
-            return fc.map(FileChannel.MapMode.READ_WRITE, offset, getLength(fc, length));
+            return fc.map(READ_WRITE, offset, getLength(fc, length));
         }
     }
     
