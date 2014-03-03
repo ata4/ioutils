@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.*;
 import java.util.HashMap;
@@ -33,80 +32,71 @@ public class ByteBufferUtils {
     private ByteBufferUtils() {
     }
     
-    public static int load(Path path, int offset, int length, ByteBuffer dest) throws IOException {
-        // don't modify position when reading the file
-        dest = dest.duplicate();
-        
-        // limit buffer if it's too large
-        if (dest.remaining() > length) {
-            dest.limit(dest.position() + length);
+    private static int getLength(FileChannel fc, int length) throws IOException {
+        if (length < 0) {
+            return (int) Math.min(fc.size(), Integer.MAX_VALUE);
+        } else {
+            return length;
         }
-        
-        // fill buffer from channel
-        try (FileChannel fc = FileChannel.open(path, READ)) {
-            return fc.read(dest, offset);
+    }
+    
+    private static ByteBuffer allocate(int size) {
+        // allocateDirect is pretty slow when used frequently, use it for larger
+        // buffers only
+        if (size > DIRECT_THRESHOLD) {
+            return ByteBuffer.allocateDirect(size);
+        } else {
+            try {
+                return ByteBuffer.allocate(size);
+            } catch (OutOfMemoryError ex) {
+                // not enough space in the heap, try direct allocation instead
+                return ByteBuffer.allocateDirect(size);
+            }
         }
     }
     
     public static ByteBuffer load(Path path, int offset, int length) throws IOException {
-        long size = length > 0 ? length : Files.size(path);
-        
-        if (size > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("File " + path + " is too large to be load");
+        try (FileChannel fc = FileChannel.open(path, READ)) {
+            ByteBuffer bb = allocate(getLength(fc, length));
+            fc.position(offset);
+            fc.read(bb);
+            return bb;
         }
-        
-        ByteBuffer bb;
-        
-        // allocateDirect is pretty slow when used frequently, use it for larger
-        // files only
-        if (size > DIRECT_THRESHOLD) {
-            bb = ByteBuffer.allocateDirect((int) size);
-        } else {
-            try {
-                bb = ByteBuffer.allocate((int) size);
-            } catch (OutOfMemoryError ex) {
-                // not enough space in the heap, try direct allocation instead
-                bb = ByteBuffer.allocateDirect((int) size);
-            }
-        }
-        
-        // read file into the buffer
-        load(path, offset, length, bb);
-        
-        return bb;
     }
 
     public static ByteBuffer load(Path path) throws IOException {
-        return load(path, 0, 0);
+        return load(path, 0, -1);
     }
     
     public static ByteBuffer load(List<Path> paths) throws IOException {
         long size = 0;
-        Map<Path, Integer> sizeMap = new HashMap<>();
+        Map<Path, FileChannel> channelMap = new HashMap<>();
         
-        for (Path path : paths) {
-            long fileSize = Files.size(path);
-            if (fileSize > Integer.MAX_VALUE) {
-                throw new IllegalArgumentException("File " + path + " is too large to be load");
+        try {
+            for (Path path : paths) {
+                FileChannel fc = FileChannel.open(path, READ);
+                size += Math.max(fc.size(), Integer.MAX_VALUE);
+                channelMap.put(path, fc);
             }
-            sizeMap.put(path, (int) fileSize);
-            size += fileSize;
+
+            if (size > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException("Files are too large to load");
+            }
+
+            ByteBuffer bb = allocate((int) size);
+
+            for (Path path : paths) {
+                channelMap.get(path).read(bb);
+            }
+
+            bb.flip();
+
+            return bb;
+        } finally {
+            for (FileChannel fc : channelMap.values()) {
+                fc.close();
+            }
         }
-        
-        if (size > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("Files are too large to be load");
-        }
-        
-        ByteBuffer bb = ByteBuffer.allocateDirect((int) size);
-        
-        for (Path path : paths) {
-            load(path, 0, sizeMap.get(path), bb);
-        }
-        
-        // prepare buffer to be read from the start
-        bb.rewind();
-        
-        return bb;
     }
     
     public static void save(Path path, ByteBuffer bb) throws IOException {
@@ -116,38 +106,23 @@ public class ByteBufferUtils {
     }
         
     public static MappedByteBuffer openReadOnly(Path path, int offset, int length) throws IOException {
-        MappedByteBuffer bb;
-        
         try (FileChannel fc = FileChannel.open(path, READ)) {
-            // map entire file as byte buffer
-            bb = fc.map(FileChannel.MapMode.READ_ONLY, offset, length > 0 ? length : fc.size());
+            return fc.map(FileChannel.MapMode.READ_ONLY, offset, getLength(fc, length));
         }
-        
-        return bb;
     }
     
     public static MappedByteBuffer openReadOnly(Path path) throws IOException {
-        return openReadOnly(path, 0, 0);
+        return openReadOnly(path, 0, -1);
     }
     
-    public static MappedByteBuffer openReadWrite(Path path, int offset, int size) throws IOException {
-        MappedByteBuffer bb;
-        
+    public static MappedByteBuffer openReadWrite(Path path, int offset, int length) throws IOException {
         try (FileChannel fc = FileChannel.open(path, READ, WRITE, CREATE)) {
-            if (size > 0 && size != fc.size()) {
-                // reset file if a new size is set
-                fc.truncate(0);
-            }
-            
-            // map file as byte buffer
-            bb = fc.map(FileChannel.MapMode.READ_WRITE, offset, size);
+            return fc.map(FileChannel.MapMode.READ_WRITE, offset, getLength(fc, length));
         }
-        
-        return bb;
     }
     
     public static MappedByteBuffer openReadWrite(Path path) throws IOException {
-        return openReadWrite(path, 0, 0);
+        return openReadWrite(path, 0, -1);
     }
     
     public static ByteBuffer getSlice(ByteBuffer bb, int offset, int length) {
