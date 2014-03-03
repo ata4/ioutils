@@ -158,4 +158,31 @@ public class ByteBufferUtils {
     public static ByteBuffer getSlice(ByteBuffer bb, int offset) {
         return getSlice(bb, offset, -1);
     }
+    
+    public static ByteBuffer concat(List<ByteBuffer> bbs) {
+        int length = 0;
+        
+        // get amount of remaining bytes from all buffers
+        for (ByteBuffer bb : bbs) {
+            bb.rewind();
+            length += bb.remaining();
+        }
+        
+        if (length == 0) {
+            // very funny
+            return EMPTY;
+        }
+        
+        ByteBuffer bbNew = ByteBuffer.allocateDirect(length);
+        
+        // put all buffers from list
+        for (ByteBuffer bb : bbs) {
+            bb.rewind();
+            bbNew.put(bb);
+        }
+        
+        bbNew.rewind();
+        
+        return bbNew;
+    }
 }
