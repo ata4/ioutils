@@ -61,6 +61,7 @@ public class ByteBufferUtils {
             ByteBuffer bb = allocate(getLength(fc, length));
             fc.position(offset);
             fc.read(bb);
+            bb.flip();
             return bb;
         }
     }
