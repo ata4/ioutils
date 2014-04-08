@@ -11,6 +11,7 @@ package info.ata4.io.buffer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import static java.nio.channels.FileChannel.MapMode.*;
@@ -133,10 +134,8 @@ public class ByteBufferUtils {
             return EMPTY;
         }
         
-        // get current position and limit
-        int pos = bb.position();
-        int limit = bb.limit();
-        
+        ByteOrder order = bb.order();
+        bb = bb.duplicate();
         bb.position(offset);
         
         // set new limit if length is provided, use current limit otherwise
@@ -148,11 +147,7 @@ public class ByteBufferUtils {
         ByteBuffer bbSlice = bb.slice();
         
         // set same byte order
-        bbSlice.order(bb.order());
-        
-        // restore original limit and position
-        bb.limit(limit);
-        bb.position(pos);
+        bbSlice.order(order);
         
         return bbSlice;
     }
