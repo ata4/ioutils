@@ -69,7 +69,7 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
         return newWriter(file, false);
     }
     
-    public static DataOutputWriter newReader(RandomAccessFile raf) throws IOException {
+    public static DataOutputWriter newWriter(RandomAccessFile raf) throws IOException {
         return newWriter(raf.getChannel());
     }
 
