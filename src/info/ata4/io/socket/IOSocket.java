@@ -279,7 +279,7 @@ public class IOSocket implements Closeable {
     
     private class CloseShieldChannel implements Channel {
         
-        private boolean open;
+        private boolean open = true;
 
         @Override
         public boolean isOpen() {
