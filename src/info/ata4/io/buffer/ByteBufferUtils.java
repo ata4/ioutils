@@ -104,6 +104,7 @@ public class ByteBufferUtils {
     
     public static void save(Path path, ByteBuffer bb) throws IOException {
         try (FileChannel fc = FileChannel.open(path, WRITE, CREATE)) {
+            fc.truncate(bb.remaining());
             fc.write(bb);
         }
     }
