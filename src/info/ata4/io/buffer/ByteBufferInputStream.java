@@ -30,6 +30,11 @@ public class ByteBufferInputStream extends InputStream {
     public ByteBuffer getByteBuffer() {
         return buf;
     }
+    
+    @Override
+    public int available() throws IOException {
+        return buf.remaining();
+    }
 
     @Override
     public synchronized int read() throws IOException {
