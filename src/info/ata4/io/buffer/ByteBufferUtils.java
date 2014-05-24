@@ -101,7 +101,7 @@ public class ByteBufferUtils {
         try {
             for (Path path : paths) {
                 FileChannel fc = FileChannel.open(path, READ);
-                size += Math.max(fc.size(), Integer.MAX_VALUE);
+                size += fc.size();
                 channelMap.put(path, fc);
             }
 
