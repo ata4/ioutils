@@ -24,9 +24,11 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import static java.nio.file.StandardOpenOption.*;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 /**
  * DataOutput extension for more data access methods.
@@ -35,7 +37,9 @@ import static java.nio.file.StandardOpenOption.*;
  */
 public class DataOutputWriter extends DataOutputWrapper implements DataOutputExtended {
     
-    private static final String DEFAULT_CHARSET = "ASCII";
+    // Charset.defaultCharset() is platform dependent and should not be used.
+    // This includes the omitted charset parameter for String.getBytes().
+    private static final Charset DEFAULT_CHARSET = Charset.forName("ASCII");
     
     public static DataOutputWriter newWriter(DataOutput out) {
         return new DataOutputWriter(new DataSocket(out));
@@ -84,7 +88,7 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     }
 
     @Override
-    public void writeStringNull(String str, String charset) throws IOException {
+    public void writeStringNull(String str, Charset charset) throws IOException {
         writeStringFixed(str, charset);
         writeByte(0);
     }
@@ -95,7 +99,7 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     }
     
     @Override
-    public void writeStringPadded(String str, int padding, String charset) throws IOException {
+    public void writeStringPadded(String str, int padding, Charset charset) throws IOException {
         int nullBytes = padding - str.length();
         if (nullBytes < 0) {
             throw new IllegalArgumentException("Invalid padding");
@@ -111,7 +115,7 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     }
     
     @Override
-    public void writeStringFixed(String str, String charset) throws IOException {
+    public void writeStringFixed(String str, Charset charset) throws IOException {
         write(str.getBytes(charset));
     }
     
@@ -121,7 +125,7 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     }
     
     @Override
-    public void writeStringInt(String str, String charset) throws IOException {
+    public void writeStringInt(String str, Charset charset) throws IOException {
         writeInt(str.length());
         writeStringFixed(str, charset);
     }
@@ -132,7 +136,7 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     }
 
     @Override
-    public void writeStringShort(String str, String charset) throws IOException {
+    public void writeStringShort(String str, Charset charset) throws IOException {
         if (str.length() > 0xffff) {
             throw new IllegalArgumentException("String is too long");
         }
@@ -147,7 +151,7 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     }
 
     @Override
-    public void writeStringByte(String str, String charset) throws IOException {
+    public void writeStringByte(String str, Charset charset) throws IOException {
         if (str.length() > 0xff) {
             throw new IllegalArgumentException("String is too long");
         }

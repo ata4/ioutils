@@ -13,6 +13,7 @@ import java.io.DataInput;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * Interface for extended DataInput methods.
@@ -54,13 +55,12 @@ public interface DataInputExtended extends DataInput {
      * @return string
      * @throws IOException 
      */
-    public String readStringNull(int limit, String charset) throws IOException;
+    public String readStringNull(int limit, Charset charset) throws IOException;
 
     /**
      * Reads a null-terminated string without byte padding, using the ASCII charset.
      * 
      * @param limit maximum amount of bytes to read before truncation
-     * @param charset character set to use when converting the bytes to string
      * @return string
      * @throws IOException 
      */
@@ -70,8 +70,6 @@ public interface DataInputExtended extends DataInput {
      * Reads a null-terminated string without byte padding, using the ASCII
      * charset and with a limit of 256 bytes.
      * 
-     * @param limit maximum amount of bytes to read before truncation
-     * @param charset character set to use when converting the bytes to string
      * @return string
      * @throws IOException 
      */
@@ -85,13 +83,12 @@ public interface DataInputExtended extends DataInput {
      * @return string
      * @throws IOException 
      */
-    public String readStringPadded(int limit, String charset) throws IOException;
+    public String readStringPadded(int limit, Charset charset) throws IOException;
     
     /**
      * Reads a null-terminated string with byte padding, using the ASCII charset.
      * 
      * @param limit maximum amount of bytes to read before truncation
-     * @param charset character set to use when converting the bytes to string
      * @return string
      * @throws IOException 
      */
@@ -105,13 +102,12 @@ public interface DataInputExtended extends DataInput {
      * @return string
      * @throws IOException 
      */
-    public String readStringFixed(int length, String charset) throws IOException;
+    public String readStringFixed(int length, Charset charset) throws IOException;
 
     /**
      * Reads a fixed size string using the ASCII charset.
      * 
      * @param length total length of the string
-     * @param charset character set to use when converting the bytes to string
      * @return string
      * @throws IOException 
      */
@@ -126,7 +122,7 @@ public interface DataInputExtended extends DataInput {
      * @return string
      * @throws IOException 
      */
-    public String readStringInt(int limit, String charset) throws IOException;
+    public String readStringInt(int limit, Charset charset) throws IOException;
 
     /**
      * Reads an integer length-prefixed string without alignment, using the ASCII
@@ -157,7 +153,7 @@ public interface DataInputExtended extends DataInput {
      * @return string
      * @throws IOException 
      */
-    public String readStringShort(int limit, String charset) throws IOException;
+    public String readStringShort(int limit, Charset charset) throws IOException;
 
     /**
      * Reads a short length-prefixed string without alignment, using the ASCII
@@ -182,12 +178,11 @@ public interface DataInputExtended extends DataInput {
     /**
      * Reads a byte length-prefixed string without alignment.
      * 
-     * @param limit if the string is longer than this value, return null
      * @param charset character set to use when converting the bytes to string
      * @return string
      * @throws IOException 
      */
-    public String readStringByte(String charset) throws IOException;
+    public String readStringByte(Charset charset) throws IOException;
     
     /**
      * Reads a byte length-prefixed string without alignment, using the ASCII

@@ -12,6 +12,7 @@ package info.ata4.io;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * Interface for extended DataOutput methods.
@@ -31,27 +32,27 @@ public interface DataOutputExtended extends DataOutput {
      */
     public void writeHalf(float f) throws IOException;
 
-    public void writeStringNull(String str, String charset) throws IOException;
+    public void writeStringNull(String str, Charset charset) throws IOException;
 
     public void writeStringNull(String str) throws IOException;
     
-    public void writeStringPadded(String str, int padding, String charset) throws IOException;
+    public void writeStringPadded(String str, int padding, Charset charset) throws IOException;
     
     public void writeStringPadded(String str, int padding) throws IOException;
 
-    public void writeStringFixed(String str, String charset) throws IOException;
+    public void writeStringFixed(String str, Charset charset) throws IOException;
 
     public void writeStringFixed(String str) throws IOException;
     
-    public void writeStringInt(String str, String charset) throws IOException;
+    public void writeStringInt(String str, Charset charset) throws IOException;
     
     public void writeStringInt(String str) throws IOException;
     
-    public void writeStringShort(String str, String charset) throws IOException;
+    public void writeStringShort(String str, Charset charset) throws IOException;
     
     public void writeStringShort(String str) throws IOException;
     
-    public void writeStringByte(String str, String charset) throws IOException;
+    public void writeStringByte(String str, Charset charset) throws IOException;
     
     public void writeStringByte(String str) throws IOException;
     
@@ -76,7 +77,6 @@ public interface DataOutputExtended extends DataOutput {
      * The actual number of bytes skipped is returned.
      *
      * @param      n   the number of bytes to be skipped.
-     * @return     the number of bytes actually skipped.
      * @exception  IOException   if an I/O error occurs.
      */
     public void skipBytes(int n) throws IOException;

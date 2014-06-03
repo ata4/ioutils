@@ -25,9 +25,10 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import static java.nio.file.StandardOpenOption.*;
+import static java.nio.file.StandardOpenOption.READ;
 import org.apache.commons.lang3.ArrayUtils;
 
 /**
@@ -37,7 +38,9 @@ import org.apache.commons.lang3.ArrayUtils;
  */
 public class DataInputReader extends DataInputWrapper implements DataInputExtended {
     
-    private static final String DEFAULT_CHARSET = "ASCII";
+    // Charset.defaultCharset() is platform dependent and should not be used.
+    // This includes the omitted charset parameter from the String constructor.
+    private static final Charset DEFAULT_CHARSET = Charset.forName("ASCII");
     
     public static DataInputReader newReader(DataInput in) {
         return new DataInputReader(new DataSocket(in));
@@ -100,7 +103,7 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
         return HalfFloat.intBitsToFloat(hbits);
     }
     
-    private String readStringInt(int limit, String charset, boolean padded) throws IOException {
+    private String readStringInt(int limit, Charset charset, boolean padded) throws IOException {
         if (limit <= 0) {
             throw new IllegalArgumentException("Invalid limit");
         }
@@ -121,7 +124,7 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     }
     
     @Override
-    public String readStringNull(int limit, String charset) throws IOException {
+    public String readStringNull(int limit, Charset charset) throws IOException {
         return readStringInt(limit, charset, false);
     }
     
@@ -136,7 +139,7 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     }
     
     @Override
-    public String readStringPadded(int limit, String charset) throws IOException {
+    public String readStringPadded(int limit, Charset charset) throws IOException {
         return readStringInt(limit, charset, true);
     }
 
@@ -146,7 +149,7 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     }
     
     @Override
-    public String readStringFixed(int length, String charset) throws IOException {
+    public String readStringFixed(int length, Charset charset) throws IOException {
         byte[] raw = new byte[length];
         readFully(raw);
         return new String(raw, charset);
@@ -158,7 +161,7 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     }
     
     @Override
-    public String readStringInt(int limit, String charset) throws IOException {
+    public String readStringInt(int limit, Charset charset) throws IOException {
         int length = readInt();
         if (limit > 0 && length > limit) {
             return null;
@@ -178,7 +181,7 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     }
     
     @Override
-    public String readStringShort(int limit, String charset) throws IOException {
+    public String readStringShort(int limit, Charset charset) throws IOException {
         int length = readUnsignedShort();
         if (limit > 0 && length > limit) {
             return null;
@@ -198,7 +201,7 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     }
     
     @Override
-    public String readStringByte(String charset) throws IOException {
+    public String readStringByte(Charset charset) throws IOException {
         int length = readUnsignedByte();
         return readStringFixed(length, charset);
     }
