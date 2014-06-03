@@ -216,15 +216,24 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
         ByteBuffer buffer = getSocket().getByteBuffer();
         if (buffer != null) {
             dst.put(buffer);
-        } else {
-            ReadableByteChannel channel = getSocket().getReadableByteChannel();
+            return;
+        } 
+        
+        ReadableByteChannel channel = getSocket().getReadableByteChannel();
 
-            if (channel != null) {
-                channel.read(dst);
-            } else {
-                throw new UnsupportedOperationException();
+        if (channel != null) {
+            // read channel to buffer while the buffer isn't completely filled
+            while (dst.hasRemaining()) {
+                if (channel.read(dst) == -1) {
+                    // break on end-of-stream
+                    break;
+                }
             }
+            return;
         }
+        
+        // no channel or byte buffer available
+        throw new UnsupportedOperationException();
     }
     
     @Override

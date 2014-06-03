@@ -170,15 +170,20 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
         ByteBuffer buffer = getSocket().getByteBuffer();
         if (buffer != null) {
             buffer.put(src);
-        } else {
-            WritableByteChannel channel = getSocket().getWritableByteChannel();
-
-            if (channel != null) {
-                channel.write(src);
-            } else {
-                throw new UnsupportedOperationException();
-            }
+            return;
         }
+        
+        WritableByteChannel channel = getSocket().getWritableByteChannel();
+        if (channel != null) {
+            // write buffer to channel while it's not completely emptied
+            while (src.hasRemaining()) {
+                channel.write(src);
+            }
+            return;
+        }
+        
+        // no channel or byte buffer available
+        throw new UnsupportedOperationException();
     }
     
     @Override
