@@ -71,4 +71,28 @@ public class BitInputStream extends InputStream {
         setBitLength(bits);
         return read();
     }
+    
+    @Override
+    public int read(byte[] b) throws IOException {
+        checkByteArrayOp();
+        return super.read(b);
+    }
+    
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        checkByteArrayOp();
+        return super.read(b, off, len);
+    }
+
+    private void checkByteArrayOp() {
+        // byte array operations won't work correctly with more than 8 bits!
+        if (bits > 8) {
+            throw new UnsupportedOperationException();
+        }
+    }
+    
+    @Override
+    public void close() throws IOException {
+        is.close();
+    }
 }
