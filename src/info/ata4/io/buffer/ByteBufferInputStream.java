@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.InvalidMarkException;
 
 /**
  * InputStream wrapper for byte buffers.
@@ -22,6 +23,8 @@ import java.nio.ByteBuffer;
 public class ByteBufferInputStream extends InputStream {
 
     private final ByteBuffer buf;
+    private int markPos;
+    private int markReadLimit;
 
     public ByteBufferInputStream(ByteBuffer buf) {
         this.buf = buf;
@@ -34,6 +37,33 @@ public class ByteBufferInputStream extends InputStream {
     @Override
     public int available() throws IOException {
         return buf.remaining();
+    }
+
+    @Override
+    public boolean markSupported() {
+        return true;
+    }
+
+    @Override
+    public synchronized void mark(int readLimit) {
+        buf.mark();
+        markPos = buf.position();
+        markReadLimit = readLimit;
+    }
+
+    @Override
+    public synchronized void reset() throws IOException {
+        // this doesn't really make sense for byte buffers, but it ensures
+        // compliancy to InputStream.reset()
+        if (buf.position() - markPos > markReadLimit) {
+            throw new IOException("Invalid mark");
+        }
+        
+        try {
+            buf.reset();
+        } catch (InvalidMarkException ex) {
+            throw new IOException(ex);
+        }
     }
 
     @Override
