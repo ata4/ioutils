@@ -187,6 +187,11 @@ public class DataOutputWriter extends DataOutputWrapper implements DataOutputExt
     }
     
     @Override
+    public void writeStruct(Struct struct) throws IOException {
+        struct.write(this);
+    }
+    
+    @Override
     public void skipBytes(int n) throws IOException {
         for (int i = 0; i < n; i++) {
             writeByte(0);

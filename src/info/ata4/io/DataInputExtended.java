@@ -200,6 +200,8 @@ public interface DataInputExtended extends DataInput {
      * @throws IOException 
      */
     public void readBuffer(ByteBuffer dst) throws IOException;
+    
+    public void readStruct(Struct struct) throws IOException;
 
     /**
      * Skips bytes to fit a specified data structure alignment.

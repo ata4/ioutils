@@ -63,6 +63,8 @@ public interface DataOutputExtended extends DataOutput {
      * @throws IOException 
      */
     public void writeBuffer(ByteBuffer src) throws IOException;
+    
+    public void writeStruct(Struct struct) throws IOException;
 
     /**
      * Makes an attempt to skip over

@@ -237,6 +237,11 @@ public class DataInputReader extends DataInputWrapper implements DataInputExtend
     }
     
     @Override
+    public void readStruct(Struct struct) throws IOException {
+        struct.read(this);
+    }
+    
+    @Override
     public void align(int length, int align) throws IOException {
         if (align > 0) {
             int rem = length % align;
