@@ -35,7 +35,7 @@ import static java.nio.file.StandardOpenOption.WRITE;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataOutputWriter extends DataOutputWrapper implements DataOutputExtended {
+public class DataOutputWriter extends DataOutputBridge implements DataOutputExtended {
     
     // Charset.defaultCharset() is platform dependent and should not be used.
     // This includes the omitted charset parameter for String.getBytes().

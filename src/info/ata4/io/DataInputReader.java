@@ -36,7 +36,7 @@ import org.apache.commons.lang3.ArrayUtils;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataInputReader extends DataInputWrapper implements DataInputExtended {
+public class DataInputReader extends DataInputBridge implements DataInputExtended {
     
     // Charset.defaultCharset() is platform dependent and should not be used.
     // This includes the omitted charset parameter from the String constructor.

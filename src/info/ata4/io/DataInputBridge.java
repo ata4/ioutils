@@ -15,15 +15,16 @@ import java.io.IOException;
 import org.apache.commons.io.EndianUtils;
 
 /**
- *
+ * IO bridge that implements DataInput.
+ * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataInputWrapper extends IOWrapper implements DataInput {
+public class DataInputBridge extends IOBridge implements DataInput {
     
     private final DataInput in;
     protected boolean swap;
     
-    public DataInputWrapper(IOSocket socket) {
+    public DataInputBridge(IOSocket socket) {
         super(socket);
         in = socket.getDataInput();
     }

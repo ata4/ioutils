@@ -14,17 +14,15 @@ import java.io.Closeable;
 import java.io.IOException;
 
 /**
- * Abstract class for wrapping DataInput or DataOutput objects (or any other
- * objects, theoretically). Also implements various interfaces and does feature
- * checking.
+ * Abstract IO bridge that combines a socket with various IO interfaces.
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public abstract class IOWrapper implements Swappable, Seekable, Closeable {
+public abstract class IOBridge implements Swappable, Seekable, Closeable {
     
     private final IOSocket socket;
 
-    public IOWrapper(IOSocket socket) {
+    public IOBridge(IOSocket socket) {
         this.socket = socket;
     }
     

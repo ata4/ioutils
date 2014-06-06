@@ -15,15 +15,16 @@ import java.io.IOException;
 import org.apache.commons.io.EndianUtils;
 
 /**
- *
+ * IO bridge that implements DataOutput.
+ * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataOutputWrapper extends IOWrapper implements DataOutput {
+public class DataOutputBridge extends IOBridge implements DataOutput {
     
     private final DataOutput out;
     protected boolean swap;
 
-    public DataOutputWrapper(IOSocket socket) {
+    public DataOutputBridge(IOSocket socket) {
         super(socket);
         this.out = socket.getDataOutput();
     }
