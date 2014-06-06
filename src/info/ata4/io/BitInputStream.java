@@ -42,6 +42,11 @@ public class BitInputStream extends InputStream {
 
     @Override
     public int read() throws IOException {
+        // pass-through when reading aligned octets
+        if (bits == 8 && bitCount == 0) {
+            return is.read();
+        }
+        
         while (bitCount < bits) {
             int b = is.read();
             if (b == -1) {
@@ -54,7 +59,7 @@ public class BitInputStream extends InputStream {
 
         int code = bitBuffer;   
         if (bitCount != 32) {
-             code &= (1 << bits) - 1;
+            code &= (1 << bits) - 1;
         }
         
         bitBuffer >>= bits;
