@@ -29,13 +29,13 @@ public class ConsoleFormatter extends Formatter {
     
     static {
         Map<Level, String> levelPrefix = new HashMap<>();
-        levelPrefix.put(Level.CONFIG,  "[cfg]");
-        levelPrefix.put(Level.FINE,    "[dbg]");
-        levelPrefix.put(Level.FINER,   "[dbg]");
-        levelPrefix.put(Level.FINEST,  "[trc]");
-        levelPrefix.put(Level.INFO,    "[inf]");
-        levelPrefix.put(Level.SEVERE,  "[err]");
-        levelPrefix.put(Level.WARNING, "[wrn]");
+        levelPrefix.put(Level.CONFIG,  "[config]");
+        levelPrefix.put(Level.FINE,    "[debug]");
+        levelPrefix.put(Level.FINER,   "[debug]");
+        levelPrefix.put(Level.FINEST,  "[trace]");
+        levelPrefix.put(Level.INFO,    "[info]");
+        levelPrefix.put(Level.SEVERE,  "[error]");
+        levelPrefix.put(Level.WARNING, "[warning]");
         
         LEVEL_PREFIX = Collections.unmodifiableMap(levelPrefix);
     }
