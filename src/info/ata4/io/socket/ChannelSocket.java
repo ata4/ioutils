@@ -19,12 +19,12 @@ import java.nio.channels.WritableByteChannel;
 public class ChannelSocket extends IOSocket {
     
     public ChannelSocket(ReadableByteChannel chan) {
-        setReadableByteChannel(chan);
+        setRawReadableByteChannel(chan);
         setCanRead(true);
     }
     
     public ChannelSocket(WritableByteChannel chan) {
-        setWritableByteChannel(chan);
+        setRawWritableByteChannel(chan);
         setCanWrite(true);
     }
 }

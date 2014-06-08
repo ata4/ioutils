@@ -9,8 +9,6 @@
  */
 package info.ata4.io.socket;
 
-import info.ata4.io.InverseDataInputStream;
-import info.ata4.io.InverseDataOutputStream;
 import info.ata4.io.Seekable;
 import info.ata4.io.Swappable;
 import java.io.Closeable;
@@ -22,13 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
-import java.nio.channels.Channels;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import org.apache.commons.io.input.CloseShieldInputStream;
-import org.apache.commons.io.output.CloseShieldOutputStream;
 
 /**
  *
@@ -36,18 +29,32 @@ import org.apache.commons.io.output.CloseShieldOutputStream;
  */
 public class IOSocket implements Closeable {
     
-    private InputStream is;
-    private OutputStream os;
+    private final IOSocketInputStream isp;
+    private final IOSocketOutputStream osp;
+    private final IOSocketReadableByteChannel rbcp;
+    private final IOSocketWritableByteChannel wbcp;
+    
     private DataInput in;
     private DataOutput out;
-    private ReadableByteChannel rchan;
-    private WritableByteChannel wchan;
     private ByteBuffer buf;
     private Swappable swappable;
     private Seekable seekable;
     private boolean canRead;
     private boolean canWrite;
+    private boolean streamBuffering;
     
+    public IOSocket() {
+        isp = new IOSocketInputStream(this);
+        osp = new IOSocketOutputStream(this);
+        rbcp = new IOSocketReadableByteChannel(this);
+        wbcp = new IOSocketWritableByteChannel(this);
+    }
+    
+    /**
+     * Returns the readability flag for this socket.
+     * 
+     * @return true if this socket can be read from
+     */
     public boolean canRead() {
         return canRead;
     }
@@ -56,6 +63,11 @@ public class IOSocket implements Closeable {
         this.canRead = canRead;
     }
     
+    /**
+     * Returns the writability flag for this socket.
+     * 
+     * @return true if this socket can be written to
+     */
     public boolean canWrite() {
         return canWrite;
     }
@@ -64,70 +76,63 @@ public class IOSocket implements Closeable {
         this.canWrite = canWrite;
     }
     
-    protected InputStream newInputStream() {
-        ReadableByteChannel chan = getReadableByteChannel();
-        if (chan != null) {
-            return Channels.newInputStream(chan);
-        }
-        
-        DataInput input = getDataInput();
-        if (input != null) {
-            return new InverseDataInputStream(input);
-        }
-        
-        return null;
-    }
-    
-    protected InputStream getCloseShield(InputStream is) {
-        if (is == null) {
-            return null;
-        } else {
-            return new CloseShieldInputStream(is);
-        }
-    }
-    
-    public InputStream getInputStream() {
-        if (is == null) {
-            is = newInputStream();
-        }
-        return getCloseShield(is);
+    /**
+     * Indicates if this socket returns buffered streams for
+     * {@link #getInputStream()} and {@link #getOutputStream()}
+     * 
+     * @return true if this socket creates buffered streams
+     */
+    public boolean hasStreamBuffering() {
+        return streamBuffering;
     }
 
-    protected void setInputStream(InputStream is) {
-        this.is = is;
+    /**
+     * Changes whether {@link #getInputStream()} and {@link #getOutputStream()}
+     * should return buffered streams.
+     * 
+     * Note that this may have unexpected side effects when other I/O paths are
+     * used simulaneously while buffering is enabled.
+     * 
+     * @param streamBuffering 
+     */
+    public void setStreamBuffering(boolean streamBuffering) {
+        this.streamBuffering = streamBuffering;
     }
     
-    protected OutputStream newOutputStream() {
-        WritableByteChannel chan = getWritableByteChannel();
-        if (chan != null) {
-            return Channels.newOutputStream(chan);
-        }
-        
-        DataOutput output = getDataOutput();
-        if (output != null) {
-            return new InverseDataOutputStream(output);
-        }
-    
-        return null;
+    /**
+     * Creates a new input stream from this socket. If any input stream was
+     * previously created by this method, it will be closed automatically.
+     * 
+     * @return output stream for this socket
+     */
+    public InputStream getInputStream() {
+        return isp.getInputStream();
     }
     
-    protected OutputStream getCloseShield(OutputStream os) {
-        if (os == null) {
-            return null;
-        } else {
-            return new CloseShieldOutputStream(os);
-        }
+    protected InputStream getRawInputStream() {
+        return isp.getRawInputStream();
     }
     
+    protected void setRawInputStream(InputStream is) {
+        isp.setRawInputStream(is);
+    }
+    
+    /**
+     * Creates a new output stream from this socket. If any output stream was
+     * previously created by this method, it will be closed automatically.
+     * 
+     * @return output stream for this socket
+     */
     public OutputStream getOutputStream() {
-        if (os == null) {
-            os = newOutputStream();
-        }
-        return getCloseShield(os);
+        return osp.getOutputStream();
     }
     
-    protected void setOutputStream(OutputStream os) {
-        this.os = os;
+    protected OutputStream getRawOutputStream() {
+        return osp.getRawOutputStream();
+    }
+    
+    protected void setRawOutputStream(OutputStream os) {
+        osp.setRawOutputStream(os);
     }
     
     protected DataInput newDataInput() {
@@ -139,6 +144,12 @@ public class IOSocket implements Closeable {
         }
     }
     
+    /**
+     * Returns the DataInput instance for this socket. If it hasn't been created
+     * yet, it will be created.
+     * 
+     * @return DataInput instance
+     */
     public DataInput getDataInput() {
         if (in == null) {
             in = newDataInput();
@@ -159,6 +170,12 @@ public class IOSocket implements Closeable {
         }
     }
     
+    /**
+     * Returns the DataOutput instance for this socket. If it hasn't been created
+     * yet, it will be created.
+     * 
+     * @return DataOutput instance
+     */
     public DataOutput getDataOutput() {
         if (out == null) {
             out = newDataOutput();
@@ -170,63 +187,32 @@ public class IOSocket implements Closeable {
         this.out = out;
     }
     
-    protected ReadableByteChannel newReadableByteChannel() {
-        InputStream stream = getInputStream();
-        if (stream != null) {
-            return Channels.newChannel(stream);
-        } else {
-            return null;
-        }
-    }
-    
-    protected ReadableByteChannel getCloseShield(ReadableByteChannel chan) {
-        if (chan == null) {
-            return null;
-        } else {
-            return new CloseShieldReadableByteChannel(chan);
-        }
-    }
-    
     public ReadableByteChannel getReadableByteChannel() {
-        if (rchan == null) {
-            rchan = newReadableByteChannel();
-        }
-        return getCloseShield(rchan);
+        return rbcp.getChannel();
     }
     
-    protected void setReadableByteChannel(ReadableByteChannel rchan) {
-        this.rchan = rchan;
+    protected ReadableByteChannel getRawReadableByteChannel() {
+        return rbcp.getRawChannel();
     }
     
-    protected WritableByteChannel newWritableByteChannel() {
-        OutputStream stream = getOutputStream();
-        if (stream != null) {
-            return Channels.newChannel(stream);
-        } else {
-            return null;
-        }
+    protected void setRawReadableByteChannel(ReadableByteChannel wchan) {
+        rbcp.setRawChannel(wchan);
     }
-    
-    protected WritableByteChannel getCloseShield(WritableByteChannel chan) {
-        if (chan == null) {
-            return null;
-        } else {
-            return new CloseShieldWritableByteChannel(chan);
-        }
-    }
-    
+
     public WritableByteChannel getWritableByteChannel() {
-        if (wchan == null) {
-            wchan = newWritableByteChannel();
-        }
-        return getCloseShield(wchan);
+        return wbcp.getChannel();
     }
     
-    protected void setWritableByteChannel(WritableByteChannel wchan) {
-        this.wchan = wchan;
+    protected WritableByteChannel getRawWritableByteChannel() {
+        return wbcp.getRawChannel();
+    }
+    
+    protected void setRawWritableByteChannel(WritableByteChannel wchan) {
+        wbcp.setRawChannel(wchan);
     }
     
     protected ByteBuffer newByteBuffer() {
+        // not set by default
         return null;
     }
     
@@ -265,64 +251,15 @@ public class IOSocket implements Closeable {
 
     @Override
     public void close() throws IOException {
-        close(is);
-        close(os);
-        close(rchan);
-        close(wchan);
+        close(isp);
+        close(osp);
+        close(rbcp);
+        close(wbcp);
     }
     
     protected void close(Closeable c) throws IOException {
         if (c != null) {
             c.close();
-        }
-    }
-    
-    private class CloseShieldChannel implements Channel {
-        
-        private boolean open = true;
-
-        @Override
-        public boolean isOpen() {
-            return open;
-        }
-
-        @Override
-        public void close() throws IOException {
-            open = false;
-        }
-    }
-    
-    private class CloseShieldReadableByteChannel extends CloseShieldChannel implements ReadableByteChannel {
-        
-        private final ReadableByteChannel chan;
-
-        private CloseShieldReadableByteChannel(ReadableByteChannel chan) {
-            this.chan = chan;
-        }
-
-        @Override
-        public int read(ByteBuffer dst) throws IOException {
-            if (!isOpen()) {
-                throw new ClosedChannelException();
-            }
-            return chan.read(dst);
-        }
-    }
-    
-    private class CloseShieldWritableByteChannel extends CloseShieldChannel implements WritableByteChannel {
-        
-        private final WritableByteChannel chan;
-
-        private CloseShieldWritableByteChannel(WritableByteChannel chan) {
-            this.chan = chan;
-        }
-
-        @Override
-        public int write(ByteBuffer src) throws IOException {
-            if (!isOpen()) {
-                throw new ClosedChannelException();
-            }
-            return chan.write(src);
         }
     }
 }

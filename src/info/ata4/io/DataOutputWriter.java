@@ -16,7 +16,6 @@ import info.ata4.io.socket.FileChannelSocket;
 import info.ata4.io.socket.IOSocket;
 import info.ata4.io.socket.StreamSocket;
 import info.ata4.io.util.HalfFloat;
-import java.io.BufferedOutputStream;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,7 +24,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.WRITE;
@@ -58,19 +56,11 @@ public class DataOutputWriter extends DataOutputBridge implements DataOutputExte
     }
     
     public static DataOutputWriter newWriter(FileChannel fc) throws IOException {
-        return new DataOutputWriter(new FileChannelSocket(fc));
-    }
-    
-    public static DataOutputWriter newWriter(Path file, boolean seekable) throws IOException {
-        if (seekable) {
-            return newWriter(FileChannel.open(file, CREATE, WRITE));
-        } else {
-            return newWriter(new BufferedOutputStream(Files.newOutputStream(file, CREATE, WRITE), 4096));
-        }
+        return new DataOutputWriter(new FileChannelSocket(fc, false, true));
     }
     
     public static DataOutputWriter newWriter(Path file) throws IOException {
-        return newWriter(file, false);
+        return newWriter(FileChannel.open(file, CREATE, WRITE));
     }
     
     public static DataOutputWriter newWriter(RandomAccessFile raf) throws IOException {

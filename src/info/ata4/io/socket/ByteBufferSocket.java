@@ -19,8 +19,6 @@ import info.ata4.io.buffer.ByteBufferOutputStream;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -38,12 +36,12 @@ public class ByteBufferSocket extends IOSocket {
     }
 
     @Override
-    protected InputStream newInputStream() {
+    public ByteBufferInputStream getInputStream() {
         return new ByteBufferInputStream(getByteBuffer());
     }
 
     @Override
-    protected OutputStream newOutputStream() {
+    public ByteBufferOutputStream getOutputStream() {
         return new ByteBufferOutputStream(getByteBuffer());
     }
 

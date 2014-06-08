@@ -1,5 +1,5 @@
 /*
- ** 2014 February 24
+ ** 2014 June 08
  **
  ** The author disclaims copyright to this source code.  In place of
  ** a legal notice, here is a blessing:
@@ -9,22 +9,17 @@
  */
 package info.ata4.io.socket;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.Closeable;
 
 /**
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class StreamSocket extends IOSocket {
-
-    public StreamSocket(InputStream is) {
-        setRawInputStream(is);
-        setCanRead(true);
-    }
+public abstract class IOSocketProvider implements Closeable {
     
-    public StreamSocket(OutputStream os) {
-        setRawOutputStream(os);
-        setCanWrite(true);
+    protected final IOSocket socket;
+
+    IOSocketProvider(IOSocket socket) {
+        this.socket = socket;
     }
 }

@@ -16,7 +16,6 @@ import info.ata4.io.socket.FileChannelSocket;
 import info.ata4.io.socket.IOSocket;
 import info.ata4.io.socket.StreamSocket;
 import info.ata4.io.util.HalfFloat;
-import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +25,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.READ;
 import org.apache.commons.lang3.ArrayUtils;
@@ -59,19 +57,11 @@ public class DataInputReader extends DataInputBridge implements DataInputExtende
     }
     
     public static DataInputReader newReader(FileChannel fc) throws IOException {
-        return new DataInputReader(new FileChannelSocket(fc));
+        return new DataInputReader(new FileChannelSocket(fc, true, false));
     }
  
-    public static DataInputReader newReader(Path file, boolean seekable) throws IOException {
-        if (seekable) {
-            return newReader(FileChannel.open(file, READ));
-        } else {
-            return newReader(new BufferedInputStream(Files.newInputStream(file, READ), 4096));
-        }
-    }
-    
     public static DataInputReader newReader(Path file) throws IOException {
-        return newReader(file, false);
+        return newReader(FileChannel.open(file, READ));
     }
     
     public static DataInputReader newReader(RandomAccessFile raf) throws IOException {
@@ -103,7 +93,7 @@ public class DataInputReader extends DataInputBridge implements DataInputExtende
         return HalfFloat.intBitsToFloat(hbits);
     }
     
-    private String readStringInt(int limit, Charset charset, boolean padded) throws IOException {
+    private String readString(int limit, Charset charset, boolean padded) throws IOException {
         if (limit <= 0) {
             throw new IllegalArgumentException("Invalid limit");
         }
@@ -125,7 +115,7 @@ public class DataInputReader extends DataInputBridge implements DataInputExtende
     
     @Override
     public String readStringNull(int limit, Charset charset) throws IOException {
-        return readStringInt(limit, charset, false);
+        return readString(limit, charset, false);
     }
     
     @Override
@@ -140,7 +130,7 @@ public class DataInputReader extends DataInputBridge implements DataInputExtende
     
     @Override
     public String readStringPadded(int limit, Charset charset) throws IOException {
-        return readStringInt(limit, charset, true);
+        return readString(limit, charset, true);
     }
 
     @Override

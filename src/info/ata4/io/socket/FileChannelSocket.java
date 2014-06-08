@@ -24,13 +24,16 @@ public class FileChannelSocket extends IOSocket {
     
     private final FileChannel fc;
     
-    public FileChannelSocket(FileChannel fc) {
+    public FileChannelSocket(FileChannel fc, boolean readable, boolean writable) {
         this.fc = fc;
         
-        // FileChannels may be read only or write only, but there's no interface
-        // to check it
-        setCanRead(true);
-        setCanWrite(true);
+        // FileChannel provides no interface to check for readable/writable,
+        // so rely on these arguments instead
+        setCanRead(readable);
+        setCanWrite(writable);
+        
+        // FileChannel is unbuffered, so use buffering for streams
+        setStreamBuffering(true);
     }
 
     @Override
