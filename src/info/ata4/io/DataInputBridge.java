@@ -96,7 +96,7 @@ public class DataInputBridge extends IOBridge implements DataInput {
     public int readUnsignedShort() throws IOException {
         int r = in.readUnsignedShort();
         if (swap) {
-            r = EndianUtils.swapShort((short) r) & 0xff;
+            r = EndianUtils.swapShort((short) r) & 0xffff;
         }
         return r;
     }
