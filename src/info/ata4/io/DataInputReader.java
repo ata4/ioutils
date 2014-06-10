@@ -81,7 +81,7 @@ public class DataInputReader extends DataInputBridge implements DataInputExtende
     public BigInteger readUnsignedLong() throws IOException {
         byte[] raw = new byte[8];
         readFully(raw);
-        if (swap) {
+        if (!isSwap()) {
             ArrayUtils.reverse(raw);
         }
         return new BigInteger(raw);

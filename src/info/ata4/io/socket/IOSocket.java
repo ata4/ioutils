@@ -10,7 +10,6 @@
 package info.ata4.io.socket;
 
 import info.ata4.io.Seekable;
-import info.ata4.io.Swappable;
 import java.io.Closeable;
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -36,7 +35,6 @@ public class IOSocket implements Closeable {
     
     private DataInput in;
     private DataOutput out;
-    private Swappable swappable;
     private Seekable seekable;
     private boolean canRead;
     private boolean canWrite;
@@ -188,14 +186,6 @@ public class IOSocket implements Closeable {
     
     public ByteBuffer getByteBuffer() {
         return null;
-    }
-    
-    public Swappable getSwappable() {
-        return swappable;
-    }
-    
-    protected void setSwappable(Swappable swappable) {
-        this.swappable = swappable;
     }
     
     public Seekable getSeekable() {

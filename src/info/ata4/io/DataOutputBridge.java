@@ -22,35 +22,10 @@ import org.apache.commons.io.EndianUtils;
 public class DataOutputBridge extends IOBridge implements DataOutput {
     
     private final DataOutput out;
-    protected boolean swap;
 
     public DataOutputBridge(IOSocket socket) {
         super(socket);
         this.out = socket.getDataOutput();
-    }
-    
-    @Override
-    public boolean isSwap() {
-        if (super.isSwappable()) {
-            return super.isSwap();
-        } else {
-            return swap;
-        }
-    }
-
-    @Override
-    public void setSwap(boolean swap) {
-        if (super.isSwappable()) {
-            super.setSwap(swap);
-        } else {
-            this.swap = swap;
-        }
-    }
-
-    @Override
-    public boolean isSwappable() {
-        // supports manual swapping using EndianUtils if required
-        return true;
     }
     
     @Override
@@ -80,7 +55,7 @@ public class DataOutputBridge extends IOBridge implements DataOutput {
 
     @Override
     public void writeShort(int v) throws IOException {
-        if (swap) {
+        if (isManualSwap()) {
             v = EndianUtils.swapShort((short) v);
         }
         out.writeShort(v);
@@ -93,7 +68,7 @@ public class DataOutputBridge extends IOBridge implements DataOutput {
 
     @Override
     public void writeInt(int v) throws IOException {
-        if (swap) {
+        if (isManualSwap()) {
             v = EndianUtils.swapInteger(v);
         }
         out.writeInt(v);
@@ -101,7 +76,7 @@ public class DataOutputBridge extends IOBridge implements DataOutput {
 
     @Override
     public void writeLong(long v) throws IOException {
-        if (swap) {
+        if (isManualSwap()) {
             v = EndianUtils.swapLong(v);
         }
         out.writeLong(v);
@@ -109,7 +84,7 @@ public class DataOutputBridge extends IOBridge implements DataOutput {
 
     @Override
     public void writeFloat(float v) throws IOException {
-        if (swap) {
+        if (isManualSwap()) {
             // NOTE: don't use writeFloat() plus EndianUtils.swapFloat() here!
             writeInt(Float.floatToRawIntBits(v));
         } else {
@@ -119,7 +94,7 @@ public class DataOutputBridge extends IOBridge implements DataOutput {
 
     @Override
     public void writeDouble(double v) throws IOException {
-        if (swap) {
+        if (isManualSwap()) {
             // NOTE: don't use writeDouble() plus EndianUtils.swapDouble() here!
             writeLong(Double.doubleToRawLongBits(v));
         } else {

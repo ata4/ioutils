@@ -22,35 +22,10 @@ import org.apache.commons.io.EndianUtils;
 public class DataInputBridge extends IOBridge implements DataInput {
     
     private final DataInput in;
-    protected boolean swap;
-    
+
     public DataInputBridge(IOSocket socket) {
         super(socket);
         in = socket.getDataInput();
-    }
-    
-    @Override
-    public boolean isSwap() {
-        if (super.isSwappable()) {
-            return super.isSwap();
-        } else {
-            return swap;
-        }
-    }
-
-    @Override
-    public void setSwap(boolean swap) {
-        if (super.isSwappable()) {
-            super.setSwap(swap);
-        } else {
-            this.swap = swap;
-        }
-    }
-    
-    @Override
-    public boolean isSwappable() {
-        // supports manual swapping using EndianUtils if required
-        return true;
     }
  
     @Override
@@ -86,7 +61,7 @@ public class DataInputBridge extends IOBridge implements DataInput {
     @Override
     public short readShort() throws IOException {
         short r = in.readShort();
-        if (swap) {
+        if (isManualSwap()) {
             r = EndianUtils.swapShort(r);
         }
         return r;
@@ -95,7 +70,7 @@ public class DataInputBridge extends IOBridge implements DataInput {
     @Override
     public int readUnsignedShort() throws IOException {
         int r = in.readUnsignedShort();
-        if (swap) {
+        if (isManualSwap()) {
             r = EndianUtils.swapShort((short) r) & 0xffff;
         }
         return r;
@@ -109,7 +84,7 @@ public class DataInputBridge extends IOBridge implements DataInput {
     @Override
     public int readInt() throws IOException {
         int r = in.readInt();
-        if (swap) {
+        if (isManualSwap()) {
             r = EndianUtils.swapInteger(r);
         }
         return r;
@@ -118,7 +93,7 @@ public class DataInputBridge extends IOBridge implements DataInput {
     @Override
     public long readLong() throws IOException {
         long r = in.readLong();
-        if (swap) {
+        if (isManualSwap()) {
             r = EndianUtils.swapLong(r);
         }
         return r;
@@ -126,7 +101,7 @@ public class DataInputBridge extends IOBridge implements DataInput {
 
     @Override
     public float readFloat() throws IOException {
-        if (swap) {
+        if (isManualSwap()) {
             // NOTE: don't use readFloat() plus EndianUtils.swapFloat() here!
             return Float.intBitsToFloat(readInt());
         } else {
@@ -136,7 +111,7 @@ public class DataInputBridge extends IOBridge implements DataInput {
 
     @Override
     public double readDouble() throws IOException {
-        if (swap) {
+        if (isManualSwap()) {
             // NOTE: don't use readDouble() plus EndianUtils.swapDouble() here!
             return Double.longBitsToDouble(readLong());
         } else {

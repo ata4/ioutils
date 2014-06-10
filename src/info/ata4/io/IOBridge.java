@@ -12,6 +12,8 @@ package info.ata4.io;
 import info.ata4.io.socket.IOSocket;
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * Abstract IO bridge that combines a socket with various IO interfaces.
@@ -21,36 +23,37 @@ import java.io.IOException;
 public abstract class IOBridge implements Swappable, Seekable, Closeable {
     
     private final IOSocket socket;
+    private final ByteBuffer bb;
+    private boolean swap;
 
     public IOBridge(IOSocket socket) {
         this.socket = socket;
+        
+        bb = socket.getByteBuffer();
+        if (bb != null) {
+            bb.order(ByteOrder.BIG_ENDIAN);
+        }
     }
     
     public IOSocket getSocket() {
         return socket;
     }
     
-    public boolean isSwappable() {
-        return socket.getSwappable() != null;
+    @Override
+    public boolean isSwap() {
+        return swap;
     }
     
-    public Swappable getSwappable() {
-        Swappable swappable = socket.getSwappable();
-        if (swappable != null) {
-            return swappable;
-        } else {
-            throw new UnsupportedOperationException("Byte swapping not supported");
+    @Override
+    public void setSwap(boolean swap) {
+        this.swap = swap;
+        if (bb != null) {
+            bb.order(swap ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
         }
     }
     
-    @Override
-    public boolean isSwap() {
-        return getSwappable().isSwap();
-    }
-
-    @Override
-    public void setSwap(boolean swap) {
-        getSwappable().setSwap(swap);
+    protected boolean isManualSwap() {
+        return swap && bb == null;
     }
     
     public boolean isSeekable() {
