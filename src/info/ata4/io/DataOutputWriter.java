@@ -69,7 +69,7 @@ public class DataOutputWriter extends DataOutputBridge implements DataOutputExte
     
     public static DataOutputWriter newBufferedWriter(Path file) throws IOException {
         OutputStream os = Files.newOutputStream(file, CREATE, WRITE, TRUNCATE_EXISTING);
-        return new DataOutputWriter(new StreamSocket(new BufferedOutputStream(os)));
+        return new DataOutputWriter(new StreamSocket(new BufferedOutputStream(os, 1 << 16)));
     }
     
     public static DataOutputWriter newMappedWriter(Path file) throws IOException {

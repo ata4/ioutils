@@ -69,7 +69,7 @@ public class DataInputReader extends DataInputBridge implements DataInputExtende
     
     public static DataInputReader newBufferedReader(Path file) throws IOException {
         InputStream is = Files.newInputStream(file, READ);
-        return newReader(new BufferedInputStream(is));
+        return newReader(new BufferedInputStream(is, 1 << 16));
     }
     
     public static DataInputReader newMappedReader(Path file) throws IOException {
