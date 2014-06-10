@@ -29,83 +29,103 @@ import java.nio.ByteOrder;
  */
 public class ByteBufferSocket extends IOSocket {
     
+    private final ByteBuffer buf;
+    
     public ByteBufferSocket(ByteBuffer buf) {
-        setByteBuffer(buf);
+        this.buf = buf;
+        
         setCanRead(true);
         setCanWrite(!buf.isReadOnly());
     }
 
     @Override
+    public ByteBuffer getByteBuffer() {
+        return buf;
+    }
+
+    @Override
     public ByteBufferInputStream getInputStream() {
-        return new ByteBufferInputStream(getByteBuffer());
+        return new ByteBufferInputStream(buf);
     }
 
     @Override
     public ByteBufferOutputStream getOutputStream() {
-        return new ByteBufferOutputStream(getByteBuffer());
+        return new ByteBufferOutputStream(buf);
     }
 
     @Override
     protected DataInput newDataInput() {
-        return new ByteBufferDataInput(getByteBuffer());
+        return new ByteBufferDataInput(buf);
     }
 
     @Override
     protected DataOutput newDataOutput() {
-        return new ByteBufferDataOutput(getByteBuffer());
+        return new ByteBufferDataOutput(buf);
     }
 
     @Override
     protected Swappable newSwappable() {
-        return new ByteBufferSwappable();
+        return new ByteBufferSwappable(buf);
     }
 
     @Override
     protected Seekable newSeekable() {
-        return new ByteBufferSeekable();
+        return new ByteBufferSeekable(buf);
     }
     
     private class ByteBufferSwappable implements Swappable {
+        
+        private final ByteBuffer buf;
+        
+        private ByteBufferSwappable(ByteBuffer buf) {
+            this.buf = buf;
+        }
 
         @Override
         public boolean isSwap() {
-            return getByteBuffer().order() != ByteOrder.BIG_ENDIAN;
+            return buf.order() != ByteOrder.BIG_ENDIAN;
         }
 
         @Override
         public void setSwap(boolean swap) {
-            getByteBuffer().order(swap ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+            buf.order(swap ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
         }
     }
     
     private class ByteBufferSeekable extends SeekableImpl {
+        
+        private final ByteBuffer buf;
+        
+        private ByteBufferSeekable(ByteBuffer buf) {
+            this.buf = buf;
+        }
 
         @Override
         public void position(long pos) throws IOException {
             if (pos > Integer.MAX_VALUE) {
                 throw new IllegalArgumentException("Pointer is too large (> " + Integer.MAX_VALUE + ")");
             }
-            getByteBuffer().position((int) pos);
+            buf.position((int) pos);
         }
 
         @Override
         public long position() throws IOException {
-            return getByteBuffer().position();
+            return buf.position();
         }
 
         @Override
         public long capacity() throws IOException {
-            return getByteBuffer().capacity();
+            return buf.capacity();
         }
 
         @Override
         public boolean hasRemaining() throws IOException {
-            return getByteBuffer().hasRemaining();
+            return buf.hasRemaining();
         }
 
         @Override
         public long remaining() throws IOException {
-            return getByteBuffer().remaining();
+            return buf.remaining();
         }
     }
 }

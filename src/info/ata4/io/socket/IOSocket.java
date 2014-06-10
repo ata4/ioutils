@@ -36,7 +36,6 @@ public class IOSocket implements Closeable {
     
     private DataInput in;
     private DataOutput out;
-    private ByteBuffer buf;
     private Swappable swappable;
     private Seekable seekable;
     private boolean canRead;
@@ -211,20 +210,9 @@ public class IOSocket implements Closeable {
         wbcp.setRawChannel(wchan);
     }
     
-    protected ByteBuffer newByteBuffer() {
+    public ByteBuffer getByteBuffer() {
         // not set by default
         return null;
-    }
-    
-    public ByteBuffer getByteBuffer() {
-        if (buf == null) {
-            buf = newByteBuffer();
-        }
-        return buf;
-    }
-    
-    protected void setByteBuffer(ByteBuffer buf) {
-        this.buf = buf;
     }
     
     protected Swappable newSwappable() {
