@@ -109,7 +109,7 @@ public class IOSocket implements Closeable {
     }
     
     protected DataInput newDataInput() {
-        InputStream stream = getInputStream();
+        InputStream stream = getRawInputStream();
         if (stream != null) {
             return new DataInputStream(stream);
         } else {
@@ -135,7 +135,7 @@ public class IOSocket implements Closeable {
     }
     
     protected DataOutput newDataOutput() {
-        OutputStream stream = getOutputStream();
+        OutputStream stream = getRawOutputStream();
         if (stream != null) {
             return new DataOutputStream(stream);
         } else {
