@@ -9,7 +9,11 @@
  */
 package info.ata4.io.socket;
 
+import info.ata4.io.SeekableImpl;
+import java.io.IOException;
+import java.nio.channels.Channel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
 /**
@@ -18,13 +22,43 @@ import java.nio.channels.WritableByteChannel;
  */
 public class ChannelSocket extends IOSocket {
     
-    public ChannelSocket(ReadableByteChannel chan) {
-        setRawReadableByteChannel(chan);
-        setCanRead(true);
+    public ChannelSocket(Channel channel) {
+        if (channel instanceof ReadableByteChannel) {
+            setRawReadableByteChannel((ReadableByteChannel) channel);
+            setCanRead(true);
+        }
+        
+        if (channel instanceof WritableByteChannel) {
+            setRawWritableByteChannel((WritableByteChannel) channel);
+            setCanWrite(true);
+        }
+        
+        if (channel instanceof SeekableByteChannel) {
+            setSeekable(new ChannelSeekable((SeekableByteChannel) channel));
+        }
     }
     
-    public ChannelSocket(WritableByteChannel chan) {
-        setRawWritableByteChannel(chan);
-        setCanWrite(true);
+    private class ChannelSeekable extends SeekableImpl {
+        
+        private final SeekableByteChannel channel;
+        
+        private ChannelSeekable(SeekableByteChannel channel) {
+            this.channel = channel;
+        }
+
+        @Override
+        public void position(long where) throws IOException {
+            channel.position(where);
+        }
+
+        @Override
+        public long position() throws IOException {
+            return channel.position();
+        }
+
+        @Override
+        public long capacity() throws IOException {
+            return channel.size();
+        }
     }
 }
