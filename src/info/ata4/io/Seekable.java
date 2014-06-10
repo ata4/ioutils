@@ -21,7 +21,8 @@ public interface Seekable {
     /**
      * Seek to the specified position relative to an origin.
      * 
-     * @param whence The position to seek to.
+     * @param where The position to seek to.
+     * @param whence Origin point of the new position.
      * @throws IOException 
      */
     public void seek(long where, SeekOrigin whence) throws IOException;
