@@ -15,6 +15,12 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -24,6 +30,17 @@ public class FileChannelSocket extends IOSocket {
     
     private final FileChannel fc;
     
+    public FileChannelSocket(Path file, OpenOption... options) throws IOException {
+        fc = FileChannel.open(file, options);
+        
+        Set<OpenOption> optionSet = new HashSet<>(Arrays.asList(options));
+        setCanRead(optionSet.contains(StandardOpenOption.READ));
+        setCanWrite(optionSet.contains(StandardOpenOption.WRITE));
+        
+        // FileChannel is unbuffered, so use buffering for streams on default
+        setStreamBuffering(true);
+    }
+    
     public FileChannelSocket(FileChannel fc, boolean readable, boolean writable) {
         this.fc = fc;
         
@@ -32,7 +49,7 @@ public class FileChannelSocket extends IOSocket {
         setCanRead(readable);
         setCanWrite(writable);
         
-        // FileChannel is unbuffered, so use buffering for streams
+        // FileChannel is unbuffered, so use buffering for streams on default
         setStreamBuffering(true);
     }
 
@@ -48,10 +65,16 @@ public class FileChannelSocket extends IOSocket {
 
     @Override
     protected Seekable newSeekable() {
-        return new FileChannelSeekable();
+        return new FileChannelSeekable(fc);
     }
     
     private class FileChannelSeekable extends SeekableImpl {
+        
+        private final FileChannel fc;
+        
+        private FileChannelSeekable(FileChannel fc) {
+            this.fc = fc;
+        }
 
         @Override
         public void position(long where) throws IOException {

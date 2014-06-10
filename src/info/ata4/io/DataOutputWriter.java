@@ -26,6 +26,7 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
 
 /**
@@ -60,7 +61,7 @@ public class DataOutputWriter extends DataOutputBridge implements DataOutputExte
     }
     
     public static DataOutputWriter newWriter(Path file) throws IOException {
-        return newWriter(FileChannel.open(file, CREATE, WRITE));
+        return new DataOutputWriter(new FileChannelSocket(file, CREATE, WRITE, TRUNCATE_EXISTING));
     }
     
     public static DataOutputWriter newWriter(RandomAccessFile raf) throws IOException {
