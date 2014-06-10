@@ -10,7 +10,6 @@
 package info.ata4.io.socket;
 
 import info.ata4.io.InverseDataInputStream;
-import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,12 +67,7 @@ class IOSocketInputStream extends IOSocketProvider {
         if (active == null) {
             return active;
         }
-        
-        // buffer stream if enabled
-        if (socket.hasStreamBuffering()) {
-            active = new BufferedInputStream(active);
-        }
-        
+
         // protect actual stream from closing
         active = new CloseShieldInputStream(active);
         

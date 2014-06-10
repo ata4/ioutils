@@ -36,6 +36,8 @@ public class ByteBufferSocket extends IOSocket {
         
         setCanRead(true);
         setCanWrite(!buf.isReadOnly());
+        setSwappable(new ByteBufferSwappable(buf));
+        setSeekable(new ByteBufferSeekable(buf));
     }
 
     @Override
@@ -61,16 +63,6 @@ public class ByteBufferSocket extends IOSocket {
     @Override
     protected DataOutput newDataOutput() {
         return new ByteBufferDataOutput(buf);
-    }
-
-    @Override
-    protected Swappable newSwappable() {
-        return new ByteBufferSwappable(buf);
-    }
-
-    @Override
-    protected Seekable newSeekable() {
-        return new ByteBufferSeekable(buf);
     }
     
     private class ByteBufferSwappable implements Swappable {

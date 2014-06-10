@@ -40,8 +40,7 @@ public class IOSocket implements Closeable {
     private Seekable seekable;
     private boolean canRead;
     private boolean canWrite;
-    private boolean streamBuffering;
-    
+
     public IOSocket() {
         isp = new IOSocketInputStream(this);
         osp = new IOSocketOutputStream(this);
@@ -73,29 +72,6 @@ public class IOSocket implements Closeable {
     
     protected void setCanWrite(boolean canWrite) {
         this.canWrite = canWrite;
-    }
-    
-    /**
-     * Indicates if this socket returns buffered streams for
-     * {@link #getInputStream()} and {@link #getOutputStream()}
-     * 
-     * @return true if this socket creates buffered streams
-     */
-    public boolean hasStreamBuffering() {
-        return streamBuffering;
-    }
-
-    /**
-     * Changes whether {@link #getInputStream()} and {@link #getOutputStream()}
-     * should return buffered streams.
-     * 
-     * Note that this may have unexpected side effects when other I/O paths are
-     * used simulaneously while buffering is enabled.
-     * 
-     * @param streamBuffering 
-     */
-    public void setStreamBuffering(boolean streamBuffering) {
-        this.streamBuffering = streamBuffering;
     }
     
     /**
@@ -211,30 +187,23 @@ public class IOSocket implements Closeable {
     }
     
     public ByteBuffer getByteBuffer() {
-        // not set by default
-        return null;
-    }
-    
-    protected Swappable newSwappable() {
         return null;
     }
     
     public Swappable getSwappable() {
-        if (swappable == null) {
-            swappable = newSwappable();
-        }
         return swappable;
     }
-
-    protected Seekable newSeekable() {
-        return null;
+    
+    protected void setSwappable(Swappable swappable) {
+        this.swappable = swappable;
     }
-
+    
     public Seekable getSeekable() {
-        if (seekable == null) {
-            seekable = newSeekable();
-        }
         return seekable;
+    }
+    
+    protected void setSeekable(Seekable seekable) {
+        this.seekable = seekable;
     }
 
     @Override

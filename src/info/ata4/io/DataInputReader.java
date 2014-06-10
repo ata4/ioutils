@@ -57,7 +57,7 @@ public class DataInputReader extends DataInputBridge implements DataInputExtende
     }
     
     public static DataInputReader newReader(FileChannel fc) throws IOException {
-        return new DataInputReader(new FileChannelSocket(fc, true, false));
+        return new DataInputReader(new FileChannelSocket(fc, READ));
     }
  
     public static DataInputReader newReader(Path file) throws IOException {

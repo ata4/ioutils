@@ -57,7 +57,7 @@ public class DataOutputWriter extends DataOutputBridge implements DataOutputExte
     }
     
     public static DataOutputWriter newWriter(FileChannel fc) throws IOException {
-        return new DataOutputWriter(new FileChannelSocket(fc, false, true));
+        return new DataOutputWriter(new FileChannelSocket(fc, WRITE));
     }
     
     public static DataOutputWriter newWriter(Path file) throws IOException {
