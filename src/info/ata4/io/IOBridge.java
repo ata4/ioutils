@@ -31,7 +31,7 @@ public abstract class IOBridge implements Swappable, Seekable, Closeable {
         
         bb = socket.getByteBuffer();
         if (bb != null) {
-            bb.order(ByteOrder.BIG_ENDIAN);
+            swap = bb.order() != ByteOrder.BIG_ENDIAN;
         }
     }
     
