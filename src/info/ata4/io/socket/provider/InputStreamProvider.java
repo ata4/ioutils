@@ -9,7 +9,7 @@
  */
 package info.ata4.io.socket.provider;
 
-import info.ata4.io.InverseDataInputStream;
+import info.ata4.io.streams.InverseDataInputStream;
 import info.ata4.io.socket.IOSocket;
 import java.io.DataInput;
 import java.io.InputStream;
