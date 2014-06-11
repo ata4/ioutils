@@ -14,8 +14,6 @@ import info.ata4.io.buffer.ByteBufferDataInput;
 import info.ata4.io.buffer.ByteBufferDataOutput;
 import info.ata4.io.buffer.ByteBufferInputStream;
 import info.ata4.io.buffer.ByteBufferOutputStream;
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -34,6 +32,9 @@ public class ByteBufferSocket extends IOSocket {
         setCanRead(true);
         setCanWrite(!buf.isReadOnly());
         setSeekable(new ByteBufferSeekable(buf));
+        
+        getDataInputProvider().set(new ByteBufferDataInput(buf));
+        getDataOutputProvider().set(new ByteBufferDataOutput(buf));
     }
 
     @Override
@@ -49,16 +50,6 @@ public class ByteBufferSocket extends IOSocket {
     @Override
     public ByteBufferOutputStream getOutputStream() {
         return new ByteBufferOutputStream(buf);
-    }
-
-    @Override
-    protected DataInput newDataInput() {
-        return new ByteBufferDataInput(buf);
-    }
-
-    @Override
-    protected DataOutput newDataOutput() {
-        return new ByteBufferDataOutput(buf);
     }
     
     private class ByteBufferSeekable extends SeekableImpl {

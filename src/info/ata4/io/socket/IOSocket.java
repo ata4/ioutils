@@ -10,11 +10,15 @@
 package info.ata4.io.socket;
 
 import info.ata4.io.Seekable;
+import info.ata4.io.socket.provider.DataInputProvider;
+import info.ata4.io.socket.provider.DataOutputProvider;
+import info.ata4.io.socket.provider.InputStreamProvider;
+import info.ata4.io.socket.provider.OutputStreamProvider;
+import info.ata4.io.socket.provider.ReadableByteChannelProvider;
+import info.ata4.io.socket.provider.WritableByteChannelProvider;
 import java.io.Closeable;
 import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -28,22 +32,57 @@ import java.nio.channels.WritableByteChannel;
  */
 public class IOSocket implements Closeable {
     
-    private final IOSocketInputStream isp;
-    private final IOSocketOutputStream osp;
-    private final IOSocketReadableByteChannel rbcp;
-    private final IOSocketWritableByteChannel wbcp;
+    private InputStreamProvider isp;
+    private OutputStreamProvider osp;
+    private ReadableByteChannelProvider rbcp;
+    private WritableByteChannelProvider wbcp;
+    private DataInputProvider dip;
+    private DataOutputProvider dop;
     
-    private DataInput in;
-    private DataOutput out;
     private Seekable seekable;
     private boolean canRead;
     private boolean canWrite;
-
-    public IOSocket() {
-        isp = new IOSocketInputStream(this);
-        osp = new IOSocketOutputStream(this);
-        rbcp = new IOSocketReadableByteChannel(this);
-        wbcp = new IOSocketWritableByteChannel(this);
+    
+    protected InputStreamProvider getInputStreamProvider() {
+        if (isp == null) {
+            isp = new InputStreamProvider(this);
+        }
+        return isp;
+    }
+    
+    protected OutputStreamProvider getOutputStreamProvider() {
+        if (osp == null) {
+            osp = new OutputStreamProvider(this);
+        }
+        return osp;
+    }
+    
+    protected ReadableByteChannelProvider getReadableByteChannelProvider() {
+        if (rbcp == null) {
+            rbcp = new ReadableByteChannelProvider(this);
+        }
+        return rbcp;
+    }
+    
+    protected WritableByteChannelProvider getWritableByteChannelProvider() {
+        if (wbcp == null) {
+            wbcp = new WritableByteChannelProvider(this);
+        }
+        return wbcp;
+    }
+    
+    protected DataInputProvider getDataInputProvider() {
+        if (dip == null) {
+            dip = new DataInputProvider(this);
+        }
+        return dip;
+    }
+    
+    protected DataOutputProvider getDataOutputProvider() {
+        if (dop == null) {
+            dop = new DataOutputProvider(this);
+        }
+        return dop;
     }
     
     /**
@@ -79,15 +118,7 @@ public class IOSocket implements Closeable {
      * @return output stream for this socket
      */
     public InputStream getInputStream() {
-        return isp.getInputStream();
-    }
-    
-    protected InputStream getRawInputStream() {
-        return isp.getRawInputStream();
-    }
-    
-    protected void setRawInputStream(InputStream is) {
-        isp.setRawInputStream(is);
+        return getInputStreamProvider().get();
     }
     
     /**
@@ -97,24 +128,7 @@ public class IOSocket implements Closeable {
      * @return output stream for this socket
      */
     public OutputStream getOutputStream() {
-        return osp.getOutputStream();
-    }
-    
-    protected OutputStream getRawOutputStream() {
-        return osp.getRawOutputStream();
-    }
-    
-    protected void setRawOutputStream(OutputStream os) {
-        osp.setRawOutputStream(os);
-    }
-    
-    protected DataInput newDataInput() {
-        InputStream stream = getRawInputStream();
-        if (stream != null) {
-            return new DataInputStream(stream);
-        } else {
-            return null;
-        }
+        return getOutputStreamProvider().get();
     }
     
     /**
@@ -124,23 +138,7 @@ public class IOSocket implements Closeable {
      * @return DataInput instance
      */
     public DataInput getDataInput() {
-        if (in == null) {
-            in = newDataInput();
-        }
-        return in;
-    }
-    
-    protected void setDataInput(DataInput in) {
-        this.in = in;
-    }
-    
-    protected DataOutput newDataOutput() {
-        OutputStream stream = getRawOutputStream();
-        if (stream != null) {
-            return new DataOutputStream(stream);
-        } else {
-            return null;
-        }
+        return getDataInputProvider().get();
     }
     
     /**
@@ -150,38 +148,15 @@ public class IOSocket implements Closeable {
      * @return DataOutput instance
      */
     public DataOutput getDataOutput() {
-        if (out == null) {
-            out = newDataOutput();
-        }
-        return out;
-    }
-    
-    protected void setDataOutput(DataOutput out) {
-        this.out = out;
+        return getDataOutputProvider().get();
     }
     
     public ReadableByteChannel getReadableByteChannel() {
-        return rbcp.getChannel();
+        return getReadableByteChannelProvider().get();
     }
     
-    protected ReadableByteChannel getRawReadableByteChannel() {
-        return rbcp.getRawChannel();
-    }
-    
-    protected void setRawReadableByteChannel(ReadableByteChannel wchan) {
-        rbcp.setRawChannel(wchan);
-    }
-
     public WritableByteChannel getWritableByteChannel() {
-        return wbcp.getChannel();
-    }
-    
-    protected WritableByteChannel getRawWritableByteChannel() {
-        return wbcp.getRawChannel();
-    }
-    
-    protected void setRawWritableByteChannel(WritableByteChannel wchan) {
-        wbcp.setRawChannel(wchan);
+        return getWritableByteChannelProvider().get();
     }
     
     public ByteBuffer getByteBuffer() {
@@ -202,6 +177,8 @@ public class IOSocket implements Closeable {
         close(osp);
         close(rbcp);
         close(wbcp);
+        close(dip);
+        close(dop);
     }
     
     protected void close(Closeable c) throws IOException {

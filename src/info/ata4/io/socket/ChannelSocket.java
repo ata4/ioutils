@@ -24,12 +24,12 @@ public class ChannelSocket extends IOSocket {
     
     public ChannelSocket(Channel channel) {
         if (channel instanceof ReadableByteChannel) {
-            setRawReadableByteChannel((ReadableByteChannel) channel);
+            getReadableByteChannelProvider().set((ReadableByteChannel) channel);
             setCanRead(true);
         }
         
         if (channel instanceof WritableByteChannel) {
-            setRawWritableByteChannel((WritableByteChannel) channel);
+            getWritableByteChannelProvider().set((WritableByteChannel) channel);
             setCanWrite(true);
         }
         

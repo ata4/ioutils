@@ -7,9 +7,10 @@
  **    May you find forgiveness for yourself and forgive others.
  **    May you share freely, never taking more than you give.
  */
-package info.ata4.io.socket;
+package info.ata4.io.socket.provider;
 
 import info.ata4.io.channels.CloseShieldWritableByteChannel;
+import info.ata4.io.socket.IOSocket;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
@@ -18,15 +19,15 @@ import java.nio.channels.WritableByteChannel;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-class IOSocketWritableByteChannel extends IOSocketChannel<WritableByteChannel> {
+public class WritableByteChannelProvider extends SocketProvider<WritableByteChannel> {
     
-    IOSocketWritableByteChannel(IOSocket socket) {
+    public WritableByteChannelProvider(IOSocket socket) {
         super(socket);
     }
 
     @Override
-    WritableByteChannel newChannel() {
-        OutputStream stream = socket.getRawOutputStream();
+    public WritableByteChannel create() {
+        OutputStream stream = socket.getOutputStream();
         if (stream != null) {
             return Channels.newChannel(stream);
         } else {
@@ -35,7 +36,7 @@ class IOSocketWritableByteChannel extends IOSocketChannel<WritableByteChannel> {
     }
 
     @Override
-    WritableByteChannel newCloseShieldChannel(WritableByteChannel channel) {
+    protected WritableByteChannel getCloseShield(WritableByteChannel channel) {
         return new CloseShieldWritableByteChannel(channel);
     }
 }

@@ -19,12 +19,12 @@ import java.io.DataOutput;
 public class DataSocket extends IOSocket {
     
     public DataSocket(DataInput in) {
-        setDataInput(in);
+        getDataInputProvider().set(in);
         setCanRead(true);
     }
     
     public DataSocket(DataOutput out) {
-        setDataOutput(out);
+        getDataOutputProvider().set(out);
         setCanWrite(true);
     }
 }

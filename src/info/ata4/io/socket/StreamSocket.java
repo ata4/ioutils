@@ -19,12 +19,12 @@ import java.io.OutputStream;
 public class StreamSocket extends IOSocket {
 
     public StreamSocket(InputStream is) {
-        setRawInputStream(is);
+        getInputStreamProvider().set(is);
         setCanRead(true);
     }
     
     public StreamSocket(OutputStream os) {
-        setRawOutputStream(os);
+        getOutputStreamProvider().set(os);
         setCanWrite(true);
     }
 }
