@@ -303,7 +303,14 @@ public class ByteBufferUtils {
         int pos = bb.position();
         bb.rewind();
         
-        ByteBuffer copy = bb.isDirect() ? ByteBuffer.allocateDirect(capacity) : ByteBuffer.allocate(capacity);
+        ByteBuffer copy;
+        
+        if (bb.isDirect()) {
+            copy = ByteBuffer.allocateDirect(capacity);
+        } else {
+            copy = ByteBuffer.allocate(capacity);
+        }
+        
         copy.order(bb.order());
         copy.put(bb);
         copy.position(pos);
