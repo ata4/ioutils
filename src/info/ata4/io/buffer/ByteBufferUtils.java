@@ -17,6 +17,7 @@ import java.nio.channels.FileChannel;
 import static java.nio.channels.FileChannel.MapMode.*;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -257,8 +258,9 @@ public class ByteBufferUtils {
      * Concatenates one or more byte buffers to one large buffer. The combined
      * size of all buffers must not exceed {@link java.lang.Integer#MAX_VALUE}.
      * 
-     * @param bbs
-     * @return 
+     * @param bbs list of byte buffers to combine
+     * @return byte buffer containing the combined content of the supplied byte
+     *         buffers
      */
     public static ByteBuffer concat(List<ByteBuffer> bbs) {
         long length = 0;
@@ -289,5 +291,43 @@ public class ByteBufferUtils {
         bbNew.rewind();
         
         return bbNew;
+    }
+    
+    /**
+     * Concatenates one or more byte buffers to one large buffer. The combined
+     * size of all buffers must not exceed {@link java.lang.Integer#MAX_VALUE}.
+     * 
+     * @param bb one or more byte buffers to combine
+     * @return byte buffer containing the combined content of the supplied byte
+     *         buffers
+     */
+    public static ByteBuffer concat(ByteBuffer... bb) {
+        return concat(Arrays.asList(bb));
+    }
+    
+    /**
+     * Performs a deep copy on a byte buffer. The resulting byte buffer will have
+     * the same position, byte order and visible bytes as the original byte buffer.
+     * If the source buffer is direct, the copied buffer will be direct, too.
+     * 
+     * Any changes in one buffer won't be visible to the other, i.e. the two
+     * buffers will be entirely independent from another.
+     * 
+     * @param bb source byte buffer
+     * @return deep copy of source buffer
+     */
+    public static ByteBuffer copy(ByteBuffer bb) {
+        int capacity = bb.limit();
+        int pos = bb.position();
+        bb.rewind();
+        
+        ByteBuffer copy = bb.isDirect() ? ByteBuffer.allocateDirect(capacity) : ByteBuffer.allocate(capacity);
+        copy.order(bb.order());
+        copy.put(bb);
+        copy.position(pos);
+        
+        bb.position(pos);
+        
+        return copy;
     }
 }
