@@ -17,9 +17,9 @@ import java.nio.channels.FileChannel;
 import static java.nio.channels.FileChannel.MapMode.*;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.*;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * ByteBuffer utility class.
@@ -34,23 +34,8 @@ public class ByteBufferUtils {
     private ByteBufferUtils() {
     }
     
-    private static int getLength(FileChannel fc, int length) throws IOException {
+    private static int truncateLength(FileChannel fc, int length) throws IOException {
         return (int) Math.min(length > 0 ? length : fc.size(), Integer.MAX_VALUE);
-    }
-    
-    private static ByteBuffer allocate(int size) {
-        // allocateDirect is pretty slow when used frequently, use it for larger
-        // buffers only
-        if (size > DIRECT_THRESHOLD) {
-            return ByteBuffer.allocateDirect(size);
-        } else {
-            try {
-                return ByteBuffer.allocate(size);
-            } catch (OutOfMemoryError ex) {
-                // not enough space in the heap, try direct allocation instead
-                return ByteBuffer.allocateDirect(size);
-            }
-        }
     }
     
     /**
@@ -65,10 +50,26 @@ public class ByteBufferUtils {
      */
     public static ByteBuffer load(Path path, int offset, int length) throws IOException {
         try (FileChannel fc = FileChannel.open(path, READ)) {
-            ByteBuffer bb = allocate(getLength(fc, length));
+            int size = truncateLength(fc, length);
+            ByteBuffer bb;
+            
+            // allocateDirect is pretty slow when used frequently, use it for larger
+            // files only
+            if (size > DIRECT_THRESHOLD) {
+                bb = ByteBuffer.allocateDirect(size);
+            } else {
+                try {
+                    bb = ByteBuffer.allocate(size);
+                } catch (OutOfMemoryError ex) {
+                    // not enough space in the heap, try direct allocation instead
+                    bb = ByteBuffer.allocateDirect(size);
+                }
+            }
+
             fc.position(offset);
             fc.read(bb);
             bb.flip();
+            
             return bb;
         }
     }
@@ -95,34 +96,13 @@ public class ByteBufferUtils {
      * @throws IOException 
      */
     public static ByteBuffer load(List<Path> paths) throws IOException {
-        long size = 0;
-        Map<Path, FileChannel> channelMap = new HashMap<>();
-        
-        try {
-            for (Path path : paths) {
-                FileChannel fc = FileChannel.open(path, READ);
-                size += fc.size();
-                channelMap.put(path, fc);
-            }
+        List<ByteBuffer> bbs = new ArrayList<>();
 
-            if (size > Integer.MAX_VALUE) {
-                throw new IllegalArgumentException("Files are too large to load");
-            }
-
-            ByteBuffer bb = allocate((int) size);
-
-            for (Path path : paths) {
-                channelMap.get(path).read(bb);
-            }
-
-            bb.flip();
-
-            return bb;
-        } finally {
-            for (FileChannel fc : channelMap.values()) {
-                fc.close();
-            }
+        for (Path path : paths) {
+            bbs.add(openReadOnly(path));
         }
+
+        return concat(bbs);
     }
     
     /**
@@ -153,7 +133,7 @@ public class ByteBufferUtils {
      */
     public static MappedByteBuffer openReadOnly(Path path, int offset, int length) throws IOException {
         try (FileChannel fc = FileChannel.open(path, READ)) {
-            return fc.map(READ_ONLY, offset, getLength(fc, length));
+            return fc.map(READ_ONLY, offset, truncateLength(fc, length));
         }
     }
     
@@ -183,7 +163,7 @@ public class ByteBufferUtils {
      */
     public static MappedByteBuffer openReadWrite(Path path, int offset, int length) throws IOException {
         try (FileChannel fc = FileChannel.open(path, READ, WRITE, CREATE)) {
-            return fc.map(READ_WRITE, offset, getLength(fc, length));
+            return fc.map(READ_WRITE, offset, truncateLength(fc, length));
         }
     }
     
@@ -257,8 +237,9 @@ public class ByteBufferUtils {
      * Concatenates one or more byte buffers to one large buffer. The combined
      * size of all buffers must not exceed {@link java.lang.Integer#MAX_VALUE}.
      * 
-     * @param bbs
-     * @return 
+     * @param bbs list of byte buffers to combine
+     * @return byte buffer containing the combined content of the supplied byte
+     *         buffers
      */
     public static ByteBuffer concat(List<ByteBuffer> bbs) {
         long length = 0;
@@ -289,5 +270,53 @@ public class ByteBufferUtils {
         bbNew.rewind();
         
         return bbNew;
+    }
+    
+    /**
+     * Concatenates one or more byte buffers to one large buffer. The combined
+     * size of all buffers must not exceed {@link java.lang.Integer#MAX_VALUE}.
+     * 
+     * @param bb one or more byte buffers to combine
+     * @return byte buffer containing the combined content of the supplied byte
+     *         buffers
+     */
+    public static ByteBuffer concat(ByteBuffer... bb) {
+        return concat(Arrays.asList(bb));
+    }
+    
+    /**
+     * Performs a deep copy on a byte buffer. The resulting byte buffer will have
+     * the same position, byte order and visible bytes as the original byte buffer.
+     * If the source buffer is direct, the copied buffer will be direct, too.
+     * 
+     * Any changes in one buffer won't be visible to the other, i.e. the two
+     * buffers will be entirely independent from another.
+     * 
+     * The position and limit of the original buffer won't change after this
+     * operation.
+     * 
+     * @param bb source byte buffer
+     * @return deep copy of source buffer
+     */
+    public static ByteBuffer copy(ByteBuffer bb) {
+        int capacity = bb.limit();
+        int pos = bb.position();
+        bb.rewind();
+        
+        ByteBuffer copy;
+        
+        if (bb.isDirect()) {
+            copy = ByteBuffer.allocateDirect(capacity);
+        } else {
+            copy = ByteBuffer.allocate(capacity);
+        }
+        
+        copy.order(bb.order());
+        copy.put(bb);
+        copy.position(pos);
+        
+        bb.position(pos);
+        
+        return copy;
     }
 }
