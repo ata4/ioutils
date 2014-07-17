@@ -202,9 +202,9 @@ public class DataOutputWriter extends DataOutputBridge implements DataOutputExte
     }
 
     @Override
-    public void align(int length, int align) throws IOException {
+    public void align(int align) throws IOException {
         if (align > 0) {
-            int rem = length % align;
+            int rem = (int) (position() % align);
             if (rem != 0) {
                 skipBytes(align - rem);
             }

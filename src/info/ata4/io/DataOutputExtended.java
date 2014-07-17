@@ -85,12 +85,12 @@ public interface DataOutputExtended extends DataOutput {
 
     /**
      * Skips bytes to fit a specified data structure alignment.
-     * The amount of bytes skipped equals <code>align - (length % align)</code>.
-     * If <code>align</code> smaller than 1, no bytes are skipped.
+     * The amount of bytes skipped equals <code>align - (position() % align)</code>.
+     * If align smaller than 1, no bytes are skipped. Skipped bytes are written
+     * as zeros.
      * 
-     * @param length data length to apply the alignment on
      * @param align data alignment length
      * @throws IOException 
      */
-    public void align(int length, int align) throws IOException;
+    public void align(int align) throws IOException;
 }

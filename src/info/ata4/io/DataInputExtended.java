@@ -205,12 +205,11 @@ public interface DataInputExtended extends DataInput {
 
     /**
      * Skips bytes to fit a specified data structure alignment.
-     * The amount of bytes skipped equals <code>align - (length % align)</code>.
+     * The amount of bytes skipped equals <code>align - (position() % align)</code>.
      * If align smaller than 1, no bytes are skipped.
      * 
-     * @param length data length to apply the alignment on
      * @param align data alignment length
      * @throws IOException 
      */
-    public void align(int length, int align) throws IOException;
+    public void align(int align) throws IOException;
 }
