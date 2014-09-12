@@ -10,12 +10,14 @@
 package info.ata4.io.socket;
 
 import info.ata4.io.SeekableImpl;
+import info.ata4.io.Swappable;
 import info.ata4.io.buffer.ByteBufferDataInput;
 import info.ata4.io.buffer.ByteBufferDataOutput;
 import info.ata4.io.buffer.ByteBufferInputStream;
 import info.ata4.io.buffer.ByteBufferOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * Wrapper for ByteBuffers to implement various IO interfaces.
@@ -32,6 +34,7 @@ public class ByteBufferSocket extends IOSocket {
         setCanRead(true);
         setCanWrite(!buf.isReadOnly());
         setSeekable(new ByteBufferSeekable(buf));
+        setSwappable(new ByteBufferSwappable(buf));
         
         getDataInputProvider().set(new ByteBufferDataInput(buf));
         getDataOutputProvider().set(new ByteBufferDataOutput(buf));
@@ -87,5 +90,25 @@ public class ByteBufferSocket extends IOSocket {
         public long remaining() throws IOException {
             return buf.remaining();
         }
+    }
+    
+    private class ByteBufferSwappable implements Swappable {
+        
+        private final ByteBuffer buf;
+        
+        private ByteBufferSwappable(ByteBuffer buf) {
+            this.buf = buf;
+        }
+
+        @Override
+        public boolean isSwap() {
+            return buf.order() == ByteOrder.LITTLE_ENDIAN;
+        }
+
+        @Override
+        public void setSwap(boolean swap) {
+            buf.order(swap ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+        }
+        
     }
 }

@@ -47,13 +47,14 @@ public abstract class IOBridge implements Swappable, Seekable, Closeable {
     @Override
     public void setSwap(boolean swap) {
         this.swap = swap;
-        if (bb != null) {
-            bb.order(swap ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+        Swappable sw = socket.getSwappable();
+        if (sw != null) {
+            sw.setSwap(swap);
         }
     }
     
     protected boolean isManualSwap() {
-        return swap && bb == null;
+        return swap && socket.getSwappable() == null;
     }
     
     public boolean isSeekable() {
