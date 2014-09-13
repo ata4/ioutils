@@ -80,6 +80,16 @@ public class ByteBufferSocket extends IOSocket {
         public long size() throws IOException {
             return buf.capacity();
         }
+        
+        @Override
+        public boolean hasRemaining() throws IOException {
+            return buf.hasRemaining();
+        }
+
+        @Override
+        public long remaining() throws IOException {
+            return buf.remaining();
+        }
     }
     
     private class ByteBufferSwappable implements Swappable {

@@ -31,22 +31,4 @@ public interface Seekable extends Positionable {
      * @throws IOException 
      */
     public void seek(long where, Origin whence) throws IOException;
-    
-    /**
-     * Returns amount of remaining bytes that are available for reading or
-     * writing from the current position.
-     * 
-     * @return
-     * @throws IOException 
-     */
-    public long remaining() throws IOException;
-
-    /**
-     * Return true if there are remaining bytes to read or write.
-     * 
-     * @return
-     * @throws IOException 
-     */
-    public boolean hasRemaining() throws IOException;
-    
 }

@@ -60,5 +60,15 @@ public class ChannelSocket extends IOSocket {
         public long size() throws IOException {
             return channel.size();
         }
+        
+        @Override
+        public long remaining() throws IOException {
+            return channel.size() - channel.position();
+        }
+        
+        @Override
+        public boolean hasRemaining() throws IOException {
+            return remaining() > 0;
+        }
     }
 }
