@@ -9,7 +9,7 @@
  */
 package info.ata4.io.socket;
 
-import info.ata4.io.SeekableImpl;
+import info.ata4.io.Positionable;
 import java.io.IOException;
 import java.nio.channels.Channel;
 import java.nio.channels.ReadableByteChannel;
@@ -34,11 +34,11 @@ public class ChannelSocket extends IOSocket {
         }
         
         if (channel instanceof SeekableByteChannel) {
-            setSeekable(new ChannelSeekable((SeekableByteChannel) channel));
+            setPositionable(new ChannelSeekable((SeekableByteChannel) channel));
         }
     }
     
-    private class ChannelSeekable extends SeekableImpl {
+    private class ChannelSeekable implements Positionable {
         
         private final SeekableByteChannel channel;
         

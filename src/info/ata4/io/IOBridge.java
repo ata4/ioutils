@@ -57,49 +57,63 @@ public abstract class IOBridge implements Swappable, Seekable, Closeable {
         return swap && socket.getSwappable() == null;
     }
     
-    public boolean isSeekable() {
-        return socket.getSeekable() != null;
+    public boolean isPositionable() {
+        return socket.getPositionable() != null;
     }
     
-    public Seekable getSeekable() {
-        Seekable seekable = socket.getSeekable();
-        if (seekable != null) {
-            return seekable;
+    public Positionable getPositionable() {
+        Positionable positionable = socket.getPositionable();
+        if (positionable != null) {
+            return positionable;
         } else {
-            throw new UnsupportedOperationException("Seeking not supported");
+            throw new UnsupportedOperationException("Positioning not supported");
         }
     }
     
     @Override
-    public void seek(long where, SeekOrigin dir) throws IOException {
-        getSeekable().seek(where, dir);
-    }
-    
-    @Override
     public void position(long where) throws IOException {
-        getSeekable().position(where);
+        getPositionable().position(where);
     }
 
     @Override
     public long position() throws IOException {
-        return getSeekable().position();
+        return getPositionable().position();
     }
 
     @Override
     public long size() throws IOException {
-        return getSeekable().size();
+        return getPositionable().size();
+    }
+    
+    @Override
+    public void seek(long where, Seekable.Origin whence) throws IOException {
+        long pos = 0;
+        switch (whence) {
+            case BEGINNING:
+                pos = where;
+                break;
+
+            case CURRENT:
+                pos = position() + where;
+                break;
+
+            case END:
+                pos = size() - where;
+                break;
+        }
+        position(pos);
+    }
+    
+    @Override
+    public long remaining() throws IOException {
+        return size() - position();
     }
 
     @Override
-    public long remaining() throws IOException {
-        return getSeekable().remaining();
-    }
-    
-    @Override
     public boolean hasRemaining() throws IOException {
-        return getSeekable().hasRemaining();
+        return remaining() > 0;
     }
-    
+
     @Override
     public void close() throws IOException {
         socket.close();

@@ -9,7 +9,7 @@
  */
 package info.ata4.io.socket;
 
-import info.ata4.io.SeekableImpl;
+import info.ata4.io.Positionable;
 import info.ata4.io.Swappable;
 import info.ata4.io.buffer.ByteBufferDataInput;
 import info.ata4.io.buffer.ByteBufferDataOutput;
@@ -33,7 +33,7 @@ public class ByteBufferSocket extends IOSocket {
         
         setCanRead(true);
         setCanWrite(!buf.isReadOnly());
-        setSeekable(new ByteBufferSeekable(buf));
+        setPositionable(new ByteBufferPositionable(buf));
         setSwappable(new ByteBufferSwappable(buf));
         
         getDataInputProvider().set(new ByteBufferDataInput(buf));
@@ -55,11 +55,11 @@ public class ByteBufferSocket extends IOSocket {
         return new ByteBufferOutputStream(buf);
     }
     
-    private class ByteBufferSeekable extends SeekableImpl {
+    private class ByteBufferPositionable implements Positionable {
         
         private final ByteBuffer buf;
         
-        private ByteBufferSeekable(ByteBuffer buf) {
+        private ByteBufferPositionable(ByteBuffer buf) {
             this.buf = buf;
         }
 
@@ -80,16 +80,6 @@ public class ByteBufferSocket extends IOSocket {
         public long size() throws IOException {
             return buf.capacity();
         }
-
-        @Override
-        public boolean hasRemaining() throws IOException {
-            return buf.hasRemaining();
-        }
-
-        @Override
-        public long remaining() throws IOException {
-            return buf.remaining();
-        }
     }
     
     private class ByteBufferSwappable implements Swappable {
@@ -109,6 +99,5 @@ public class ByteBufferSocket extends IOSocket {
         public void setSwap(boolean swap) {
             buf.order(swap ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
         }
-        
     }
 }

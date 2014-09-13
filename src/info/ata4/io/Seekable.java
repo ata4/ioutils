@@ -1,5 +1,5 @@
 /*
- ** 2013 December 28
+ ** 2014 September 13
  **
  ** The author disclaims copyright to this source code.  In place of
  ** a legal notice, here is a blessing:
@@ -12,11 +12,16 @@ package info.ata4.io;
 import java.io.IOException;
 
 /**
- * Interface for IO classes that provide random access.
- * 
+ * Interface for IO classes that provide random access with additional convenience
+ * methods.
+ *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public interface Seekable {
+public interface Seekable extends Positionable {
+    
+    public static enum Origin {
+        BEGINNING, CURRENT, END
+    }
     
     /**
      * Seek to the specified position relative to an origin.
@@ -25,31 +30,7 @@ public interface Seekable {
      * @param whence Origin point of the new position.
      * @throws IOException 
      */
-    public void seek(long where, SeekOrigin whence) throws IOException;
-
-    /**
-     * Sets a new absolute position.
-     * 
-     * @param where The position to seek to.
-     * @throws IOException 
-     */
-    public void position(long where) throws IOException;
-
-    /**
-     * Obtain the current position.
-     * 
-     * @return
-     * @throws IOException 
-     */
-    public long position() throws IOException;
-    
-    /**
-     * Returns the total size in bytes.
-     * 
-     * @return
-     * @throws IOException 
-     */
-    public long size() throws IOException;
+    public void seek(long where, Origin whence) throws IOException;
     
     /**
      * Returns amount of remaining bytes that are available for reading or
@@ -67,4 +48,5 @@ public interface Seekable {
      * @throws IOException 
      */
     public boolean hasRemaining() throws IOException;
+    
 }

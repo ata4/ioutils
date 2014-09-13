@@ -9,6 +9,7 @@
  */
 package info.ata4.io.socket;
 
+import info.ata4.io.Positionable;
 import info.ata4.io.Seekable;
 import info.ata4.io.Swappable;
 import info.ata4.io.socket.provider.DataInputProvider;
@@ -40,7 +41,7 @@ public class IOSocket implements Closeable {
     private DataInputProvider dip;
     private DataOutputProvider dop;
     
-    private Seekable seekable;
+    private Positionable positionable;
     private Swappable swappable;
     private boolean canRead;
     private boolean canWrite;
@@ -165,12 +166,12 @@ public class IOSocket implements Closeable {
         return null;
     }
     
-    public Seekable getSeekable() {
-        return seekable;
+    public Positionable getPositionable() {
+        return positionable;
     }
     
-    protected void setSeekable(Seekable seekable) {
-        this.seekable = seekable;
+    protected void setPositionable(Positionable positionable) {
+        this.positionable = positionable;
     }
 
     public Swappable getSwappable() {
