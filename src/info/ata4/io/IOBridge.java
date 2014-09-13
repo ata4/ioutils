@@ -86,8 +86,8 @@ public abstract class IOBridge implements Swappable, Seekable, Closeable {
     }
 
     @Override
-    public long capacity() throws IOException {
-        return getSeekable().capacity();
+    public long size() throws IOException {
+        return getSeekable().size();
     }
 
     @Override

@@ -31,7 +31,7 @@ public abstract class SeekableImpl implements Seekable {
                 break;
 
             case END:
-                pos = capacity() - where;
+                pos = size() - where;
                 break;
         }
         position(pos);
@@ -39,7 +39,7 @@ public abstract class SeekableImpl implements Seekable {
     
     @Override
     public long remaining() throws IOException {
-        return capacity() - position();
+        return size() - position();
     }
 
     @Override

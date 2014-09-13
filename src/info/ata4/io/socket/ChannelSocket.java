@@ -57,7 +57,7 @@ public class ChannelSocket extends IOSocket {
         }
 
         @Override
-        public long capacity() throws IOException {
+        public long size() throws IOException {
             return channel.size();
         }
     }

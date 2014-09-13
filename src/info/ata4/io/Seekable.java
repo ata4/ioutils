@@ -44,16 +44,16 @@ public interface Seekable {
     public long position() throws IOException;
     
     /**
-     * Returns the total capacity in bytes.
+     * Returns the total size in bytes.
      * 
      * @return
      * @throws IOException 
      */
-    public long capacity() throws IOException;
+    public long size() throws IOException;
     
     /**
      * Returns amount of remaining bytes that are available for reading or
-     * writing.
+     * writing from the current position.
      * 
      * @return
      * @throws IOException 
