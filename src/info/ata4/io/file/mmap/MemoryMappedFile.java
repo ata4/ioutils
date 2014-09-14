@@ -28,8 +28,18 @@ import java.util.Set;
  */
 public class MemoryMappedFile {
     
+    /**
+     * Maximum size for one memory-mapped page. Integer.MAX_VALUE isn't recommended,
+     * since it's unaligned and may cause troubles on 32-bit systems.
+     */
+    private static final int PAGE_SIZE = 1 << 30; // 1 GiB
+    
+    /**
+     * Number of overlapping bytes between pages. Should be equal to the length
+     * of the largest datatype that can be read with a byte buffer, which is
+     * long/double.
+     */
     private static final int PAGE_MARGIN = 8;
-    private static final int PAGE_SIZE = 1 << 30 - PAGE_MARGIN;
     
     private final ByteBuffer[] buffers;
     private final long size;
@@ -49,8 +59,8 @@ public class MemoryMappedFile {
             buffers = new ByteBuffer[bufferCount];
             for (int i = 0; i < bufferCount; i++) {
                 long remaining = size - bufferOfs;
-                long bufferLen1 = (int) Math.min(PAGE_SIZE, remaining);
-                long bufferLen2 = (int) Math.min(PAGE_SIZE + PAGE_MARGIN, remaining);
+                long bufferLen1 = (int) Math.min(PAGE_SIZE - PAGE_MARGIN, remaining);
+                long bufferLen2 = (int) Math.min(PAGE_SIZE, remaining);
                 buffers[i] = fc.map(mapMode, bufferOfs, bufferLen2);
                 bufferOfs += bufferLen1;
             }
