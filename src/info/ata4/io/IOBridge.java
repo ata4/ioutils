@@ -12,8 +12,6 @@ package info.ata4.io;
 import info.ata4.io.socket.IOSocket;
 import java.io.Closeable;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 /**
  * Abstract IO bridge that combines a socket with various IO interfaces.
@@ -23,15 +21,14 @@ import java.nio.ByteOrder;
 public abstract class IOBridge implements Swappable, Seekable, Closeable {
     
     private final IOSocket socket;
-    private final ByteBuffer bb;
     private boolean swap;
 
     public IOBridge(IOSocket socket) {
         this.socket = socket;
         
-        bb = socket.getByteBuffer();
-        if (bb != null) {
-            swap = bb.order() != ByteOrder.BIG_ENDIAN;
+        Swappable sw = socket.getSwappable();
+        if (sw != null) {
+            swap = sw.isSwap();
         }
     }
     
