@@ -29,12 +29,6 @@ import java.util.Set;
 public class MemoryMappedFile {
     
     /**
-     * Maximum size for one memory-mapped page. Integer.MAX_VALUE isn't recommended,
-     * since it's unaligned and may cause troubles on 32-bit systems.
-     */
-    private static final int PAGE_SIZE = 1 << 30; // 1 GiB
-    
-    /**
      * Number of overlapping bytes between pages. Should be equal to the length
      * of the largest datatype that can be read with a byte buffer, which is
      * long/double.
@@ -43,28 +37,34 @@ public class MemoryMappedFile {
     
     private final ByteBuffer[] buffers;
     private final long size;
+    private final int pageSize;
     
     private long position;
     private ByteOrder order = ByteOrder.BIG_ENDIAN;
     
-    public MemoryMappedFile(Path path, OpenOption... options) throws IOException {
+    public MemoryMappedFile(Path path, int pageSize, OpenOption... options) throws IOException {
         Set<OpenOption> optionsSet = new HashSet<>(Arrays.asList(options));
         MapMode mapMode = optionsSet.contains(WRITE) ? READ_WRITE : READ_ONLY;
+        this.pageSize = pageSize;
+        long bufferOfs = 0;
         
         try (FileChannel fc = FileChannel.open(path, options)) {
             size = fc.size();
-            int bufferCount = (int) (size / PAGE_SIZE) + 1;
-            long bufferOfs = 0;
-
-            buffers = new ByteBuffer[bufferCount];
-            for (int i = 0; i < bufferCount; i++) {
+            buffers = new ByteBuffer[(int) (size / pageSize) + 1];
+            
+            for (int i = 0; i < buffers.length; i++) {
                 long remaining = size - bufferOfs;
-                long bufferLen1 = (int) Math.min(PAGE_SIZE - PAGE_MARGIN, remaining);
-                long bufferLen2 = (int) Math.min(PAGE_SIZE, remaining);
+                long bufferLen1 = (int) Math.min(pageSize, remaining);
+                long bufferLen2 = (int) Math.min(pageSize + PAGE_MARGIN, remaining);
+                
                 buffers[i] = fc.map(mapMode, bufferOfs, bufferLen2);
                 bufferOfs += bufferLen1;
             }
         }
+    }
+    
+    public MemoryMappedFile(Path path, OpenOption... options) throws IOException {
+        this(path, 1 << 30, options);
     }
 
     public long getSize() {
@@ -103,11 +103,11 @@ public class MemoryMappedFile {
     }
     
     private int getPage(long offset) {
-        return (int) (offset / PAGE_SIZE);
+        return (int) (offset / pageSize);
     }
 
     private int getIndex(long offset) {
-        return (int) (offset % PAGE_SIZE);
+        return (int) (offset % pageSize);
     }
     
     private ByteBuffer getBuffer(long offset) {
