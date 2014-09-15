@@ -38,13 +38,15 @@ public class MemoryMappedFile {
     private final ByteBuffer[] buffers;
     private final long size;
     private final int pageSize;
+    private final boolean readOnly;
     
     private long position;
     private ByteOrder order = ByteOrder.BIG_ENDIAN;
     
     public MemoryMappedFile(Path path, long fileSize, int pageSize, OpenOption... options) throws IOException {
         Set<OpenOption> optionsSet = new HashSet<>(Arrays.asList(options));
-        MapMode mapMode = optionsSet.contains(WRITE) ? READ_WRITE : READ_ONLY;
+        readOnly = !optionsSet.contains(WRITE);
+        MapMode mapMode = readOnly ? READ_ONLY : READ_WRITE;
         this.pageSize = pageSize;
         long bufferOfs = 0;
         
@@ -69,6 +71,10 @@ public class MemoryMappedFile {
     
     public MemoryMappedFile(Path path, OpenOption... options) throws IOException {
         this(path, -1, 1 << 30, options);
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
     }
 
     public long getSize() {
