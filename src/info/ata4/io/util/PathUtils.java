@@ -61,7 +61,7 @@ public class PathUtils {
     
     public static void deleteQuietly(Path path) {
         try {
-            Files.delete(path);
+            Files.deleteIfExists(path);
         } catch (IOException ex) {
         }
     }
