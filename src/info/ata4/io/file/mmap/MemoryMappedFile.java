@@ -42,14 +42,14 @@ public class MemoryMappedFile {
     private long position;
     private ByteOrder order = ByteOrder.BIG_ENDIAN;
     
-    public MemoryMappedFile(Path path, int pageSize, OpenOption... options) throws IOException {
+    public MemoryMappedFile(Path path, long fileSize, int pageSize, OpenOption... options) throws IOException {
         Set<OpenOption> optionsSet = new HashSet<>(Arrays.asList(options));
         MapMode mapMode = optionsSet.contains(WRITE) ? READ_WRITE : READ_ONLY;
         this.pageSize = pageSize;
         long bufferOfs = 0;
         
         try (FileChannel fc = FileChannel.open(path, options)) {
-            size = fc.size();
+            size = fileSize < 0 ? fc.size() : fileSize;
             buffers = new ByteBuffer[(int) (size / pageSize) + 1];
             
             for (int i = 0; i < buffers.length; i++) {
@@ -63,8 +63,12 @@ public class MemoryMappedFile {
         }
     }
     
+    public MemoryMappedFile(Path path, long fileSize, OpenOption... options) throws IOException {
+        this(path, fileSize, 1 << 30, options);
+    }
+    
     public MemoryMappedFile(Path path, OpenOption... options) throws IOException {
-        this(path, 1 << 30, options);
+        this(path, -1, 1 << 30, options);
     }
 
     public long getSize() {
