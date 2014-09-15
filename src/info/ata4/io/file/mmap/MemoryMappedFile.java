@@ -130,7 +130,7 @@ public class MemoryMappedFile {
         while (length > 0) {
             ByteBuffer bb = getBuffer(position);
             bb.position(getIndex(position));
-            int lengthChunk = Math.min(length, bb.remaining());
+            int lengthChunk = Math.min(Math.min(length, bb.remaining()), pageSize);
             bb.get(dst, offset, lengthChunk);
             position += lengthChunk;
             offset += lengthChunk;
@@ -155,7 +155,7 @@ public class MemoryMappedFile {
         while (length > 0) {
             ByteBuffer bb = getBuffer(position);
             bb.position(getIndex(position));
-            int lengthChunk = Math.min(length, bb.remaining());
+            int lengthChunk = Math.min(Math.min(length, bb.remaining()), pageSize);
             bb.put(src, offset, lengthChunk);
             position += lengthChunk;
             offset += lengthChunk;
