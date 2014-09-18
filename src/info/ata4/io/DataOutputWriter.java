@@ -10,6 +10,8 @@
 package info.ata4.io;
 
 import info.ata4.io.buffer.ByteBufferUtils;
+import info.ata4.io.file.mmap.MemoryMappedFile;
+import info.ata4.io.file.mmap.MemoryMappedFileSocket;
 import info.ata4.io.socket.ByteBufferSocket;
 import info.ata4.io.socket.ChannelSocket;
 import info.ata4.io.socket.DataSocket;
@@ -73,7 +75,11 @@ public class DataOutputWriter extends DataOutputBridge implements DataOutputExte
     }
     
     public static DataOutputWriter newMappedWriter(Path file) throws IOException {
-        return newWriter(ByteBufferUtils.openReadWrite(file));
+        if (Files.size(file) < Integer.MAX_VALUE) {
+            return newWriter(ByteBufferUtils.openReadWrite(file));
+        } else {
+            return new DataOutputWriter(new MemoryMappedFileSocket(new MemoryMappedFile(file, WRITE)));
+        }
     }
     
     public static DataOutputWriter newWriter(RandomAccessFile raf) throws IOException {

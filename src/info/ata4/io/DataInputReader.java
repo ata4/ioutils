@@ -10,6 +10,8 @@
 package info.ata4.io;
 
 import info.ata4.io.buffer.ByteBufferUtils;
+import info.ata4.io.file.mmap.MemoryMappedFile;
+import info.ata4.io.file.mmap.MemoryMappedFileSocket;
 import info.ata4.io.socket.ByteBufferSocket;
 import info.ata4.io.socket.ChannelSocket;
 import info.ata4.io.socket.DataSocket;
@@ -73,7 +75,11 @@ public class DataInputReader extends DataInputBridge implements DataInputExtende
     }
     
     public static DataInputReader newMappedReader(Path file) throws IOException {
-        return newReader(ByteBufferUtils.openReadOnly(file));
+        if (Files.size(file) < Integer.MAX_VALUE) {
+            return newReader(ByteBufferUtils.openReadOnly(file));
+        } else {
+            return new DataInputReader(new MemoryMappedFileSocket(new MemoryMappedFile(file, READ)));
+        }
     }
 
     public static DataInputReader newReader(RandomAccessFile raf) throws IOException {
