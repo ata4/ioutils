@@ -38,6 +38,21 @@ public class ByteBufferUtils {
         return (int) Math.min(length > 0 ? length : fc.size(), Integer.MAX_VALUE);
     }
     
+    public static ByteBuffer allocate(int size) {
+        // allocateDirect is pretty slow when used frequently, use it for larger
+        // buffers only
+        if (size > DIRECT_THRESHOLD) {
+            return ByteBuffer.allocateDirect(size);
+        } else {
+            try {
+                return ByteBuffer.allocate(size);
+            } catch (OutOfMemoryError ex) {
+                // not enough space in the heap, try direct allocation instead
+                return ByteBuffer.allocateDirect(size);
+            }
+        }
+    }
+    
     /**
      * Reads a file and puts its content into a byte buffer, using the given length
      * and offset.
@@ -51,20 +66,7 @@ public class ByteBufferUtils {
     public static ByteBuffer load(Path path, int offset, int length) throws IOException {
         try (FileChannel fc = FileChannel.open(path, READ)) {
             int size = truncateLength(fc, length);
-            ByteBuffer bb;
-            
-            // allocateDirect is pretty slow when used frequently, use it for larger
-            // files only
-            if (size > DIRECT_THRESHOLD) {
-                bb = ByteBuffer.allocateDirect(size);
-            } else {
-                try {
-                    bb = ByteBuffer.allocate(size);
-                } catch (OutOfMemoryError ex) {
-                    // not enough space in the heap, try direct allocation instead
-                    bb = ByteBuffer.allocateDirect(size);
-                }
-            }
+            ByteBuffer bb = allocate(size);
 
             fc.position(offset);
             fc.read(bb);
