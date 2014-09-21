@@ -223,7 +223,9 @@ public class DataInputReader extends DataInputBridge implements DataInputExtende
     public void readBuffer(ByteBuffer dst) throws IOException {
         ByteBuffer buffer = getSocket().getByteBuffer();
         if (buffer != null) {
-            dst.put(buffer);
+            while (dst.hasRemaining()) {
+                dst.put(buffer.get());
+            }
             return;
         } 
         
