@@ -9,9 +9,9 @@
  */
 package info.ata4.io.file;
 
-import info.ata4.io.buffer.ByteBufferUtils;
+import info.ata4.io.DataInputReader;
+import info.ata4.io.DataOutputWriter;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
 /**
@@ -21,27 +21,23 @@ import java.nio.file.Path;
  */
 public abstract class FileHandler {
     
-    private Path sourceFile;
-    
-    public void open(Path file) throws IOException {
-        sourceFile = file;
-        load(ByteBufferUtils.openReadOnly(file));
-    }
+    protected Path sourceFile;
 
     public void load(Path file) throws IOException {
         sourceFile = file;
-        load(ByteBufferUtils.load(file));
+        load(DataInputReader.newReader(file));
     }
     
-    public abstract void load(ByteBuffer bb) throws IOException;
+    public abstract void load(DataInputReader in) throws IOException;
+    
+    public void save(Path file) throws IOException {
+        sourceFile = file;
+        save(DataOutputWriter.newWriter(file));
+    }
 
-    public abstract void save(Path file) throws IOException;
+    public abstract void save(DataOutputWriter in) throws IOException;
 
     public Path getSourceFile() {
         return sourceFile;
-    }
-
-    public void setSourceFile(Path sourceFile) {
-        this.sourceFile = sourceFile;
     }
 }
