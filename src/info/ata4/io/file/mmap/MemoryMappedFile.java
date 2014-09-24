@@ -9,9 +9,12 @@
  */
 package info.ata4.io.file.mmap;
 
+import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import static java.nio.channels.FileChannel.MapMode.*;
@@ -26,7 +29,7 @@ import java.util.Set;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class MemoryMappedFile {
+public class MemoryMappedFile implements Closeable {
     
     /**
      * Number of overlapping bytes between pages. Should be equal to the length
@@ -35,13 +38,14 @@ public class MemoryMappedFile {
      */
     private static final int PAGE_MARGIN = 8;
     
-    private final ByteBuffer[] buffers;
+    private final MappedByteBuffer[] buffers;
     private final long size;
     private final int pageSize;
     private final boolean readOnly;
     
     private long position;
     private ByteOrder order = ByteOrder.BIG_ENDIAN;
+    private boolean closed;
     
     public MemoryMappedFile(Path path, long fileSize, int pageSize, OpenOption... options) throws IOException {
         Set<OpenOption> optionsSet = new HashSet<>(Arrays.asList(options));
@@ -52,7 +56,7 @@ public class MemoryMappedFile {
         
         try (FileChannel fc = FileChannel.open(path, options)) {
             size = fileSize < 0 ? fc.size() : fileSize;
-            buffers = new ByteBuffer[(int) (size / pageSize) + 1];
+            buffers = new MappedByteBuffer[(int) (size / pageSize) + 1];
             
             for (int i = 0; i < buffers.length; i++) {
                 long remaining = size - bufferOfs;
@@ -330,5 +334,49 @@ public class MemoryMappedFile {
     public void putDouble(double value) {
         putDouble(position, value);
         position += 8;
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (closed) {
+            return;
+        }
+        
+        boolean useCleaner = true;
+        for (int i = 0; i < buffers.length; i++) {
+            if (useCleaner) {
+                // try an usafe sun.misc.Cleaner invocation, which may fail in
+                // some VM implementations
+                try {
+                    cleanBuffer(buffers[i]);
+                } catch (Throwable t) {
+                    // avoid further attempts
+                    useCleaner = false;
+                }
+            }
+            
+            // make sure the buffer can't be used anymore at this point
+            buffers[i] = null;
+        }
+        
+        // try garbage collection in case the cleaner method didn't work. if the
+        // buffers are still not cleared after this point, then we're out of luck...
+        if (!useCleaner) {
+            System.gc();
+        }
+        
+        closed = true;
+    }
+    
+    private void cleanBuffer(ByteBuffer cb) throws ReflectiveOperationException {
+        if (!cb.isDirect()) {
+            return;
+        }
+
+        Method cleaner = cb.getClass().getMethod("cleaner");
+        cleaner.setAccessible(true);
+        Method clean = Class.forName("sun.misc.Cleaner").getMethod("clean");
+        clean.setAccessible(true);
+        clean.invoke(cleaner.invoke(cb));
     }
 }
