@@ -193,14 +193,6 @@ public interface DataInputExtended extends DataInput {
      */
     public String readStringByte() throws IOException;
     
-    /**
-     * Reads a sequence of bytes from this data input into the given buffer.
-     * 
-     * @param dst The buffer into which bytes are to be transferred
-     * @throws IOException 
-     */
-    public void readBuffer(ByteBuffer dst) throws IOException;
-    
     public void readStruct(Struct struct) throws IOException;
 
     /**

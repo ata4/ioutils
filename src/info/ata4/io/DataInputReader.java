@@ -39,7 +39,7 @@ import org.apache.commons.lang3.ArrayUtils;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataInputReader extends DataInputBridge implements DataInputExtended {
+public class DataInputReader extends DataInputBridge implements DataInputExtended, ByteBufferReadable {
     
     // Charset.defaultCharset() is platform dependent and should not be used.
     // This includes the omitted charset parameter from the String constructor.
@@ -221,29 +221,14 @@ public class DataInputReader extends DataInputBridge implements DataInputExtende
     
     @Override
     public void readBuffer(ByteBuffer dst) throws IOException {
-        ByteBuffer buffer = getSocket().getByteBuffer();
-        if (buffer != null) {
+        ByteBufferReadable readable = getSocket().getByteBufferReadable();
+        if (readable != null) {
+            readable.readBuffer(dst);
+        } else {
             while (dst.hasRemaining()) {
-                dst.put(buffer.get());
+                dst.put(readByte());
             }
-            return;
-        } 
-        
-        ReadableByteChannel channel = getSocket().getReadableByteChannel();
-
-        if (channel != null) {
-            // read channel to buffer while the buffer isn't completely filled
-            while (dst.hasRemaining()) {
-                if (channel.read(dst) == -1) {
-                    // break on end-of-stream
-                    break;
-                }
-            }
-            return;
         }
-        
-        // no channel or byte buffer available
-        throw new UnsupportedOperationException();
     }
     
     @Override

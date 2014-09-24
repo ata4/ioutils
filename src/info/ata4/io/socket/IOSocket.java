@@ -9,8 +9,9 @@
  */
 package info.ata4.io.socket;
 
+import info.ata4.io.ByteBufferReadable;
+import info.ata4.io.ByteBufferWritable;
 import info.ata4.io.Positionable;
-import info.ata4.io.Seekable;
 import info.ata4.io.Swappable;
 import info.ata4.io.socket.provider.DataInputProvider;
 import info.ata4.io.socket.provider.DataOutputProvider;
@@ -43,6 +44,8 @@ public class IOSocket implements Closeable {
     
     private Positionable positionable;
     private Swappable swappable;
+    private ByteBufferReadable bufferReadable;
+    private ByteBufferWritable bufferWritable;
     private boolean canRead;
     private boolean canWrite;
     
@@ -180,6 +183,22 @@ public class IOSocket implements Closeable {
 
     public void setSwappable(Swappable swappable) {
         this.swappable = swappable;
+    }
+
+    public ByteBufferReadable getByteBufferReadable() {
+        return bufferReadable;
+    }
+
+    public void setByteBufferReadable(ByteBufferReadable bufferReadable) {
+        this.bufferReadable = bufferReadable;
+    }
+
+    public ByteBufferWritable getByteBufferWritable() {
+        return bufferWritable;
+    }
+
+    public void setByteBufferWritable(ByteBufferWritable bufferWritable) {
+        this.bufferWritable = bufferWritable;
     }
 
     @Override

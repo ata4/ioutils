@@ -39,7 +39,7 @@ import static java.nio.file.StandardOpenOption.WRITE;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataOutputWriter extends DataOutputBridge implements DataOutputExtended {
+public class DataOutputWriter extends DataOutputBridge implements DataOutputExtended, ByteBufferWritable {
     
     // Charset.defaultCharset() is platform dependent and should not be used.
     // This includes the omitted charset parameter for String.getBytes().
@@ -176,23 +176,14 @@ public class DataOutputWriter extends DataOutputBridge implements DataOutputExte
     
     @Override
     public void writeBuffer(ByteBuffer src) throws IOException {
-        ByteBuffer buffer = getSocket().getByteBuffer();
-        if (buffer != null) {
-            buffer.put(src);
-            return;
-        }
-        
-        WritableByteChannel channel = getSocket().getWritableByteChannel();
-        if (channel != null) {
-            // write buffer to channel while it's not completely emptied
+        ByteBufferWritable writable = getSocket().getByteBufferWritable();
+        if (writable != null) {
+            writable.writeBuffer(src);
+        } else {
             while (src.hasRemaining()) {
-                channel.write(src);
+                writeByte(src.get());
             }
-            return;
         }
-        
-        // no channel or byte buffer available
-        throw new UnsupportedOperationException();
     }
     
     @Override

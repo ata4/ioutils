@@ -56,14 +56,6 @@ public interface DataOutputExtended extends DataOutput {
     
     public void writeStringByte(String str) throws IOException;
     
-    /**
-     * Writes a sequence of bytes to this data output from the given buffer.
-     * 
-     * @param src The buffer from which bytes are to be retrieved
-     * @throws IOException 
-     */
-    public void writeBuffer(ByteBuffer src) throws IOException;
-    
     public void writeStruct(Struct struct) throws IOException;
 
     /**
