@@ -25,8 +25,6 @@ import java.util.Set;
  */
 public class FileChannelSocket extends ChannelSocket {
     
-    private final FileChannel fc;
-    
     public FileChannelSocket(Path file, OpenOption... options) throws IOException {
         this(FileChannel.open(file, options), options);
     }
@@ -37,13 +35,5 @@ public class FileChannelSocket extends ChannelSocket {
         Set<OpenOption> optionSet = new HashSet<>(Arrays.asList(options));
         setCanRead(optionSet.contains(READ));
         setCanWrite(optionSet.contains(WRITE));
-        
-        this.fc = fc;
-    }
-
-    @Override
-    public void close() throws IOException {
-        super.close();
-        fc.close();
     }
 }

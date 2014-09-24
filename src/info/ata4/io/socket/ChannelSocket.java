@@ -10,6 +10,7 @@
 package info.ata4.io.socket;
 
 import info.ata4.io.Positionable;
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.channels.Channel;
 import java.nio.channels.ReadableByteChannel;
@@ -21,6 +22,8 @@ import java.nio.channels.WritableByteChannel;
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
 public class ChannelSocket extends IOSocket {
+    
+    private final Channel channel;
     
     public ChannelSocket(Channel channel) {
         if (channel instanceof ReadableByteChannel) {
@@ -36,6 +39,14 @@ public class ChannelSocket extends IOSocket {
         if (channel instanceof SeekableByteChannel) {
             setPositionable(new ChannelSeekable((SeekableByteChannel) channel));
         }
+        
+        this.channel = channel;
+    }
+
+    @Override
+    protected void close(Closeable c) throws IOException {
+        super.close(c);
+        channel.close();
     }
     
     private class ChannelSeekable implements Positionable {
