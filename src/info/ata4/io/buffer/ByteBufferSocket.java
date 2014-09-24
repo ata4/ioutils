@@ -7,7 +7,7 @@
  **    May you find forgiveness for yourself and forgive others.
  **    May you share freely, never taking more than you give.
  */
-package info.ata4.io.socket;
+package info.ata4.io.buffer;
 
 import info.ata4.io.Positionable;
 import info.ata4.io.Swappable;
@@ -15,6 +15,7 @@ import info.ata4.io.buffer.ByteBufferDataInput;
 import info.ata4.io.buffer.ByteBufferDataOutput;
 import info.ata4.io.buffer.ByteBufferInputStream;
 import info.ata4.io.buffer.ByteBufferOutputStream;
+import info.ata4.io.socket.IOSocket;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
