@@ -25,6 +25,10 @@ public class PathUtils {
     private PathUtils() {
     }
     
+    public static String getBaseName(Path path) {
+        return FilenameUtils.getBaseName(path.getFileName().toString());
+    }
+    
     public static String getExtension(Path path) {
         return FilenameUtils.getExtension(path.getFileName().toString());
     }
