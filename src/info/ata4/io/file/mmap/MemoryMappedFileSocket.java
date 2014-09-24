@@ -21,6 +21,8 @@ import java.nio.ByteOrder;
  */
 public class MemoryMappedFileSocket extends IOSocket {
     
+    private final MemoryMappedFile mmf;
+    
     public MemoryMappedFileSocket(MemoryMappedFile mmf) {
         getInputStreamProvider().set(new MemoryMappedFileInputStream(mmf));
         getOutputStreamProvider().set(new MemoryMappedFileOutputStream(mmf));
@@ -30,6 +32,14 @@ public class MemoryMappedFileSocket extends IOSocket {
         
         setPositionable(new MemoryMappedFilePositionable(mmf));
         setSwappable(new MemoryMappedFileSwappable(mmf));
+        
+        this.mmf = mmf;
+    }
+
+    @Override
+    public void close() throws IOException {
+        super.close();
+        mmf.close();
     }
     
     private class MemoryMappedFileSwappable implements Swappable {
