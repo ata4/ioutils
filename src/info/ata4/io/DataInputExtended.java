@@ -12,7 +12,6 @@ package info.ata4.io;
 import java.io.DataInput;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 /**

@@ -11,7 +11,6 @@ package info.ata4.io;
 
 import java.io.DataOutput;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 /**
@@ -59,21 +58,13 @@ public interface DataOutputExtended extends DataOutput {
     public void writeStruct(Struct struct) throws IOException;
 
     /**
-     * Makes an attempt to skip over
-     * <code>n</code> bytes of data in the output
-     * stream, writing null bytes in place of the skipped bytes.
-     * However, it may skip over some smaller number of
-     * bytes, possibly zero. This may result from
-     * any of a number of conditions; reaching
-     * end of file before <code>n</code> bytes
-     * have been skipped is only one possibility.
-     * This method never throws an <code>EOFException</code>.
-     * The actual number of bytes skipped is returned.
+     * Writes a number of fill bytes of the supplied type.
      *
-     * @param      n   the number of bytes to be skipped.
+     * @param      n   the number of bytes to fill
+     * @param      b   value of the fill bytes
      * @exception  IOException   if an I/O error occurs.
      */
-    public void skipBytes(int n) throws IOException;
+    public void fill(int n, byte b) throws IOException;
 
     /**
      * Skips bytes to fit a specified data structure alignment.

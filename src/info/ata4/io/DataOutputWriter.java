@@ -115,7 +115,7 @@ public class DataOutputWriter extends DataOutputBridge implements DataOutputExte
         }
         
         writeStringFixed(str, charset);
-        skipBytes(nullBytes);
+        fill(nullBytes, (byte) 0);
     }
 
     @Override
@@ -192,9 +192,9 @@ public class DataOutputWriter extends DataOutputBridge implements DataOutputExte
     }
     
     @Override
-    public void skipBytes(int n) throws IOException {
+    public void fill(int n, byte b) throws IOException {
         for (int i = 0; i < n; i++) {
-            writeByte(0);
+            writeByte(b);
         }
     }
 
@@ -203,7 +203,7 @@ public class DataOutputWriter extends DataOutputBridge implements DataOutputExte
         if (align > 0) {
             int rem = (int) (position() % align);
             if (rem != 0) {
-                skipBytes(align - rem);
+                fill(align - rem, (byte) 0);
             }
         }
     }
