@@ -9,7 +9,6 @@
  */
 package info.ata4.io;
 
-import info.ata4.io.buffer.ByteBufferUtils;
 import info.ata4.io.file.mmap.MemoryMappedFile;
 import info.ata4.io.file.mmap.MemoryMappedFileSocket;
 import info.ata4.io.buffer.ByteBufferSocket;
@@ -26,13 +25,13 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import static java.nio.channels.FileChannel.MapMode.READ_WRITE;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
-import static java.nio.file.StandardOpenOption.WRITE;
+import static java.nio.file.StandardOpenOption.*;
 
 /**
  * DataOutput extension for more data access methods.
@@ -61,24 +60,33 @@ public class DataOutputWriter extends DataOutputBridge implements DataOutputExte
         return new DataOutputWriter(new ChannelSocket(fc));
     }
     
-    public static DataOutputWriter newWriter(FileChannel fc) throws IOException {
-        return new DataOutputWriter(new FileChannelSocket(fc, WRITE));
+    public static DataOutputWriter newWriter(Path file, OpenOption... options) throws IOException {
+        return new DataOutputWriter(new FileChannelSocket(file, options));
     }
     
-    public static DataOutputWriter newWriter(Path file) throws IOException {
-        return new DataOutputWriter(new FileChannelSocket(file, CREATE, WRITE, TRUNCATE_EXISTING));
-    }
-    
-    public static DataOutputWriter newBufferedWriter(Path file) throws IOException {
-        OutputStream os = Files.newOutputStream(file, CREATE, WRITE, TRUNCATE_EXISTING);
+    public static DataOutputWriter newBufferedWriter(Path file, OpenOption... options) throws IOException {
+        OutputStream os = Files.newOutputStream(file, options);
         return new DataOutputWriter(new StreamSocket(new BufferedOutputStream(os, 1 << 16)));
     }
     
     public static DataOutputWriter newMappedWriter(Path file) throws IOException {
         if (Files.size(file) < Integer.MAX_VALUE) {
-            return newWriter(ByteBufferUtils.openReadWrite(file));
+            try (FileChannel fc = FileChannel.open(file, WRITE)) {
+                return newWriter(fc.map(READ_WRITE, 0, (int) fc.size()));
+            }
         } else {
             return new DataOutputWriter(new MemoryMappedFileSocket(new MemoryMappedFile(file, WRITE)));
+        }
+    }
+    
+    public static DataOutputWriter newMappedWriter(Path file, long size) throws IOException {
+        if (Files.size(file) < Integer.MAX_VALUE) {
+            try (FileChannel fc = FileChannel.open(file, CREATE, WRITE)) {
+                fc.truncate(size);
+                return newWriter(fc.map(READ_WRITE, 0, size));
+            }
+        } else {
+            return new DataOutputWriter(new MemoryMappedFileSocket(new MemoryMappedFile(file, size, CREATE, WRITE)));
         }
     }
     

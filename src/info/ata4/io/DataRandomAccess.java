@@ -10,14 +10,20 @@
 package info.ata4.io;
 
 import info.ata4.io.buffer.ByteBufferSocket;
+import info.ata4.io.file.mmap.MemoryMappedFile;
+import info.ata4.io.file.mmap.MemoryMappedFileSocket;
 import info.ata4.io.socket.FileChannelSocket;
 import info.ata4.io.socket.IOSocket;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import static java.nio.channels.FileChannel.MapMode.READ_WRITE;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import static java.nio.file.StandardOpenOption.*;
 
 /**
  * Combined data input and output extension with random access.
@@ -34,6 +40,27 @@ public class DataRandomAccess extends IOBridge implements DataInputExtended, Dat
         return new DataRandomAccess(new ByteBufferSocket(bb));
     }
     
+    public static DataRandomAccess newMappedRandomAccess(Path file) throws IOException {
+        if (Files.size(file) < Integer.MAX_VALUE) {
+            try (FileChannel fc = FileChannel.open(file, READ, WRITE)) {
+                return newRandomAccess(fc.map(READ_WRITE, 0, (int) fc.size()));
+            }
+        } else {
+            return new DataRandomAccess(new MemoryMappedFileSocket(new MemoryMappedFile(file, READ, WRITE)));
+        }
+    }
+    
+    public static DataRandomAccess newMappedRandomAccess(Path file, long size) throws IOException {
+        if (Files.size(file) < Integer.MAX_VALUE) {
+            try (FileChannel fc = FileChannel.open(file, CREATE, READ, WRITE)) {
+                fc.truncate(size);
+                return newRandomAccess(fc.map(READ_WRITE, 0, size));
+            }
+        } else {
+            return new DataRandomAccess(new MemoryMappedFileSocket(new MemoryMappedFile(file, size, CREATE, READ, WRITE)));
+        }
+    }
+
     private final DataInputReader reader;
     private final DataOutputWriter writer;
 

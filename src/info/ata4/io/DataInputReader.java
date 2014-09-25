@@ -9,7 +9,6 @@
  */
 package info.ata4.io;
 
-import info.ata4.io.buffer.ByteBufferUtils;
 import info.ata4.io.file.mmap.MemoryMappedFile;
 import info.ata4.io.file.mmap.MemoryMappedFileSocket;
 import info.ata4.io.buffer.ByteBufferSocket;
@@ -27,6 +26,7 @@ import java.io.RandomAccessFile;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -76,7 +76,9 @@ public class DataInputReader extends DataInputBridge implements DataInputExtende
     
     public static DataInputReader newMappedReader(Path file) throws IOException {
         if (Files.size(file) < Integer.MAX_VALUE) {
-            return newReader(ByteBufferUtils.openReadOnly(file));
+         try (FileChannel fc = FileChannel.open(file, READ)) {
+                return newReader(fc.map(READ_ONLY, 0, fc.size()));
+            }
         } else {
             return new DataInputReader(new MemoryMappedFileSocket(new MemoryMappedFile(file, READ)));
         }
