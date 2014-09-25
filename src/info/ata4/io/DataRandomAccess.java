@@ -9,16 +9,15 @@
  */
 package info.ata4.io;
 
+import info.ata4.io.buffer.ByteBufferSocket;
 import info.ata4.io.socket.FileChannelSocket;
 import info.ata4.io.socket.IOSocket;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.READ;
-import static java.nio.file.StandardOpenOption.WRITE;
 
 /**
  * Combined data input and output extension with random access.
@@ -27,8 +26,12 @@ import static java.nio.file.StandardOpenOption.WRITE;
  */
 public class DataRandomAccess extends IOBridge implements DataInputExtended, DataOutputExtended, ByteBufferReadable, ByteBufferWritable {
 
-    public static DataRandomAccess newRandomAccess(Path file) throws IOException {
-        return new DataRandomAccess(new FileChannelSocket(file, CREATE, READ, WRITE));
+    public static DataRandomAccess newRandomAccess(Path file, OpenOption... options) throws IOException {
+        return new DataRandomAccess(new FileChannelSocket(file, options));
+    }
+    
+    public static DataRandomAccess newRandomAccess(ByteBuffer bb) {
+        return new DataRandomAccess(new ByteBufferSocket(bb));
     }
     
     private final DataInputReader reader;
