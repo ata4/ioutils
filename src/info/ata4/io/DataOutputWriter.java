@@ -23,6 +23,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import static java.nio.channels.FileChannel.MapMode.READ_WRITE;
@@ -96,6 +97,26 @@ public class DataOutputWriter extends DataOutputBridge implements DataOutputExte
 
     public DataOutputWriter(IOSocket socket) {
         super(socket);
+    }
+    
+    @Override
+    public void writeUnsignedByte(int v) throws IOException {
+        writeByte(v & 0xff);
+    }
+
+    @Override
+    public void writeUnsignedShort(int v) throws IOException {
+        writeShort(v & 0xffff);
+    }
+
+    @Override
+    public void writeUnsignedInt(long v) throws IOException {
+        writeInt((int) (v & 0xffffffff));
+    }
+
+    @Override
+    public void writeUnsignedLong(BigInteger v) throws IOException {
+        write(v.toByteArray());
     }
     
     @Override

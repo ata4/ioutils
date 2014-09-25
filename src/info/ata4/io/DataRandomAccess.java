@@ -257,6 +257,26 @@ public class DataRandomAccess extends IOBridge implements DataInputExtended, Dat
     public String readUTF() throws IOException {
         return reader.readUTF();
     }
+    
+    @Override
+    public void writeUnsignedByte(int v) throws IOException {
+        writer.writeUnsignedByte(v);
+    }
+
+    @Override
+    public void writeUnsignedShort(int v) throws IOException {
+        writer.writeUnsignedShort(v);
+    }
+
+    @Override
+    public void writeUnsignedInt(long v) throws IOException {
+        writer.writeUnsignedInt(v);
+    }
+
+    @Override
+    public void writeUnsignedLong(BigInteger v) throws IOException {
+        writer.writeUnsignedLong(v);
+    }
 
     @Override
     public void writeHalf(float f) throws IOException {

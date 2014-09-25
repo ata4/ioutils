@@ -11,6 +11,7 @@ package info.ata4.io;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 
 /**
@@ -21,6 +22,14 @@ import java.nio.charset.Charset;
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
 public interface DataOutputExtended extends DataOutput {
+    
+    public void writeUnsignedByte(int v) throws IOException;
+    
+    public void writeUnsignedShort(int v) throws IOException;
+    
+    public void writeUnsignedInt(long v) throws IOException;
+    
+    public void writeUnsignedLong(BigInteger v) throws IOException;
     
     /**
      * Writes a float as half-precision 16 bit floating-point number according to
