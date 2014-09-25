@@ -9,8 +9,12 @@
  */
 package info.ata4.io.socket;
 
+import info.ata4.io.Positionable;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import org.apache.commons.io.input.CountingInputStream;
+import org.apache.commons.io.output.CountingOutputStream;
 
 /**
  *
@@ -21,10 +25,97 @@ public class StreamSocket extends IOSocket {
     public StreamSocket(InputStream is) {
         getInputStreamProvider().set(is);
         setCanRead(true);
+        
+        if (is instanceof CountingInputStream) {
+            setPositionable(new InputStreamPositionable((CountingInputStream) is));
+        }
     }
     
     public StreamSocket(OutputStream os) {
         getOutputStreamProvider().set(os);
         setCanWrite(true);
+        
+        if (os instanceof CountingOutputStream) {
+            setPositionable(new OutputStreamPositionable((CountingOutputStream) os));
+        }
+    }
+    
+    private class InputStreamPositionable implements Positionable {
+        
+        private final CountingInputStream is;
+
+        private InputStreamPositionable(CountingInputStream is) {
+            this.is = is;
+        }
+
+        @Override
+        public void position(long where) throws IOException {
+            long pos = position();
+            if (where >= pos) {
+                long left = where - pos;
+                while (left > 0) {
+                    left -= is.skip(left);
+                }
+            } else {
+                // can't skip backward
+                throw new UnsupportedOperationException();
+            }
+        }
+
+        @Override
+        public long position() throws IOException {
+            return is.getCount();
+        }
+
+        @Override
+        public long size() throws IOException {
+            return is.getCount();
+        }
+
+        @Override
+        public long remaining() throws IOException {
+            return is.available();
+        }
+
+        @Override
+        public boolean hasRemaining() throws IOException {
+            return remaining() > 0;
+        }
+        
+    }
+    
+    private class OutputStreamPositionable implements Positionable {
+        
+        private final CountingOutputStream os;
+
+        private OutputStreamPositionable(CountingOutputStream os) {
+            this.os = os;
+        }
+
+        @Override
+        public void position(long where) throws IOException {
+            // doesn't work here
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public long position() throws IOException {
+            return os.getCount();
+        }
+
+        @Override
+        public long size() throws IOException {
+            return Long.MAX_VALUE; // no defined end, so use max long value
+        }
+
+        @Override
+        public long remaining() throws IOException {
+            return size() - position();
+        }
+
+        @Override
+        public boolean hasRemaining() throws IOException {
+            return remaining() > 0;
+        }
     }
 }
