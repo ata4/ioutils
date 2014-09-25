@@ -38,6 +38,8 @@ public class MemoryMappedFile implements Closeable {
      */
     private static final int PAGE_MARGIN = 8;
     
+    private static final int DEFAULT_PAGE_SIZE = 1 << 30;
+    
     private final MappedByteBuffer[] buffers;
     private final long size;
     private final int pageSize;
@@ -55,7 +57,12 @@ public class MemoryMappedFile implements Closeable {
         long bufferOfs = 0;
         
         try (FileChannel fc = FileChannel.open(path, options)) {
-            size = fileSize < 0 ? fc.size() : fileSize;
+            if (fileSize >= 0) {
+                size = fileSize;
+                fc.truncate(size);
+            } else {
+                size = fc.size();
+            }
             buffers = new MappedByteBuffer[(int) (size / pageSize) + 1];
             
             for (int i = 0; i < buffers.length; i++) {
@@ -70,11 +77,11 @@ public class MemoryMappedFile implements Closeable {
     }
     
     public MemoryMappedFile(Path path, long fileSize, OpenOption... options) throws IOException {
-        this(path, fileSize, 1 << 30, options);
+        this(path, fileSize, DEFAULT_PAGE_SIZE, options);
     }
     
     public MemoryMappedFile(Path path, OpenOption... options) throws IOException {
-        this(path, -1, 1 << 30, options);
+        this(path, -1, DEFAULT_PAGE_SIZE, options);
     }
 
     public boolean isReadOnly() {
