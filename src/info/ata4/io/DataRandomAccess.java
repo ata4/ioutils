@@ -79,6 +79,13 @@ public class DataRandomAccess extends IOBridge implements DataInputExtended, Dat
     }
 
     @Override
+    public void setSwap(boolean swap) {
+        super.setSwap(swap);
+        reader.setSwap(swap);
+        writer.setSwap(swap);
+    }
+
+    @Override
     public long readUnsignedInt() throws IOException {
         return reader.readUnsignedInt();
     }
