@@ -22,20 +22,29 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  */
 public class ObjectToString {
 
-    private static final ToStringStyle STYLE = new ObjectToStringStyle();
+    private static final ToStringStyle STYLE_NORMAL = new ObjectToStringStyle(false);
+    private static final ToStringStyle STYLE_RECURSIVE = new ObjectToStringStyle(true);
     
     public static String toString(Object obj) {
-        return ReflectionToStringBuilder.toString(obj, STYLE);
+        return toString(obj, true);
+    }
+    
+    public static String toString(Object obj, boolean recursive) {
+        return ReflectionToStringBuilder.toString(obj, recursive ? STYLE_RECURSIVE : STYLE_NORMAL);
     }
     
     private static class ObjectToStringStyle extends ToStringStyle {
         
         private static final String INDENT = "  ";
         
-        private StringBuffer indentBuffer = new StringBuffer();
+        private final StringBuffer indentBuffer = new StringBuffer();
+        private final boolean recursive;
 
-        ObjectToStringStyle() {
+        ObjectToStringStyle(boolean recursive) {
             super();
+            
+            this.recursive = recursive;
+            
             setUseIdentityHashCode(false);
             setUseShortClassName(true);
             setArrayStart("[");
@@ -94,7 +103,7 @@ public class ObjectToString {
             
             Iterator<? extends Map.Entry> it = map.entrySet().iterator();
             
-            while(it.hasNext()) {
+            while (it.hasNext()) {
                 Map.Entry entry = it.next();
                 
                 appendObject(buffer, entry.getKey());
@@ -113,7 +122,7 @@ public class ObjectToString {
         }
         
         private void appendObject(StringBuffer buffer, Object obj) {
-            if (hasDefaultToString(obj)) {
+            if (recursive && hasDefaultToString(obj)) {
                 indent();
                 buffer.append(ReflectionToStringBuilder.toString(obj, this));
                 unindent();
