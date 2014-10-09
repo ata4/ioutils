@@ -321,4 +321,8 @@ public class ByteBufferUtils {
         
         return copy;
     }
+    
+    public static boolean isEmpty(ByteBuffer bb) {
+        return bb == null || bb.capacity() == 0;
+    }
 }
