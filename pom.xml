@@ -1,0 +1,40 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>info.ata4</groupId>
+  <artifactId>ioutils</artifactId>
+  <packaging>jar</packaging>
+  <name>ioutils</name>
+  <version>0.0.0-SNAPSHOT</version>
+  <description>A collection of some frequently used I/O utility Java classes, mostly related with byte buffers.</description>
+  <url>https://github.com/ata4/ioutils</url>
+  <licenses>
+    <license>
+      <name>Unlicense</name>
+      <url>http://unlicense.org</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <build>
+    <sourceDirectory>src/</sourceDirectory>
+  </build>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.3.1</version>
+    </dependency>
+  </dependencies>
+</project>
