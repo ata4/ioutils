@@ -9,6 +9,8 @@
  */
 package info.ata4.io;
 
+import info.ata4.io.data.DataInputExtended;
+import info.ata4.io.data.DataOutputExtended;
 import info.ata4.io.buffer.ByteBufferSocket;
 import info.ata4.io.file.mmap.MemoryMappedFile;
 import info.ata4.io.file.mmap.MemoryMappedFileSocket;

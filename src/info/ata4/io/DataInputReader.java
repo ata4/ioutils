@@ -9,11 +9,12 @@
  */
 package info.ata4.io;
 
+import info.ata4.io.data.DataInputExtended;
 import info.ata4.io.file.mmap.MemoryMappedFile;
 import info.ata4.io.file.mmap.MemoryMappedFileSocket;
 import info.ata4.io.buffer.ByteBufferSocket;
 import info.ata4.io.socket.ChannelSocket;
-import info.ata4.io.socket.DataSocket;
+import info.ata4.io.data.DataSocket;
 import info.ata4.io.socket.FileChannelSocket;
 import info.ata4.io.socket.IOSocket;
 import info.ata4.io.socket.StreamSocket;

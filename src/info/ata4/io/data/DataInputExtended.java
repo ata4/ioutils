@@ -7,8 +7,9 @@
  **    May you find forgiveness for yourself and forgive others.
  **    May you share freely, never taking more than you give.
  */
-package info.ata4.io;
+package info.ata4.io.data;
 
+import info.ata4.io.Struct;
 import java.io.DataInput;
 import java.io.IOException;
 import java.math.BigInteger;
