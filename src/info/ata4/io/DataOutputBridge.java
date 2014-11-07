@@ -19,7 +19,7 @@ import org.apache.commons.io.EndianUtils;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataOutputBridge extends IOBridge implements DataOutput {
+public abstract class DataOutputBridge extends IOBridge implements DataOutput {
     
     private final DataOutput out;
 

@@ -194,14 +194,4 @@ public interface DataInputExtended extends DataInput {
     public String readStringByte() throws IOException;
     
     public void readStruct(Struct struct) throws IOException;
-
-    /**
-     * Skips bytes to fit a specified data structure alignment.
-     * The amount of bytes skipped equals <code>align - (position() % align)</code>.
-     * If align smaller than 1, no bytes are skipped.
-     * 
-     * @param align data alignment length
-     * @throws IOException 
-     */
-    public void align(int align) throws IOException;
 }

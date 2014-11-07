@@ -75,15 +75,4 @@ public interface DataOutputExtended extends DataOutput {
      * @exception  IOException   if an I/O error occurs.
      */
     public void fill(int n, byte b) throws IOException;
-
-    /**
-     * Skips bytes to fit a specified data structure alignment.
-     * The amount of bytes skipped equals <code>align - (position() % align)</code>.
-     * If align smaller than 1, no bytes are skipped. Skipped bytes are written
-     * as zeros.
-     * 
-     * @param align data alignment length
-     * @throws IOException 
-     */
-    public void align(int align) throws IOException;
 }

@@ -19,7 +19,7 @@ import org.apache.commons.io.EndianUtils;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataInputBridge extends IOBridge implements DataInput {
+public abstract class DataInputBridge extends IOBridge implements DataInput {
     
     private final DataInput in;
 

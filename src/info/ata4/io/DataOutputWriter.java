@@ -227,7 +227,7 @@ public class DataOutputWriter extends DataOutputBridge implements DataOutputExte
             writeByte(b);
         }
     }
-
+    
     @Override
     public void align(int align) throws IOException {
         if (align > 0) {
