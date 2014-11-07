@@ -17,17 +17,16 @@ package info.ata4.io;
 public interface Swappable {
     
     /**
-     * Returns true if all incoming data are read in reverse byte order and
-     * are assumed to have little endian instead of big endian.
+     * Returns true if all incoming data is interpreted as little endian instead
+     * of big endian.
      *
      * @return true if byte swapping is active
      */
     public boolean isSwap();
     
     /**
-     * Changes the byte swapping flag. If true, all incoming data are read in
-     * reverse byte order and are assumed to have little endian instead of
-     * big endian.
+     * Changes the byte swapping flag. If true, all incoming data is interpreted
+     * as little endian instead of big endian.
      * 
      * @param swap new byte swapping flag
      */
