@@ -25,7 +25,7 @@ import org.apache.commons.lang3.ArrayUtils;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataInputReader extends IOBridge implements DataInputExtended, ByteBufferReadable {
+public class DataReader extends IOBridge implements DataInputExtended, ByteBufferReadable {
     
     // Charset.defaultCharset() is platform dependent and should not be used.
     // This includes the omitted charset parameter from the String constructor.
@@ -33,7 +33,7 @@ public class DataInputReader extends IOBridge implements DataInputExtended, Byte
     
     private final DataInput in;
 
-    public DataInputReader(IOSocket socket) {
+    public DataReader(IOSocket socket) {
         super(socket);
         in = socket.getDataInput();
     }

@@ -27,7 +27,7 @@ public interface Struct {
      * @param in data source
      * @throws IOException if an I/O error occurs
      */
-    public void read(DataInputReader in) throws IOException;
+    public void read(DataReader in) throws IOException;
     
     /**
      * Serializes this object to a DataOutputWriter.
@@ -35,6 +35,6 @@ public interface Struct {
      * @param out data destination
      * @throws IOException if an I/O error occurs 
      */
-    public void write(DataOutputWriter out) throws IOException;
+    public void write(DataWriter out) throws IOException;
     
 }

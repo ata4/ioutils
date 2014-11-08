@@ -9,8 +9,8 @@
  */
 package info.ata4.io.file;
 
-import info.ata4.io.DataInputReader;
-import info.ata4.io.DataOutputWriter;
+import info.ata4.io.DataReader;
+import info.ata4.io.DataWriter;
 import info.ata4.io.socket.IOSocket;
 import info.ata4.io.socket.Sockets;
 import java.io.IOException;

@@ -24,7 +24,7 @@ import org.apache.commons.io.EndianUtils;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataOutputWriter extends IOBridge implements DataOutputExtended, ByteBufferWritable {
+public class DataWriter extends IOBridge implements DataOutputExtended, ByteBufferWritable {
     
     // Charset.defaultCharset() is platform dependent and should not be used.
     // This includes the omitted charset parameter for String.getBytes().
@@ -32,7 +32,7 @@ public class DataOutputWriter extends IOBridge implements DataOutputExtended, By
     
     private final DataOutput out;
 
-    public DataOutputWriter(IOSocket socket) {
+    public DataWriter(IOSocket socket) {
         super(socket);
         this.out = socket.getDataOutput();
     }

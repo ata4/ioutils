@@ -24,20 +24,20 @@ import java.nio.charset.Charset;
  */
 public class DataRandomAccess extends IOBridge implements DataInputExtended, DataOutputExtended, ByteBufferReadable, ByteBufferWritable {
 
-    private final DataInputReader reader;
-    private final DataOutputWriter writer;
+    private final DataReader reader;
+    private final DataWriter writer;
 
     public DataRandomAccess(IOSocket socket) {
         super(socket);
-        reader = new DataInputReader(socket);
-        writer = new DataOutputWriter(socket);
+        reader = new DataReader(socket);
+        writer = new DataWriter(socket);
     }
 
-    public DataInputReader getReader() {
+    public DataReader getReader() {
         return reader;
     }
 
-    public DataOutputWriter getWriter() {
+    public DataWriter getWriter() {
         return writer;
     }
 
