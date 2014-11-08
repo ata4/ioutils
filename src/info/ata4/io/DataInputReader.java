@@ -10,29 +10,13 @@
 package info.ata4.io;
 
 import info.ata4.io.data.DataInputExtended;
-import info.ata4.io.file.mmap.MemoryMappedFile;
-import info.ata4.io.file.mmap.MemoryMappedFileSocket;
-import info.ata4.io.buffer.ByteBufferSocket;
-import info.ata4.io.socket.ChannelSocket;
-import info.ata4.io.data.DataSocket;
-import info.ata4.io.socket.FileChannelSocket;
 import info.ata4.io.socket.IOSocket;
-import info.ata4.io.socket.StreamSocket;
 import info.ata4.io.util.HalfFloat;
-import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import static java.nio.file.StandardOpenOption.READ;
 import org.apache.commons.io.EndianUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -46,49 +30,6 @@ public class DataInputReader extends IOBridge implements DataInputExtended, Byte
     // Charset.defaultCharset() is platform dependent and should not be used.
     // This includes the omitted charset parameter from the String constructor.
     private static final Charset DEFAULT_CHARSET = Charset.forName("ASCII");
-
-    public static DataInputReader newReader(DataInput in) {
-        return new DataInputReader(new DataSocket(in));
-    }
-    
-    public static DataInputReader newReader(InputStream is) {
-        return new DataInputReader(new StreamSocket(is));
-    }
-    
-    public static DataInputReader newReader(ByteBuffer bb) {
-        return new DataInputReader(new ByteBufferSocket(bb));
-    }
-    
-    public static DataInputReader newReader(ReadableByteChannel fc) {
-        return new DataInputReader(new ChannelSocket(fc));
-    }
-    
-    public static DataInputReader newReader(FileChannel fc) throws IOException {
-        return new DataInputReader(new FileChannelSocket(fc, READ));
-    }
- 
-    public static DataInputReader newReader(Path file) throws IOException {
-        return new DataInputReader(new FileChannelSocket(file, READ));
-    }
-    
-    public static DataInputReader newBufferedReader(Path file) throws IOException {
-        InputStream is = Files.newInputStream(file, READ);
-        return newReader(new BufferedInputStream(is, 1 << 16));
-    }
-    
-    public static DataInputReader newMappedReader(Path file) throws IOException {
-        if (Files.size(file) < Integer.MAX_VALUE) {
-         try (FileChannel fc = FileChannel.open(file, READ)) {
-                return newReader(fc.map(READ_ONLY, 0, fc.size()));
-            }
-        } else {
-            return new DataInputReader(new MemoryMappedFileSocket(new MemoryMappedFile(file, READ)));
-        }
-    }
-
-    public static DataInputReader newReader(RandomAccessFile raf) throws IOException {
-        return newReader(raf.getChannel());
-    }
     
     private final DataInput in;
 

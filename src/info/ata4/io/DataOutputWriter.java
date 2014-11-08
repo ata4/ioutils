@@ -10,30 +10,13 @@
 package info.ata4.io;
 
 import info.ata4.io.data.DataOutputExtended;
-import info.ata4.io.file.mmap.MemoryMappedFile;
-import info.ata4.io.file.mmap.MemoryMappedFileSocket;
-import info.ata4.io.buffer.ByteBufferSocket;
-import info.ata4.io.socket.ChannelSocket;
-import info.ata4.io.data.DataSocket;
-import info.ata4.io.socket.FileChannelSocket;
 import info.ata4.io.socket.IOSocket;
-import info.ata4.io.socket.StreamSocket;
 import info.ata4.io.util.HalfFloat;
-import java.io.BufferedOutputStream;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import static java.nio.channels.FileChannel.MapMode.READ_WRITE;
-import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import static java.nio.file.StandardOpenOption.*;
 import org.apache.commons.io.EndianUtils;
 
 /**
@@ -46,56 +29,6 @@ public class DataOutputWriter extends IOBridge implements DataOutputExtended, By
     // Charset.defaultCharset() is platform dependent and should not be used.
     // This includes the omitted charset parameter for String.getBytes().
     private static final Charset DEFAULT_CHARSET = Charset.forName("ASCII");
-    
-    public static DataOutputWriter newWriter(DataOutput out) {
-        return new DataOutputWriter(new DataSocket(out));
-    }
-    
-    public static DataOutputWriter newWriter(OutputStream os) {
-        return new DataOutputWriter(new StreamSocket(os));
-    }
-    
-    public static DataOutputWriter newWriter(ByteBuffer bb) {
-        return new DataOutputWriter(new ByteBufferSocket(bb));
-    }
-    
-    public static DataOutputWriter newWriter(WritableByteChannel fc) {
-        return new DataOutputWriter(new ChannelSocket(fc));
-    }
-    
-    public static DataOutputWriter newWriter(Path file, OpenOption... options) throws IOException {
-        return new DataOutputWriter(new FileChannelSocket(file, options));
-    }
-    
-    public static DataOutputWriter newBufferedWriter(Path file, OpenOption... options) throws IOException {
-        OutputStream os = Files.newOutputStream(file, options);
-        return new DataOutputWriter(new StreamSocket(new BufferedOutputStream(os, 1 << 16)));
-    }
-    
-    public static DataOutputWriter newMappedWriter(Path file) throws IOException {
-        if (Files.size(file) < Integer.MAX_VALUE) {
-            try (FileChannel fc = FileChannel.open(file, WRITE)) {
-                return newWriter(fc.map(READ_WRITE, 0, (int) fc.size()));
-            }
-        } else {
-            return new DataOutputWriter(new MemoryMappedFileSocket(new MemoryMappedFile(file, WRITE)));
-        }
-    }
-    
-    public static DataOutputWriter newMappedWriter(Path file, long size) throws IOException {
-        if (Files.size(file) < Integer.MAX_VALUE) {
-            try (FileChannel fc = FileChannel.open(file, CREATE, WRITE)) {
-                fc.truncate(size);
-                return newWriter(fc.map(READ_WRITE, 0, size));
-            }
-        } else {
-            return new DataOutputWriter(new MemoryMappedFileSocket(new MemoryMappedFile(file, size, CREATE, WRITE)));
-        }
-    }
-    
-    public static DataOutputWriter newWriter(RandomAccessFile raf) throws IOException {
-        return newWriter(raf.getChannel());
-    }
     
     private final DataOutput out;
 

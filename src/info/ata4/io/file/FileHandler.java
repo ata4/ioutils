@@ -11,6 +11,8 @@ package info.ata4.io.file;
 
 import info.ata4.io.DataInputReader;
 import info.ata4.io.DataOutputWriter;
+import info.ata4.io.socket.IOSocket;
+import info.ata4.io.socket.Sockets;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -25,17 +27,17 @@ public abstract class FileHandler {
 
     public void load(Path file) throws IOException {
         sourceFile = file;
-        load(DataInputReader.newReader(file));
+        load(Sockets.forFileRead(file));
     }
     
-    public abstract void load(DataInputReader in) throws IOException;
+    public abstract void load(IOSocket socket) throws IOException;
     
     public void save(Path file) throws IOException {
         sourceFile = file;
-        save(DataOutputWriter.newWriter(file));
+        save(Sockets.forFileWrite(file));
     }
 
-    public abstract void save(DataOutputWriter in) throws IOException;
+    public abstract void save(IOSocket socket) throws IOException;
 
     public Path getSourceFile() {
         return sourceFile;
