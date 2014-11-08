@@ -26,7 +26,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
+ * Abstraction of a memory-mapped byte buffer with 64 bit indices to support files
+ * larger than 2^31 - 1 bytes.
+ * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
 public class MemoryMappedFile implements Closeable {
