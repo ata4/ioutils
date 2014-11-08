@@ -33,6 +33,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.READ;
+import org.apache.commons.io.EndianUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 /**
@@ -40,7 +41,7 @@ import org.apache.commons.lang3.ArrayUtils;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataInputReader extends DataInputBridge implements DataInputExtended, ByteBufferReadable {
+public class DataInputReader extends IOBridge implements DataInputExtended, ByteBufferReadable {
     
     // Charset.defaultCharset() is platform dependent and should not be used.
     // This includes the omitted charset parameter from the String constructor.
@@ -88,9 +89,113 @@ public class DataInputReader extends DataInputBridge implements DataInputExtende
     public static DataInputReader newReader(RandomAccessFile raf) throws IOException {
         return newReader(raf.getChannel());
     }
+    
+    private final DataInput in;
 
     public DataInputReader(IOSocket socket) {
         super(socket);
+        in = socket.getDataInput();
+    }
+    
+    @Override
+    public void readFully(byte[] b) throws IOException {
+        in.readFully(b);
+    }
+
+    @Override
+    public void readFully(byte[] b, int off, int len) throws IOException {
+        in.readFully(b, off, len);
+    }
+
+    @Override
+    public int skipBytes(int n) throws IOException {
+        return in.skipBytes(n);
+    }
+
+    @Override
+    public boolean readBoolean() throws IOException {
+        return in.readBoolean();
+    }
+
+    @Override
+    public byte readByte() throws IOException {
+        return in.readByte();
+    }
+
+    @Override
+    public int readUnsignedByte() throws IOException {
+        return in.readUnsignedByte();
+    }
+
+    @Override
+    public short readShort() throws IOException {
+        short r = in.readShort();
+        if (isManualSwap()) {
+            r = EndianUtils.swapShort(r);
+        }
+        return r;
+    }
+
+    @Override
+    public int readUnsignedShort() throws IOException {
+        int r = in.readUnsignedShort();
+        if (isManualSwap()) {
+            r = EndianUtils.swapShort((short) r) & 0xffff;
+        }
+        return r;
+    }
+
+    @Override
+    public char readChar() throws IOException {
+        return in.readChar();
+    }
+
+    @Override
+    public int readInt() throws IOException {
+        int r = in.readInt();
+        if (isManualSwap()) {
+            r = EndianUtils.swapInteger(r);
+        }
+        return r;
+    }
+
+    @Override
+    public long readLong() throws IOException {
+        long r = in.readLong();
+        if (isManualSwap()) {
+            r = EndianUtils.swapLong(r);
+        }
+        return r;
+    }
+
+    @Override
+    public float readFloat() throws IOException {
+        if (isManualSwap()) {
+            // NOTE: don't use readFloat() plus EndianUtils.swapFloat() here!
+            return Float.intBitsToFloat(readInt());
+        } else {
+            return in.readFloat();
+        }
+    }
+
+    @Override
+    public double readDouble() throws IOException {
+        if (isManualSwap()) {
+            // NOTE: don't use readDouble() plus EndianUtils.swapDouble() here!
+            return Double.longBitsToDouble(readLong());
+        } else {
+            return in.readDouble();
+        }
+    }
+
+    @Override
+    public String readLine() throws IOException {
+        return in.readLine();
+    }
+
+    @Override
+    public String readUTF() throws IOException {
+        return in.readUTF();
     }
 
     @Override

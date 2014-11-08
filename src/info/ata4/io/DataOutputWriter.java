@@ -34,13 +34,14 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.*;
+import org.apache.commons.io.EndianUtils;
 
 /**
  * DataOutput extension for more data access methods.
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DataOutputWriter extends DataOutputBridge implements DataOutputExtended, ByteBufferWritable {
+public class DataOutputWriter extends IOBridge implements DataOutputExtended, ByteBufferWritable {
     
     // Charset.defaultCharset() is platform dependent and should not be used.
     // This includes the omitted charset parameter for String.getBytes().
@@ -95,9 +96,101 @@ public class DataOutputWriter extends DataOutputBridge implements DataOutputExte
     public static DataOutputWriter newWriter(RandomAccessFile raf) throws IOException {
         return newWriter(raf.getChannel());
     }
+    
+    private final DataOutput out;
 
     public DataOutputWriter(IOSocket socket) {
         super(socket);
+        this.out = socket.getDataOutput();
+    }
+    
+    @Override
+    public void write(int b) throws IOException {
+        out.write(b);
+    }
+
+    @Override
+    public void write(byte[] b) throws IOException {
+        out.write(b);
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        out.write(b, off, len);
+    }
+
+    @Override
+    public void writeBoolean(boolean v) throws IOException {
+        out.writeBoolean(v);
+    }
+
+    @Override
+    public void writeByte(int v) throws IOException {
+        out.writeByte(v);
+    }
+
+    @Override
+    public void writeShort(int v) throws IOException {
+        if (isManualSwap()) {
+            v = EndianUtils.swapShort((short) v);
+        }
+        out.writeShort(v);
+    }
+
+    @Override
+    public void writeChar(int v) throws IOException {
+        out.writeChar(v);
+    }
+
+    @Override
+    public void writeInt(int v) throws IOException {
+        if (isManualSwap()) {
+            v = EndianUtils.swapInteger(v);
+        }
+        out.writeInt(v);
+    }
+
+    @Override
+    public void writeLong(long v) throws IOException {
+        if (isManualSwap()) {
+            v = EndianUtils.swapLong(v);
+        }
+        out.writeLong(v);
+    }
+
+    @Override
+    public void writeFloat(float v) throws IOException {
+        if (isManualSwap()) {
+            // NOTE: don't use writeFloat() plus EndianUtils.swapFloat() here!
+            writeInt(Float.floatToRawIntBits(v));
+        } else {
+            out.writeFloat(v);
+        }
+    }
+
+    @Override
+    public void writeDouble(double v) throws IOException {
+        if (isManualSwap()) {
+            // NOTE: don't use writeDouble() plus EndianUtils.swapDouble() here!
+            writeLong(Double.doubleToRawLongBits(v));
+        } else {
+            out.writeDouble(v);
+        }
+    }
+
+    @Override
+    public void writeBytes(String s) throws IOException {
+        out.writeBytes(s);
+    }
+
+    @Override
+    public void writeChars(String s) throws IOException {
+        out.writeChars(s);
+    }
+
+    @Override
+    public void writeUTF(String s) throws IOException {
+        out.writeUTF(s);
     }
     
     @Override
