@@ -10,6 +10,8 @@
 package info.ata4.io.socket;
 
 import info.ata4.io.Positionable;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -23,8 +25,13 @@ import org.apache.commons.io.output.CountingOutputStream;
 public class StreamSocket extends IOSocket {
 
     public StreamSocket(InputStream is) {
+        MutableIOSocketProperties props = new MutableIOSocketProperties();
+        props.setStreaming(true);
+        props.setReadable(true);
+        props.setBuffered(is instanceof BufferedInputStream);
+        setProperties(props);
+        
         getInputStreamProvider().set(is);
-        setCanRead(true);
         
         if (is instanceof CountingInputStream) {
             setPositionable(new InputStreamPositionable((CountingInputStream) is));
@@ -32,8 +39,14 @@ public class StreamSocket extends IOSocket {
     }
     
     public StreamSocket(OutputStream os) {
+        MutableIOSocketProperties props = new MutableIOSocketProperties();
+        props.setStreaming(true);
+        props.setWritable(true);
+        props.setGrowable(true);
+        props.setBuffered(os instanceof BufferedOutputStream);
+        setProperties(props);
+        
         getOutputStreamProvider().set(os);
-        setCanWrite(true);
         
         if (os instanceof CountingOutputStream) {
             setPositionable(new OutputStreamPositionable((CountingOutputStream) os));

@@ -29,20 +29,25 @@ public class ChannelSocket extends IOSocket {
     private final Channel channel;
     
     public ChannelSocket(Channel channel) {
+        MutableIOSocketProperties props = new MutableIOSocketProperties();
+        props.setStreaming(true);
+        setProperties(props);
+        
         if (channel instanceof ReadableByteChannel) {
             getReadableByteChannelProvider().set((ReadableByteChannel) channel);
             setByteBufferReadable(new ChannelByteBufferReadable((ReadableByteChannel) channel));
-            setCanRead(true);
         }
         
         if (channel instanceof WritableByteChannel) {
             getWritableByteChannelProvider().set((WritableByteChannel) channel);
             setByteBufferWritable(new ChannelByteBufferWritable((WritableByteChannel) channel));
-            setCanWrite(true);
+            props.setWritable(true);
+            props.setGrowable(true);
         }
         
         if (channel instanceof SeekableByteChannel) {
             setPositionable(new ChannelSeekable((SeekableByteChannel) channel));
+            props.setStreaming(false);
         }
         
         this.channel = channel;

@@ -13,11 +13,6 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import static java.nio.file.StandardOpenOption.READ;
-import static java.nio.file.StandardOpenOption.WRITE;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  *
@@ -26,14 +21,6 @@ import java.util.Set;
 public class FileChannelSocket extends ChannelSocket {
     
     public FileChannelSocket(Path file, OpenOption... options) throws IOException {
-        this(FileChannel.open(file, options), options);
-    }
-    
-    public FileChannelSocket(FileChannel fc, OpenOption... options) {
-        super(fc);
-        
-        Set<OpenOption> optionSet = new HashSet<>(Arrays.asList(options));
-        setCanRead(optionSet.contains(READ));
-        setCanWrite(optionSet.contains(WRITE));
+        super(FileChannel.open(file, options));
     }
 }

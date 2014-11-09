@@ -46,8 +46,7 @@ public class IOSocket implements Closeable {
     private Swappable swappable;
     private ByteBufferReadable bufferReadable;
     private ByteBufferWritable bufferWritable;
-    private boolean canRead;
-    private boolean canWrite;
+    private IOSocketProperties props;
     
     protected InputStreamProvider getInputStreamProvider() {
         if (isp == null) {
@@ -89,32 +88,6 @@ public class IOSocket implements Closeable {
             dop = new DataOutputProvider(this);
         }
         return dop;
-    }
-    
-    /**
-     * Returns the readability flag for this socket.
-     * 
-     * @return true if this socket can be read from
-     */
-    public boolean canRead() {
-        return canRead;
-    }
-    
-    protected void setCanRead(boolean canRead) {
-        this.canRead = canRead;
-    }
-    
-    /**
-     * Returns the writability flag for this socket.
-     * 
-     * @return true if this socket can be written to
-     */
-    public boolean canWrite() {
-        return canWrite;
-    }
-    
-    protected void setCanWrite(boolean canWrite) {
-        this.canWrite = canWrite;
     }
     
     /**
@@ -199,6 +172,14 @@ public class IOSocket implements Closeable {
 
     public void setByteBufferWritable(ByteBufferWritable bufferWritable) {
         this.bufferWritable = bufferWritable;
+    }
+    
+    public IOSocketProperties getProperties() {
+        return props;
+    }
+    
+    protected void setProperties(IOSocketProperties props) {
+        this.props = props;
     }
 
     @Override

@@ -14,6 +14,7 @@ import info.ata4.io.ByteBufferWritable;
 import info.ata4.io.Positionable;
 import info.ata4.io.Swappable;
 import info.ata4.io.socket.IOSocket;
+import info.ata4.io.socket.MutableIOSocketProperties;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -32,8 +33,12 @@ public class ByteBufferSocket extends IOSocket {
     public ByteBufferSocket(ByteBuffer buf) {
         this.buf = buf;
         
-        setCanRead(true);
-        setCanWrite(!buf.isReadOnly());
+        MutableIOSocketProperties props = new MutableIOSocketProperties();
+        props.setReadable(true);
+        props.setWritable(!buf.isReadOnly());
+        props.setBuffered(true);
+        setProperties(props);
+        
         setPositionable(new ByteBufferPositionable(buf));
         setSwappable(new ByteBufferSwappable(buf));
         setByteBufferReadable(new ByteBufferReader(buf));

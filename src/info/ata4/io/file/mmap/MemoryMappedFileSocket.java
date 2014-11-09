@@ -12,6 +12,7 @@ package info.ata4.io.file.mmap;
 import info.ata4.io.Positionable;
 import info.ata4.io.Swappable;
 import info.ata4.io.socket.IOSocket;
+import info.ata4.io.socket.MutableIOSocketProperties;
 import java.io.IOException;
 import java.nio.ByteOrder;
 
@@ -24,6 +25,12 @@ public class MemoryMappedFileSocket extends IOSocket {
     private final MemoryMappedFile mmf;
     
     public MemoryMappedFileSocket(MemoryMappedFile mmf) {
+        MutableIOSocketProperties props = new MutableIOSocketProperties();
+        props.setReadable(true);
+        props.setWritable(!mmf.isReadOnly());
+        props.setBuffered(true);
+        setProperties(props);
+        
         getInputStreamProvider().set(new MemoryMappedFileInputStream(mmf));
         getOutputStreamProvider().set(new MemoryMappedFileOutputStream(mmf));
         
