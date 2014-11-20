@@ -69,12 +69,8 @@ public class Sockets {
         return new ChannelSocket(fc);
     }
  
-    public static IOSocket forFileRead(Path file) throws IOException {
-        return new FileChannelSocket(file, READ);
-    }
-    
-    public static IOSocket forFileWrite(Path file) throws IOException {
-        return new FileChannelSocket(file, WRITE);
+    public static IOSocket forFile(Path file, OpenOption... options) throws IOException {
+        return new FileChannelSocket(file, options);
     }
     
     public static IOSocket forFileBufferedRead(Path file) throws IOException {
@@ -85,14 +81,6 @@ public class Sockets {
     public static IOSocket forFileBufferedWrite(Path file) throws IOException {
         OutputStream os = Files.newOutputStream(file, WRITE);
         return forOutputStream(new BufferedOutputStream(os, 1 << 16));
-    }
-    
-    public static IOSocket forFileRandomAccess(Path file) throws IOException {
-        return new FileChannelSocket(file, READ, WRITE);
-    }
-    
-    public static IOSocket forFileRandomAccess(Path file, OpenOption... options) throws IOException {
-        return new FileChannelSocket(file, options);
     }
     
     public static IOSocket forFileMemoryMapped(Path file) throws IOException {

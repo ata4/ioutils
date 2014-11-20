@@ -9,12 +9,14 @@
  */
 package info.ata4.io.file;
 
-import info.ata4.io.DataReader;
-import info.ata4.io.DataWriter;
 import info.ata4.io.socket.IOSocket;
 import info.ata4.io.socket.Sockets;
 import java.io.IOException;
 import java.nio.file.Path;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.READ;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 /**
  * Basic handler that can read and write files and also read from byte buffers.
@@ -27,14 +29,14 @@ public abstract class FileHandler {
 
     public void load(Path file) throws IOException {
         sourceFile = file;
-        load(Sockets.forFileRead(file));
+        load(Sockets.forFile(file, READ));
     }
     
     public abstract void load(IOSocket socket) throws IOException;
     
     public void save(Path file) throws IOException {
         sourceFile = file;
-        save(Sockets.forFileWrite(file));
+        save(Sockets.forFile(file, WRITE, CREATE, TRUNCATE_EXISTING));
     }
 
     public abstract void save(IOSocket socket) throws IOException;
