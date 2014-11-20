@@ -12,8 +12,8 @@ package info.ata4.io;
 import java.io.IOException;
 
 /**
- * Interface for classes that can be serialized to DataOutputWriter and
- * deserialized from DataInputReader.
+ * Interface for classes that can be serialized to DataWriter and
+ * deserialized from DataReader.
  * 
  * Typically used to emulate simple C/C++ structs.
  * 
@@ -22,7 +22,7 @@ import java.io.IOException;
 public interface Struct {
 
     /**
-     * Deserializes this object from a DataInputReader.
+     * Deserializes this object from a DataReader.
      * 
      * @param in data source
      * @throws IOException if an I/O error occurs
@@ -30,7 +30,7 @@ public interface Struct {
     public void read(DataReader in) throws IOException;
     
     /**
-     * Serializes this object to a DataOutputWriter.
+     * Serializes this object to a DataWriter.
      * 
      * @param out data destination
      * @throws IOException if an I/O error occurs 
