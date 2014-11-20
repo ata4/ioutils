@@ -11,7 +11,9 @@ package info.ata4.io;
 
 import info.ata4.io.data.DataInputExtended;
 import info.ata4.io.socket.IOSocket;
+import info.ata4.io.socket.Sockets;
 import info.ata4.io.util.HalfFloat;
+import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -282,7 +284,26 @@ public class DataReader extends IOBridge implements DataInputExtended, ByteBuffe
     
     @Override
     public void readStruct(Struct struct) throws IOException {
-        struct.read(this);
+        // read struct directly if the socket is buffered, otherwise create a
+        // temporary buffered data reader
+        if (getSocket().getProperties().isBuffered()) {
+            struct.read(this);
+        } else {
+            long offset = position();
+            long size;
+            
+            try (
+                DataReader bin = new DataReader(Sockets.forInputStream(
+                    new BufferedInputStream(getSocket().getInputStream())));
+            ) {
+                bin.setSwap(isSwap());
+                struct.read(bin);
+                size = bin.size();
+            }
+            
+            // correct position
+            position(offset + size);
+        }
     }
     
     @Override

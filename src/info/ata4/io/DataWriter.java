@@ -11,7 +11,9 @@ package info.ata4.io;
 
 import info.ata4.io.data.DataOutputExtended;
 import info.ata4.io.socket.IOSocket;
+import info.ata4.io.socket.Sockets;
 import info.ata4.io.util.HalfFloat;
+import java.io.BufferedOutputStream;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -244,7 +246,26 @@ public class DataWriter extends IOBridge implements DataOutputExtended, ByteBuff
     
     @Override
     public void writeStruct(Struct struct) throws IOException {
-        struct.write(this);
+        // write struct directly if the socket is buffered, otherwise create a
+        // temporary buffered data writer
+        if (getSocket().getProperties().isBuffered()) {
+            struct.write(this);
+        } else {
+            long offset = position();
+            long size;
+            
+            try (
+                DataWriter bout = new DataWriter(Sockets.forOutputStream(
+                    new BufferedOutputStream(getSocket().getOutputStream())));
+            ) {
+                bout.setSwap(isSwap());
+                struct.write(bout);
+                size = bout.size();
+            }
+            
+            // correct position
+            position(offset + size);
+        }
     }
     
     @Override
