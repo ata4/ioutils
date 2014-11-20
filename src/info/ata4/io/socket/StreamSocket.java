@@ -31,11 +31,18 @@ public class StreamSocket extends IOSocket {
         props.setBuffered(is instanceof BufferedInputStream);
         setProperties(props);
         
-        getInputStreamProvider().set(is);
+        CountingInputStream cis;
         
         if (is instanceof CountingInputStream) {
-            setPositionable(new InputStreamPositionable((CountingInputStream) is));
+            cis = (CountingInputStream) is;
+        } else {
+            cis = new CountingInputStream(is);
+            is = cis;
         }
+        
+        setPositionable(new InputStreamPositionable(cis));
+        
+        getInputStreamProvider().set(is);
     }
     
     public StreamSocket(OutputStream os) {
@@ -46,11 +53,18 @@ public class StreamSocket extends IOSocket {
         props.setBuffered(os instanceof BufferedOutputStream);
         setProperties(props);
         
-        getOutputStreamProvider().set(os);
+        CountingOutputStream cos;
         
         if (os instanceof CountingOutputStream) {
-            setPositionable(new OutputStreamPositionable((CountingOutputStream) os));
+            cos = (CountingOutputStream) os;
+        } else {
+            cos = new CountingOutputStream(os);
+            os = cos;
         }
+        
+        setPositionable(new OutputStreamPositionable(cos));
+        
+        getOutputStreamProvider().set(os);
     }
     
     private class InputStreamPositionable implements Positionable {
