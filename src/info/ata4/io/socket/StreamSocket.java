@@ -77,12 +77,12 @@ public class StreamSocket extends IOSocket {
 
         @Override
         public long position() throws IOException {
-            return is.getCount();
+            return is.getByteCount();
         }
 
         @Override
         public long size() throws IOException {
-            return is.getCount();
+            return is.getByteCount();
         }
 
         @Override
@@ -113,7 +113,7 @@ public class StreamSocket extends IOSocket {
 
         @Override
         public long position() throws IOException {
-            return os.getCount();
+            return os.getByteCount();
         }
 
         @Override
