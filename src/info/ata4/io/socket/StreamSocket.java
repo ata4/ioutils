@@ -132,12 +132,12 @@ public class StreamSocket extends IOSocket {
 
         @Override
         public long size() throws IOException {
-            return Long.MAX_VALUE; // no defined end, so use max long value
+            return position();
         }
 
         @Override
         public long remaining() throws IOException {
-            return size() - position();
+            return Long.MAX_VALUE; // no defined end, so use max long value
         }
 
         @Override
