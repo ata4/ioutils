@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
 import static java.nio.channels.FileChannel.MapMode.READ_WRITE;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
@@ -31,6 +32,9 @@ import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.WRITE;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -73,27 +77,28 @@ public class Sockets {
         return new FileChannelSocket(file, options);
     }
     
-    public static IOSocket forFileBufferedRead(Path file) throws IOException {
+    public static IOSocket forBufferedReadFile(Path file) throws IOException {
         InputStream is = Files.newInputStream(file, READ);
         return forInputStream(new BufferedInputStream(is, 1 << 16));
     }
     
-    public static IOSocket forFileBufferedWrite(Path file) throws IOException {
+    public static IOSocket forBufferedWriteFile(Path file) throws IOException {
         OutputStream os = Files.newOutputStream(file, WRITE);
         return forOutputStream(new BufferedOutputStream(os, 1 << 16));
     }
     
-    public static IOSocket forFileMemoryMapped(Path file) throws IOException {
+    public static IOSocket forMemoryMappedFile(Path file, OpenOption... options) throws IOException {
         if (Files.size(file) < Integer.MAX_VALUE) {
-            try (FileChannel fc = FileChannel.open(file, READ, WRITE)) {
-                return forByteBuffer(fc.map(READ_WRITE, 0, (int) fc.size()));
+            Set<OpenOption> optionsSet = new HashSet<>(Arrays.asList(options));
+            try (FileChannel fc = FileChannel.open(file, options)) {
+                return forByteBuffer(fc.map(optionsSet.contains(WRITE) ? READ_WRITE : READ_ONLY, 0, (int) fc.size()));
             }
         } else {
-            return new MemoryMappedFileSocket(new MemoryMappedFile(file, READ, WRITE));
+            return new MemoryMappedFileSocket(new MemoryMappedFile(file, options));
         }
     }
     
-    public static IOSocket forFileMemoryMapped(Path file, long size) throws IOException {
+    public static IOSocket forMemoryMappedFile(Path file, long size) throws IOException {
         if (Files.size(file) < Integer.MAX_VALUE) {
             try (FileChannel fc = FileChannel.open(file, CREATE, READ, WRITE)) {
                 fc.truncate(size);
