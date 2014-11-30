@@ -77,13 +77,13 @@ public class Sockets {
         return new FileChannelSocket(file, options);
     }
     
-    public static IOSocket forBufferedReadFile(Path file) throws IOException {
-        InputStream is = Files.newInputStream(file, READ);
+    public static IOSocket forBufferedReadFile(Path file, OpenOption... options) throws IOException {
+        InputStream is = Files.newInputStream(file, options);
         return forInputStream(new BufferedInputStream(is, 1 << 16));
     }
     
-    public static IOSocket forBufferedWriteFile(Path file) throws IOException {
-        OutputStream os = Files.newOutputStream(file, WRITE);
+    public static IOSocket forBufferedWriteFile(Path file, OpenOption... options) throws IOException {
+        OutputStream os = Files.newOutputStream(file, options);
         return forOutputStream(new BufferedOutputStream(os, 1 << 16));
     }
     
