@@ -121,8 +121,19 @@ public class StreamSocket extends IOSocket {
 
         @Override
         public void position(long where) throws IOException {
-            // doesn't work here
-            throw new UnsupportedOperationException();
+            long pos = position();
+            if (where >= pos) {
+                long left = where - pos;
+                while (left > 0) {
+                    int fillBytes = (int) Math.min(4096, left);
+                    byte[] fill = new byte[fillBytes];
+                    os.write(fill);
+                    left -= fillBytes;
+                }
+            } else {
+                // can't skip backward
+                throw new UnsupportedOperationException();
+            }
         }
 
         @Override
