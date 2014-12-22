@@ -10,9 +10,11 @@
 package info.ata4.io.util;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -67,6 +69,14 @@ public class PathUtils {
         try {
             Files.deleteIfExists(path);
         } catch (IOException ex) {
+        }
+    }
+    
+    public static Path getCodeSourceLocation(Class clazz) {
+        try {
+            return Paths.get(clazz.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (URISyntaxException ex) {
+            return null;
         }
     }
 }
