@@ -146,15 +146,7 @@ public class ByteBufferDataInput implements DataInput {
 
     @Override
     public String readLine() throws IOException {
-        try {
-            StringBuilder sb = new StringBuilder();
-            for (byte c = 0; buf.hasRemaining() && c != '\n'; c = buf.get()) {
-                sb.append((char) c);
-            }
-            return sb.toString();
-        } catch (BufferUnderflowException ex) {
-            throw new EOFException();
-        }
+        throw new UnsupportedOperationException();
     }
 
     @Override

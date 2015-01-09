@@ -128,7 +128,14 @@ public class ByteBufferDataOutput implements DataOutput {
 
     @Override
     public void writeBytes(String s) throws IOException {
-        write(s.getBytes());
+        try {
+            final int len = s.length();
+            for (int i = 0; i < len; i++) {
+                writeByte(s.charAt(i));
+            }
+        } catch (BufferOverflowException ex) {
+            throw new IOException(ex);
+        }
     }
 
     @Override
@@ -145,7 +152,9 @@ public class ByteBufferDataOutput implements DataOutput {
 
     @Override
     public void writeUTF(String s) throws IOException {
-        write(s.getBytes("UTF-8"));
+        // unlike DataInputStream.readUTF(), DataOutputStream.writeUTF() is
+        // package-private. what a bummer...
+        throw new UnsupportedOperationException();
     }
     
 }
