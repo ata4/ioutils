@@ -10,27 +10,27 @@
 package info.ata4.io.channel;
 
 import java.io.IOException;
-import java.nio.channels.FileChannel;
+import java.nio.channels.SeekableByteChannel;
 
 /**
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class FileChannelDataReader extends ByteChannelDataReader {
+public class SeekableByteChannelDataReader extends ByteChannelDataReader {
     
     private final BufferedReadablePositionableByteChannel rpchan;
     
-    public FileChannelDataReader(FileChannel fc, int bufferSize) throws IOException {
-        this(new BufferedReadablePositionableByteChannel(fc, bufferSize));
+    public SeekableByteChannelDataReader(SeekableByteChannel chan, int bufferSize) throws IOException {
+        this(new BufferedReadablePositionableByteChannel(chan, bufferSize));
     }
     
-    public FileChannelDataReader(FileChannel fc) throws IOException {
-        this(new BufferedReadablePositionableByteChannel(fc));
+    public SeekableByteChannelDataReader(SeekableByteChannel chan) throws IOException {
+        this(new BufferedReadablePositionableByteChannel(chan));
     }
     
-    private FileChannelDataReader(BufferedReadablePositionableByteChannel schan) throws IOException {
-        super(schan);
-        this.rpchan = schan;
+    private SeekableByteChannelDataReader(BufferedReadablePositionableByteChannel rpchan) throws IOException {
+        super(rpchan);
+        this.rpchan = rpchan;
     }
     
     @Override

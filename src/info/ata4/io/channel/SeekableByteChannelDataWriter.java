@@ -10,27 +10,27 @@
 package info.ata4.io.channel;
 
 import java.io.IOException;
-import java.nio.channels.FileChannel;
+import java.nio.channels.SeekableByteChannel;
 
 /**
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class FileChannelDataWriter extends ByteChannelDataWriter {
+public class SeekableByteChannelDataWriter extends ByteChannelDataWriter {
     
     private final BufferedWritablePositionableByteChannel wpchan;
     
-    public FileChannelDataWriter(FileChannel fc, int bufferSize) throws IOException {
-        this(new BufferedWritablePositionableByteChannel(fc, bufferSize));
+    public SeekableByteChannelDataWriter(SeekableByteChannel chan, int bufferSize) throws IOException {
+        this(new BufferedWritablePositionableByteChannel(chan, bufferSize));
     }
     
-    public FileChannelDataWriter(FileChannel fc) throws IOException {
-        this(new BufferedWritablePositionableByteChannel(fc));
+    public SeekableByteChannelDataWriter(SeekableByteChannel chan) throws IOException {
+        this(new BufferedWritablePositionableByteChannel(chan));
     }
     
-    private FileChannelDataWriter(BufferedWritablePositionableByteChannel schan) throws IOException {
-        super(schan);
-        this.wpchan = schan;
+    private SeekableByteChannelDataWriter(BufferedWritablePositionableByteChannel wpchan) throws IOException {
+        super(wpchan);
+        this.wpchan = wpchan;
     }
     
     @Override
