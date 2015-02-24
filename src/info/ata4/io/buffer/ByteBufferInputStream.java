@@ -16,11 +16,11 @@ import java.nio.ByteBuffer;
 import java.nio.InvalidMarkException;
 
 /**
- * InputStream wrapper for byte buffers.
+ * InputStream adapter for a ByteBuffer.
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class ByteBufferInputStream extends InputStream {
+public class ByteBufferInputStream extends InputStream implements ByteBufferBacked {
 
     private final ByteBuffer buf;
     private int markPos;
@@ -30,7 +30,8 @@ public class ByteBufferInputStream extends InputStream {
         this.buf = buf;
     }
     
-    public ByteBuffer getByteBuffer() {
+    @Override
+    public ByteBuffer buffer() {
         return buf;
     }
     
@@ -64,6 +65,19 @@ public class ByteBufferInputStream extends InputStream {
         } catch (InvalidMarkException ex) {
             throw new IOException(ex);
         }
+    }
+    
+    @Override
+    public long skip(long n) throws IOException {
+        if (n <= 0) {
+            return 0;
+        }
+        
+        int posOld = buf.position();
+        int posNew = (int) Math.min(buf.limit(), posOld + n);
+        buf.position(posNew);
+        
+        return posNew - posOld;
     }
 
     @Override

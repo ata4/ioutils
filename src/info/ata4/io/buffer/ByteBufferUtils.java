@@ -12,7 +12,13 @@ package info.ata4.io.buffer;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.CharBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.nio.MappedByteBuffer;
+import java.nio.ShortBuffer;
 import java.nio.channels.FileChannel;
 import static java.nio.channels.FileChannel.MapMode.*;
 import java.nio.file.Path;
@@ -51,6 +57,42 @@ public class ByteBufferUtils {
                 return ByteBuffer.allocateDirect(size);
             }
         }
+    }
+    
+    public static ShortBuffer allocateDirectShort(int size) {
+        ByteBuffer bb = ByteBuffer.allocateDirect(size * 2);
+        bb.order(ByteOrder.nativeOrder());
+        return bb.asShortBuffer();
+    }
+    
+    public static CharBuffer allocateDirectChar(int size) {
+        ByteBuffer bb = ByteBuffer.allocateDirect(size * 2);
+        bb.order(ByteOrder.nativeOrder());
+        return bb.asCharBuffer();
+    }
+    
+    public static IntBuffer allocateDirectInt(int size) {
+        ByteBuffer bb = ByteBuffer.allocateDirect(size * 4);
+        bb.order(ByteOrder.nativeOrder());
+        return bb.asIntBuffer();
+    }
+    
+    public static LongBuffer allocateDirectLong(int size) {
+        ByteBuffer bb = ByteBuffer.allocateDirect(size * 8);
+        bb.order(ByteOrder.nativeOrder());
+        return bb.asLongBuffer();
+    }
+    
+    public static FloatBuffer allocateDirectFloat(int size) {
+        ByteBuffer bb = ByteBuffer.allocateDirect(size * 4);
+        bb.order(ByteOrder.nativeOrder());
+        return bb.asFloatBuffer();
+    }
+    
+    public static DoubleBuffer allocateDirectDouble(int size) {
+        ByteBuffer bb = ByteBuffer.allocateDirect(size * 8);
+        bb.order(ByteOrder.nativeOrder());
+        return bb.asDoubleBuffer();
     }
     
     /**
@@ -298,28 +340,34 @@ public class ByteBufferUtils {
      * operation.
      * 
      * @param bb source byte buffer
+     * @param forceDirect force copy to be a direct ByteBuffer
      * @return deep copy of source buffer
      */
-    public static ByteBuffer copy(ByteBuffer bb) {
+    public static ByteBuffer copy(ByteBuffer bb, boolean forceDirect) {
         int capacity = bb.limit();
         int pos = bb.position();
-        bb.rewind();
-        
+        ByteOrder order = bb.order();
         ByteBuffer copy;
         
-        if (bb.isDirect()) {
+        if (bb.isDirect() || forceDirect) {
             copy = ByteBuffer.allocateDirect(capacity);
         } else {
             copy = ByteBuffer.allocate(capacity);
         }
         
-        copy.order(bb.order());
+        bb.rewind();
+        
+        copy.order(order);
         copy.put(bb);
         copy.position(pos);
         
         bb.position(pos);
         
         return copy;
+    }
+    
+    public static ByteBuffer copy(ByteBuffer bb) {
+        return copy(bb, false);
     }
     
     public static boolean isEmpty(ByteBuffer bb) {

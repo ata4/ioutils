@@ -27,6 +27,10 @@ public class PathUtils {
     private PathUtils() {
     }
     
+    public static String getName(Path path) {
+        return path.getFileName().toString();
+    }
+    
     public static String getBaseName(Path path) {
         return FilenameUtils.getBaseName(path.getFileName().toString());
     }
@@ -35,7 +39,7 @@ public class PathUtils {
         return FilenameUtils.getExtension(path.getFileName().toString());
     }
     
-    public static Path changeExtension(Path path, String ext) {
+    public static Path setExtension(Path path, String ext) {
         String name = path.getFileName().toString();
         name = FilenameUtils.removeExtension(name);
         if (ext == null) {
@@ -46,7 +50,7 @@ public class PathUtils {
     }
 
     public static Path removeExtension(Path path) {
-        return changeExtension(path, null);
+        return setExtension(path, null);
     }
     
     public static Path append(Path path, String ext) {

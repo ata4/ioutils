@@ -15,11 +15,11 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 /**
- * OutputStream wrapper for byte buffers.
+ * OutputStream adapter for a ByteBuffer.
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class ByteBufferOutputStream extends OutputStream {
+public class ByteBufferOutputStream extends OutputStream implements ByteBufferBacked {
 
     private final ByteBuffer buf;
 
@@ -31,7 +31,8 @@ public class ByteBufferOutputStream extends OutputStream {
         this.buf = buf;
     }
     
-    public ByteBuffer getByteBuffer() {
+    @Override
+    public ByteBuffer buffer() {
         return buf;
     }
 

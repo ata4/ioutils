@@ -21,10 +21,10 @@ public interface Positionable {
     /**
      * Sets a new absolute position.
      * 
-     * @param where The position to seek to.
+     * @param newPos The new position to set.
      * @throws IOException 
      */
-    public void position(long where) throws IOException;
+    public void position(long newPos) throws IOException;
 
     /**
      * Obtain the current position.
@@ -41,21 +41,4 @@ public interface Positionable {
      * @throws IOException 
      */
     public long size() throws IOException;
-
-    /**
-     * Returns amount of remaining bytes that are available for reading or
-     * writing from the current position.
-     * 
-     * @return
-     * @throws IOException 
-     */
-    public long remaining() throws IOException;
-
-    /**
-     * Return true if there are remaining bytes to read or write.
-     * 
-     * @return
-     * @throws IOException 
-     */
-    public boolean hasRemaining() throws IOException;
 }

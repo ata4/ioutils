@@ -1,3 +1,5 @@
+package info.ata4.io;
+
 /*
  ** 2013 December 27
  **
@@ -7,7 +9,9 @@
  **    May you find forgiveness for yourself and forgive others.
  **    May you share freely, never taking more than you give.
  */
-package info.ata4.io;
+
+
+import java.nio.ByteOrder;
 
 /**
  * Interface for IO classes that can dynamically swap the byte order.
@@ -16,19 +20,7 @@ package info.ata4.io;
  */
 public interface Swappable {
     
-    /**
-     * Returns true if all incoming data is interpreted as little endian instead
-     * of big endian.
-     *
-     * @return true if byte swapping is active
-     */
-    public boolean isSwap();
-    
-    /**
-     * Changes the byte swapping flag. If true, all incoming data is interpreted
-     * as little endian instead of big endian.
-     * 
-     * @param swap new byte swapping flag
-     */
-    public void setSwap(boolean swap);
+    public ByteOrder order();
+
+    public void order(ByteOrder order);
 }
