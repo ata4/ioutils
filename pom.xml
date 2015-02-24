@@ -4,8 +4,8 @@
   <artifactId>ioutils</artifactId>
   <packaging>jar</packaging>
   <name>ioutils</name>
-  <version>0.0.0-SNAPSHOT</version>
-  <description>A collection of some frequently used I/O utility Java classes, mostly related with byte buffers.</description>
+  <version>0.2.0-SNAPSHOT</version>
+  <description>A collection of some frequently used I/O Java utility classes.</description>
   <url>https://github.com/ata4/ioutils</url>
   <licenses>
     <license>
