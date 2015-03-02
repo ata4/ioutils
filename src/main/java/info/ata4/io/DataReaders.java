@@ -9,14 +9,16 @@
  */
 package info.ata4.io;
 
-import info.ata4.io.buffer.ByteBufferDataReader;
-import info.ata4.io.channel.ByteChannelDataReader;
-import info.ata4.io.channel.SeekableByteChannelDataReader;
+import info.ata4.io.buffer.source.BufferedSource;
+import info.ata4.io.buffer.source.ByteBufferSource;
+import info.ata4.io.buffer.source.ByteChannelSource;
+import info.ata4.io.buffer.source.SeekableByteChannelSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -27,20 +29,28 @@ import java.nio.file.Path;
  */
 public class DataReaders {
     
-    public static ByteBufferDataReader forByteBuffer(ByteBuffer bb) {
-        return new ByteBufferDataReader(bb);
+    public static DataReader forByteBuffer(ByteBuffer bb) {
+        return new DataReader(new ByteBufferSource(bb));
     }
     
-    public static ByteChannelDataReader forByteChannel(ReadableByteChannel chan) throws IOException {
-        return new ByteChannelDataReader(chan);
+    public static DataReader forReadableByteChannel(ReadableByteChannel chan) throws IOException {
+        ByteBuffer bb = ByteBuffer.allocateDirect(1 << 18);
+        BufferedSource buf = new ByteChannelSource(bb, chan); 
+        return new DataReader(buf);
     }
     
-    public static ByteChannelDataReader forInputStream(InputStream is) throws IOException {
-        return new ByteChannelDataReader(Channels.newChannel(is));
+    public static DataReader forSeekableByteChannel(SeekableByteChannel chan) throws IOException {
+        ByteBuffer bb = ByteBuffer.allocateDirect(1 << 16);
+        BufferedSource buf = new SeekableByteChannelSource(bb, chan); 
+        return new DataReader(buf);
     }
     
-    public static SeekableByteChannelDataReader forFile(Path path, OpenOption... options) throws IOException {
-        return new SeekableByteChannelDataReader(Files.newByteChannel(path, options));
+    public static DataReader forInputStream(InputStream is) throws IOException {
+        return forReadableByteChannel(Channels.newChannel(is));
+    }
+    
+    public static DataReader forFile(Path path, OpenOption... options) throws IOException {
+        return forSeekableByteChannel(Files.newByteChannel(path, options));
     }
     
     private DataReaders() {

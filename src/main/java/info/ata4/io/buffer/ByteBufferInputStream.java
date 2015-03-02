@@ -20,7 +20,7 @@ import java.nio.InvalidMarkException;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class ByteBufferInputStream extends InputStream implements ByteBufferBacked {
+public class ByteBufferInputStream extends InputStream {
 
     private final ByteBuffer buf;
     private int markPos;
@@ -29,12 +29,7 @@ public class ByteBufferInputStream extends InputStream implements ByteBufferBack
     public ByteBufferInputStream(ByteBuffer buf) {
         this.buf = buf;
     }
-    
-    @Override
-    public ByteBuffer buffer() {
-        return buf;
-    }
-    
+
     @Override
     public int available() throws IOException {
         return buf.remaining();

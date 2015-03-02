@@ -9,9 +9,9 @@
  */
 package info.ata4.io;
 
+import info.ata4.io.buffer.source.BufferedSource;
 import info.ata4.io.util.HalfFloat;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -19,22 +19,73 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.lang3.ArrayUtils;
 
-
 /**
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public abstract class DataReader extends DataBridge implements DataInput, StringInput {
+public class DataReader extends DataBridge implements DataInput, StringInput {
+    
+    public DataReader(BufferedSource buf) {
+        super(buf);
+    }
     
     public void readStruct(Struct struct) throws IOException {
         struct.read(this);
     }
-    
-    public abstract InputStream stream();
 
     ///////////////
     // DataInput //
     ///////////////
+    
+    @Override
+    public void readBytes(byte[] b, int off, int len) throws IOException {
+        buf.requestRead(len).get(b, off, len);
+    }
+    
+    @Override
+    public void readBuffer(ByteBuffer dst) throws IOException {
+        buf.read(dst);
+    }
+    
+    @Override
+    public boolean readBoolean() throws IOException {
+        return buf.requestRead(1).get() != 0;
+    }
+
+    @Override
+    public byte readByte() throws IOException {
+        return buf.requestRead(1).get();
+    }
+
+    @Override
+    public short readShort() throws IOException {
+        return buf.requestRead(2).getShort();
+    }
+
+    @Override
+    public char readChar() throws IOException {
+        return buf.requestRead(2).getChar();
+    }
+
+    @Override
+    public int readInt() throws IOException {
+        return buf.requestRead(4).getInt();
+    }
+
+    @Override
+    public long readLong() throws IOException {
+        return buf.requestRead(8).getLong();
+    }
+
+    @Override
+    public float readFloat() throws IOException {
+        return buf.requestRead(4).getFloat();
+    }
+
+    @Override
+    public double readDouble() throws IOException {
+        return buf.requestRead(8).getDouble();
+    }
     
     @Override
     public void readBytes(byte[] b) throws IOException {

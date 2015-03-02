@@ -9,10 +9,11 @@
  */
 package info.ata4.io;
 
+import info.ata4.io.buffer.source.BufferedSource;
 import info.ata4.io.util.HalfFloat;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -20,13 +21,15 @@ import java.nio.charset.StandardCharsets;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public abstract class DataWriter extends DataBridge implements DataOutput, StringOutput {
+public class DataWriter extends DataBridge implements DataOutput, StringOutput {
+    
+    public DataWriter(BufferedSource buf) {
+        super(buf);
+    }
     
     public void writeStruct(Struct struct) throws IOException {
         struct.write(this);
     }
-    
-    public abstract OutputStream stream();
     
     ////////////////
     // DataOutput //
@@ -35,6 +38,56 @@ public abstract class DataWriter extends DataBridge implements DataOutput, Strin
     @Override
     public void writeBytes(byte[] b) throws IOException {
         writeBytes(b, 0, b.length);
+    }
+
+    @Override
+    public void writeBytes(byte[] b, int off, int len) throws IOException {
+        buf.requestWrite(len).put(b, off, len);
+    }
+    
+    @Override
+    public void writeBuffer(ByteBuffer dst) throws IOException {
+        buf.write(dst);
+    }
+    
+    @Override
+    public void writeByte(byte b) throws IOException {
+        buf.requestWrite(1).put(b);
+    }
+    
+    @Override
+    public void writeBoolean(boolean v) throws IOException {
+        buf.requestWrite(1).put((byte) (v ? 1 : 0));
+    }
+
+    @Override
+    public void writeShort(short v) throws IOException {
+        buf.requestWrite(2).putShort(v);
+    }
+
+    @Override
+    public void writeChar(char v) throws IOException {
+        buf.requestWrite(2).putChar(v);
+    }
+
+    @Override
+    public void writeInt(int v) throws IOException {
+        buf.requestWrite(4).putInt(v);
+    }
+
+    @Override
+    public void writeLong(long v) throws IOException {
+        buf.requestWrite(8).putLong(v);
+    }
+
+    @Override
+    public void writeFloat(float v) throws IOException {
+        buf.requestWrite(4).putFloat(v);
+    }
+
+    @Override
+    public void writeDouble(double v) throws IOException {
+        buf.requestWrite(8).putDouble(v);
     }
     
     @Override
@@ -49,7 +102,7 @@ public abstract class DataWriter extends DataBridge implements DataOutput, Strin
 
     @Override
     public void writeUnsignedInt(long v) throws IOException {
-        writeInt((int) (v & 0xffffffff));
+        writeInt((int) (v & 0xffffffffl));
     }
 
     @Override

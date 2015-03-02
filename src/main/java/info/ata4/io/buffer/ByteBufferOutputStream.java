@@ -19,7 +19,7 @@ import java.nio.ByteBuffer;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class ByteBufferOutputStream extends OutputStream implements ByteBufferBacked {
+public class ByteBufferOutputStream extends OutputStream {
 
     private final ByteBuffer buf;
 
@@ -29,11 +29,6 @@ public class ByteBufferOutputStream extends OutputStream implements ByteBufferBa
         }
 
         this.buf = buf;
-    }
-    
-    @Override
-    public ByteBuffer buffer() {
-        return buf;
     }
 
     @Override

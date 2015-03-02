@@ -9,13 +9,15 @@
  */
 package info.ata4.io;
 
-import info.ata4.io.buffer.ByteBufferDataWriter;
-import info.ata4.io.channel.ByteChannelDataWriter;
-import info.ata4.io.channel.SeekableByteChannelDataWriter;
+import info.ata4.io.buffer.source.BufferedSource;
+import info.ata4.io.buffer.source.ByteBufferSource;
+import info.ata4.io.buffer.source.ByteChannelSource;
+import info.ata4.io.buffer.source.SeekableByteChannelSource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
@@ -27,20 +29,28 @@ import java.nio.file.Path;
  */
 public class DataWriters {
     
-    public static ByteBufferDataWriter forByteBuffer(ByteBuffer bb) {
-        return new ByteBufferDataWriter(bb);
+    public static DataWriter forByteBuffer(ByteBuffer bb) {
+        return new DataWriter(new ByteBufferSource(bb));
     }
     
-    public static ByteChannelDataWriter forByteChannel(WritableByteChannel chan) throws IOException {
-        return new ByteChannelDataWriter(chan);
+    public static DataWriter forWritableByteChannel(WritableByteChannel chan) throws IOException {
+        ByteBuffer bb = ByteBuffer.allocateDirect(1 << 18);
+        BufferedSource buf = new ByteChannelSource(bb, chan); 
+        return new DataWriter(buf);
     }
     
-    public static ByteChannelDataWriter forOutputStream(OutputStream os) throws IOException {
-        return new ByteChannelDataWriter(Channels.newChannel(os));
+    public static DataWriter forSeekableByteChannel(SeekableByteChannel chan) throws IOException {
+        ByteBuffer bb = ByteBuffer.allocateDirect(1 << 16);
+        BufferedSource buf = new SeekableByteChannelSource(bb, chan); 
+        return new DataWriter(buf);
     }
     
-    public static SeekableByteChannelDataWriter forFile(Path path, OpenOption... options) throws IOException {
-        return new SeekableByteChannelDataWriter(Files.newByteChannel(path, options));
+    public static DataWriter forOutputStream(OutputStream os) throws IOException {
+        return forWritableByteChannel(Channels.newChannel(os));
+    }
+    
+    public static DataWriter forFile(Path path, OpenOption... options) throws IOException {
+        return forSeekableByteChannel(Files.newByteChannel(path, options));
     }
     
     private DataWriters() {

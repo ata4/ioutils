@@ -22,18 +22,13 @@ import java.nio.channels.SeekableByteChannel;
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class ByteBufferChannel implements SeekableByteChannel, ByteBufferBacked, Swappable {
+public class ByteBufferChannel implements SeekableByteChannel, Swappable {
     
     private final ByteBuffer buf;
     private boolean closed;
     
     public ByteBufferChannel(ByteBuffer bb) {
         this.buf = bb;
-    }
-    
-    @Override
-    public ByteBuffer buffer() {
-        return buf;
     }
     
     @Override

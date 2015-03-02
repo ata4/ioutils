@@ -9,34 +9,60 @@
  */
 package info.ata4.io;
 
+import info.ata4.io.buffer.source.BufferedSource;
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.ByteOrder;
 
 /**
  * Base class for both DataReader and DataWriter.
  * 
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public abstract class DataBridge implements Seekable, Closeable {
+public abstract class DataBridge implements Seekable, Closeable, Swappable {
+    
+    protected final BufferedSource buf;
+    
+    public DataBridge(BufferedSource buf) {
+        this.buf = buf;
+    }
+
+    ///////////////
+    // Swappable //
+    ///////////////
     
     @Override
-    public void close() throws IOException {
+    public ByteOrder order() {
+        return buf.order();
     }
     
     @Override
+    public void order(ByteOrder order) {
+        buf.order(order);
+    }
+    
+    //////////////////
+    // Positionable //
+    //////////////////
+    
+    @Override
     public long position() throws IOException {
-        throw new UnsupportedOperationException();
+        return buf.position();
     }
     
     @Override
     public void position(long newPos) throws IOException {
-        throw new UnsupportedOperationException();
+        buf.position(newPos);
     }
     
     @Override
     public long size() throws IOException {
-        throw new UnsupportedOperationException();
+        return buf.size();
     }
+    
+    //////////////
+    // Seekable //
+    //////////////
 
     @Override
     public void seek(long where, Seekable.Origin whence) throws IOException {
@@ -69,11 +95,25 @@ public abstract class DataBridge implements Seekable, Closeable {
     
     @Override
     public void align(int align) throws IOException {
-        if (align > 0) {
-            int rem = (int) (position() % align);
-            if (rem != 0) {
-                seek(align - rem, Seekable.Origin.CURRENT);
-            }
+        if (align < 0) {
+            throw new IllegalArgumentException();
+        } else if (align == 0) {
+            return;
         }
+        
+        long pos = position();
+        long rem = pos % align;
+        if (rem != 0) {
+            position(pos + align - rem);
+        }
+    }
+    
+    ///////////////
+    // Closeable //
+    ///////////////
+
+    @Override
+    public void close() throws IOException {
+        buf.close();
     }
 }
