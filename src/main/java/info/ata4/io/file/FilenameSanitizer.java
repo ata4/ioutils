@@ -37,8 +37,7 @@ public class FilenameSanitizer {
         // path separators, pipes, wildcards, etc..
         Character[] chars = {'<', '>', '/', '\\', '|', '?', '*', ':'};
         illegalChars.addAll(Arrays.asList(chars));
-        
-        
+
         // directory pointers
         illegalNames.add(".");
         illegalNames.add("..");
@@ -58,32 +57,21 @@ public class FilenameSanitizer {
         ILLEGAL_NAMES = Collections.unmodifiableSet(illegalNames);
     }
     
-    public static String sanitizeName(String name) {
-        if (ILLEGAL_NAMES.contains(name.toLowerCase())) {
-            return "";
-        }
-        
+    public static String sanitize(String name) {        
         StringBuilder sb = new StringBuilder(name);
         for (int i = 0; i < sb.length(); i++) {
             if (ILLEGAL_CHARS.contains(sb.charAt(i))) {
                 sb.deleteCharAt(i);
+                i--;
             }
         }
-        return sb.toString();
-    }
-    
-    public static boolean isValidName(String name) {
+        name = sb.toString();
+        
         if (ILLEGAL_NAMES.contains(name.toLowerCase())) {
-            return false;
+            return "";
         }
         
-        for (int i = 0; i < name.length(); i++) {
-            if (ILLEGAL_CHARS.contains(name.charAt(i))) {
-                return false;
-            }
-        }
-        
-        return true;
+        return name;
     }
     
     private FilenameSanitizer() {
