@@ -10,8 +10,10 @@
 package info.ata4.io;
 
 import info.ata4.io.buffer.source.BufferedSource;
+import info.ata4.io.stream.BufferedSourceInputStream;
 import info.ata4.io.util.HalfFloat;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -31,6 +33,10 @@ public class DataReader extends DataBridge implements DataInput, StringInput {
     
     public void readStruct(Struct struct) throws IOException {
         struct.read(this);
+    }
+    
+    public InputStream stream() {
+        return new BufferedSourceInputStream(buf);
     }
 
     ///////////////

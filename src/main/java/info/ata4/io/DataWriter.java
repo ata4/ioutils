@@ -10,8 +10,10 @@
 package info.ata4.io;
 
 import info.ata4.io.buffer.source.BufferedSource;
+import info.ata4.io.stream.BufferedSourceOutputStream;
 import info.ata4.io.util.HalfFloat;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -29,6 +31,10 @@ public class DataWriter extends DataBridge implements DataOutput, StringOutput {
     
     public void writeStruct(Struct struct) throws IOException {
         struct.write(this);
+    }
+    
+    public OutputStream stream() {
+        return new BufferedSourceOutputStream(buf);
     }
     
     ////////////////
