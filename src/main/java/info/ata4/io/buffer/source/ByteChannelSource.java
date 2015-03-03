@@ -110,6 +110,9 @@ public class ByteChannelSource implements BufferedSource {
         // copy remaining bytes to the beginning of the buffer
         buf.compact();
         
+        // clear limit
+        buf.limit(buf.capacity());
+
         // fill buffer from channel
         while (chanIn.read(buf) > 0);
 
@@ -136,13 +139,16 @@ public class ByteChannelSource implements BufferedSource {
     }
     
     public void clear() {
+        // reset position and marks
         buf.clear();
         
+        // clear all bytes
         while (buf.hasRemaining()) {
             buf.put((byte) 0);
         }
         
-        buf.flip();
+        // mark it as empty
+        buf.limit(0);
     }
 
     @Override
