@@ -36,9 +36,13 @@ public class BufferedSourceOutputStream extends OutputStream {
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
-        ByteBuffer bb = ByteBuffer.wrap(b, off, len);
-        while (bb.hasRemaining()) {
-            buf.write(bb);
+        if (len > buf.bufferSize()) {
+            ByteBuffer bb = ByteBuffer.wrap(b, off, len);
+            while (bb.hasRemaining()) {
+                buf.write(bb);
+            }
+        } else {
+            buf.requestWrite(len).put(b, off, len);
         }
     }
 }
