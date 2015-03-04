@@ -207,16 +207,15 @@ public class ByteChannelSource implements BufferedSource {
         if (buf.remaining() < required) {
             flush();
             fill();
+            
+            // extend limit for writing
+            if (write) {
+                buf.limit(Math.min(buf.capacity(), buf.position() + required));
+            }
 
-            // if there are still not enough bytes available...
+            // if there are still not enough bytes available, throw exception
             if (buf.remaining() < required) {
-                if (write) {
-                    // lift limit at EOF to allow writing
-                    buf.limit(buf.capacity());
-                } else {
-                    // throw exception
-                    throw new EOFException();
-                }
+                throw new EOFException();
             }
         }
         
