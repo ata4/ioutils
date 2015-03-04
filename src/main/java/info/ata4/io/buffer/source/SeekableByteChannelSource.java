@@ -53,7 +53,10 @@ public class SeekableByteChannelSource extends ByteChannelSource {
     
     @Override
     public void fill() throws IOException {
-        bufPos = chan.position();
+        if (!canRead()) {
+            return;
+        }
+        bufPos = chan.position() - buf.remaining();
         super.fill();
     }
     
