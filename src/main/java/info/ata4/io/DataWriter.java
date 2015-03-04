@@ -12,6 +12,7 @@ package info.ata4.io;
 import info.ata4.io.buffer.source.BufferedSource;
 import info.ata4.io.stream.BufferedSourceOutputStream;
 import info.ata4.io.util.HalfFloat;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
@@ -52,8 +53,11 @@ public class DataWriter extends DataBridge implements DataOutput, StringOutput {
     }
     
     @Override
-    public void writeBuffer(ByteBuffer dst) throws IOException {
-        buf.write(dst);
+    public void writeBuffer(ByteBuffer src) throws IOException {
+        while (src.hasRemaining() && buf.write(src) > 0);
+        if (src.hasRemaining()) {
+            throw new EOFException();
+        }
     }
     
     @Override

@@ -12,6 +12,7 @@ package info.ata4.io;
 import info.ata4.io.buffer.source.BufferedSource;
 import info.ata4.io.stream.BufferedSourceInputStream;
 import info.ata4.io.util.HalfFloat;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -50,7 +51,10 @@ public class DataReader extends DataBridge implements DataInput, StringInput {
     
     @Override
     public void readBuffer(ByteBuffer dst) throws IOException {
-        buf.read(dst);
+        while (dst.hasRemaining() && buf.read(dst) > 0);
+        if (dst.hasRemaining()) {
+            throw new EOFException();
+        }
     }
     
     @Override
