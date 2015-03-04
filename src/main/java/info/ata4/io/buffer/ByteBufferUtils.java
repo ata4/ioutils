@@ -370,6 +370,17 @@ public class ByteBufferUtils {
         return copy(bb, false);
     }
     
+    public static int transfer(ByteBuffer src, ByteBuffer dst) {
+        int numBytes = Math.min(src.remaining(), dst.remaining());
+        if (numBytes > 0) {
+            int oldLimit = src.limit();
+            src.limit(src.position() + numBytes);
+            dst.put(src);
+            src.limit(oldLimit);
+        }
+        return numBytes;
+    }
+    
     public static boolean isEmpty(ByteBuffer bb) {
         return bb == null || bb.capacity() == 0;
     }

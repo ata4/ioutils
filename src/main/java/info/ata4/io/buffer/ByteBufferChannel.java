@@ -51,12 +51,7 @@ public class ByteBufferChannel implements SeekableByteChannel, Swappable {
             return -1;
         }
         
-        int read = 0;
-        while (dst.hasRemaining() && buf.hasRemaining()) {
-            dst.put(buf.get());
-            read++;
-        }
-        return read;
+        return ByteBufferUtils.transfer(buf, dst);
     }
 
     @Override
@@ -73,12 +68,7 @@ public class ByteBufferChannel implements SeekableByteChannel, Swappable {
             return -1;
         }
         
-        int written = 0;
-        while (src.hasRemaining() && buf.hasRemaining()) {
-            buf.put(src.get());
-            written++;
-        }
-        return written;
+        return ByteBufferUtils.transfer(src, buf);
     }
 
     @Override
