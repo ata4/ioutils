@@ -11,6 +11,7 @@ package info.ata4.io.buffer;
 
 import java.nio.ByteBuffer;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -18,16 +19,55 @@ import static org.junit.Assert.*;
  */
 public class ByteBufferUtilsTest {
     
-    private static ByteBuffer allocateTestBuffer(int capacity) {
-        ByteBuffer bb = ByteBuffer.allocate(capacity);
+    private static ByteBuffer allocateTestBuffer(int capacity, boolean direct) {
+        ByteBuffer bb;
+        
+        if (direct) {
+            bb = ByteBuffer.allocateDirect(capacity);
+        } else {
+            bb = ByteBuffer.allocate(capacity);
+        }
+        
         for (int i = 0; i < capacity; i++) {
             bb.put((byte) (i & 0xff));
         }
+        
         bb.flip();
+        
         return bb;
     }
     
-    @org.junit.Test
+    private static ByteBuffer allocateTestBuffer(int capacity) {
+        return allocateTestBuffer(capacity, false);
+    }
+    
+    @Test
+    public void testCopy() {
+        ByteBuffer src = allocateTestBuffer(100);
+        ByteBuffer dst = ByteBufferUtils.copy(src);
+        
+        assertEquals(src.hashCode(), dst.hashCode());
+    }
+    
+    @Test
+    public void testCopyDirect() {
+        ByteBuffer src = allocateTestBuffer(100, true);
+        ByteBuffer dst = ByteBufferUtils.copy(src);
+        
+        assertEquals(src.hashCode(), dst.hashCode());
+        assertTrue(dst.isDirect());
+    }
+    
+    @Test
+    public void testCopyDirectForced() {
+        ByteBuffer src = allocateTestBuffer(100);
+        ByteBuffer dst = ByteBufferUtils.copy(src, true);
+        
+        assertEquals(src.hashCode(), dst.hashCode());
+        assertTrue(dst.isDirect());
+    }
+    
+    @Test
     public void testTransferSameSize() {
         ByteBuffer src = allocateTestBuffer(100);
         ByteBuffer dst = ByteBuffer.allocate(100);
@@ -46,7 +86,7 @@ public class ByteBufferUtilsTest {
         assertEquals(src.hashCode(), dst.hashCode());
     }
     
-    @org.junit.Test
+    @Test
     public void testTransferSmallSrc() {
         ByteBuffer src = allocateTestBuffer(50);
         ByteBuffer dst = ByteBuffer.allocate(100);
@@ -65,7 +105,7 @@ public class ByteBufferUtilsTest {
         assertEquals(src.hashCode(), dst.hashCode());
     }
     
-    @org.junit.Test
+    @Test
     public void testTransferSmallDst() {
         ByteBuffer src = allocateTestBuffer(100);
         ByteBuffer dst = ByteBuffer.allocate(50);
@@ -84,7 +124,7 @@ public class ByteBufferUtilsTest {
         assertEquals(src.hashCode(), dst.hashCode());
     }
     
-    @org.junit.Test
+    @Test
     public void testTransferLimitedSrc() {
         int ofs = 25;
         int limit = 75;
@@ -111,13 +151,13 @@ public class ByteBufferUtilsTest {
         assertEquals(src.hashCode(), dst.hashCode());
     }
 
-    @org.junit.Test
+    @Test
     public void testNonEmpty() {
         ByteBuffer bb = ByteBuffer.allocate(1);
         assertFalse(ByteBufferUtils.isEmpty(bb));
     }
     
-    @org.junit.Test
+    @Test
     public void testEmpty() {
         ByteBuffer bb = ByteBuffer.allocate(0);
         assertTrue(ByteBufferUtils.isEmpty(bb));
