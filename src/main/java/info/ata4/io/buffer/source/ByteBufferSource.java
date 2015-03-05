@@ -71,6 +71,11 @@ public class ByteBufferSource implements BufferedSource {
     public boolean canWrite() {
         return !buf.isReadOnly();
     }
+    
+    @Override
+    public boolean canGrow() {
+        return false;
+    }
 
     @Override
     public int read(ByteBuffer dst) throws IOException {

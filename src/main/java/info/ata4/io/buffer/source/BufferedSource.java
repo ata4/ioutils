@@ -46,6 +46,17 @@ public interface BufferedSource extends Positionable, Swappable, Closeable {
     public boolean canWrite();
     
     /**
+     * Checks whether this source can be written beyond the reported size. If the
+     * source cannot grow, it has a fixed size and out of bound writes result in
+     * EOFExceptions.
+     * 
+     * Always returns false if {@link #canWrite} returns false.
+     * 
+     * @return true if the size of the source can grow.
+     */
+    public boolean canGrow();
+    
+    /**
      * Reads contents of this source to the buffer. Behaves like
      * {@link java.nio.channels.ReadableByteChannel#read(java.nio.ByteBuffer)}.
      * 

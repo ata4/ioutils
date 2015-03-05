@@ -101,6 +101,11 @@ public class ByteChannelSource implements BufferedSource {
         return chanOut != null;
     }
     
+    @Override
+    public boolean canGrow() {
+        return canWrite();
+    }
+    
     public void fill() throws IOException {
         // don't fill in write-only mode
         if (!canRead()) {
