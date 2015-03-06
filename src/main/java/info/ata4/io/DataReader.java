@@ -10,7 +10,7 @@
 package info.ata4.io;
 
 import info.ata4.io.buffer.source.BufferedSource;
-import info.ata4.io.stream.BufferedSourceInputStream;
+import info.ata4.io.buffer.source.BufferedSourceChannel;
 import info.ata4.io.util.HalfFloat;
 import java.io.EOFException;
 import java.io.IOException;
@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.Channels;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.lang3.ArrayUtils;
@@ -37,7 +38,7 @@ public class DataReader extends DataBridge implements DataInput, StringInput {
     }
     
     public InputStream stream() {
-        return new BufferedSourceInputStream(buf);
+        return Channels.newInputStream(new BufferedSourceChannel(buf));
     }
 
     ///////////////

@@ -10,13 +10,14 @@
 package info.ata4.io;
 
 import info.ata4.io.buffer.source.BufferedSource;
-import info.ata4.io.stream.BufferedSourceOutputStream;
+import info.ata4.io.buffer.source.BufferedSourceChannel;
 import info.ata4.io.util.HalfFloat;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -35,7 +36,7 @@ public class DataWriter extends DataBridge implements DataOutput, StringOutput {
     }
     
     public OutputStream stream() {
-        return new BufferedSourceOutputStream(buf);
+        return Channels.newOutputStream(new BufferedSourceChannel(buf));
     }
     
     ////////////////

@@ -144,6 +144,7 @@ public class ByteChannelSource implements BufferedSource {
         buf.flip();
     }
     
+    @Override
     public void flush() throws IOException {
         // don't flush in read-only mode or if buffer is clean
         if (!canWrite() || !isDirty()) {
@@ -231,6 +232,8 @@ public class ByteChannelSource implements BufferedSource {
             } else {
                 // fill buffer and then write
                 fill();
+                buf.limit(buf.capacity());
+                
                 n = chanBuf.write(src);
             }
         }

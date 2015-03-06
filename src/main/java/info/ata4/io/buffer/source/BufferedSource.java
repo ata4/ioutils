@@ -65,6 +65,8 @@ public interface BufferedSource extends Positionable, Swappable, Closeable {
      */
     public boolean canSeek();
     
+    public void flush() throws IOException;
+    
     /**
      * Reads contents of this source to the buffer. Behaves like
      * {@link java.nio.channels.ReadableByteChannel#read(java.nio.ByteBuffer)}.

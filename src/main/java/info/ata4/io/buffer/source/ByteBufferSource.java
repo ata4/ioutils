@@ -81,6 +81,10 @@ public class ByteBufferSource implements BufferedSource {
     public boolean canSeek() {
         return true;
     }
+    
+    @Override
+    public void flush() {
+    }
 
     @Override
     public int read(ByteBuffer dst) throws IOException {
