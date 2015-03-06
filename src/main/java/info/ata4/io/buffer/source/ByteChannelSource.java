@@ -15,8 +15,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.NonReadableChannelException;
-import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.logging.Level;
@@ -74,17 +72,17 @@ public class ByteChannelSource implements BufferedSource {
     
     @Override
     public void position(long newPos) throws IOException {
-        throw new UnsupportedOperationException();
+        throw new NonSeekableSourceException();
     }
 
     @Override
     public long position() throws IOException {
-        throw new UnsupportedOperationException();
+        throw new NonSeekableSourceException();
     }
 
     @Override
     public long size() throws IOException {
-        throw new UnsupportedOperationException();
+        throw new NonSeekableSourceException();
     }
 
     @Override
@@ -116,6 +114,11 @@ public class ByteChannelSource implements BufferedSource {
     @Override
     public boolean canGrow() {
         return canWrite();
+    }
+    
+    @Override
+    public boolean canSeek() {
+        return false;
     }
     
     public void fill() throws IOException {
@@ -181,7 +184,7 @@ public class ByteChannelSource implements BufferedSource {
     @Override
     public int read(ByteBuffer dst) throws IOException {
         if (!canRead()) {
-            throw new NonReadableChannelException();
+            throw new NonReadableSourceException();
         }
         
         int n = chanBuf.read(dst);
@@ -209,7 +212,7 @@ public class ByteChannelSource implements BufferedSource {
     @Override
     public int write(ByteBuffer src) throws IOException {
         if (!canWrite()) {
-            throw new NonWritableChannelException();
+            throw new NonWritableSourceException();
         }
         
         int n = chanBuf.write(src);
@@ -238,6 +241,14 @@ public class ByteChannelSource implements BufferedSource {
     }
 
     private ByteBuffer request(int required, boolean write) throws EOFException, IOException {
+        if (write && !canWrite()) {
+            throw new NonWritableSourceException();
+        }
+        
+        if (!write && !canRead()) {
+            throw new NonReadableSourceException();
+        }
+        
         // check if additional bytes need to be buffered
         if (buf.remaining() < required) {
             L.log(Level.FINEST, "request: need {0} more bytes for {1}",

@@ -76,6 +76,11 @@ public class ByteBufferSource implements BufferedSource {
     public boolean canGrow() {
         return false;
     }
+    
+    @Override
+    public boolean canSeek() {
+        return true;
+    }
 
     @Override
     public int read(ByteBuffer dst) throws IOException {
@@ -84,6 +89,9 @@ public class ByteBufferSource implements BufferedSource {
 
     @Override
     public int write(ByteBuffer src) throws IOException {
+        if (!canWrite()) {
+            throw new NonWritableSourceException();
+        }
         return chanBuf.write(src);
     }
     
@@ -97,6 +105,9 @@ public class ByteBufferSource implements BufferedSource {
 
     @Override
     public ByteBuffer requestWrite(int required) throws EOFException, IOException {
+        if (!canWrite()) {
+            throw new NonWritableSourceException();
+        }
         return requestRead(required);
     }
     

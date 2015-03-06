@@ -31,7 +31,7 @@ public interface BufferedSource extends Positionable, Swappable, Closeable {
     
     /**
      * Checks whether this source is readable or not. If the source is not readable,
-     * {@link #read} and {@link #requestRead} will fail.
+     * {@link #read} and {@link #requestRead} will throw NonReadableSourceException.
      * 
      * @return true if the source is readable.
      */
@@ -39,7 +39,7 @@ public interface BufferedSource extends Positionable, Swappable, Closeable {
     
     /**
      * Checks whether this source is writable or not. If the source is not writable,
-     * {@link #write} and {@link #requestWrite} will fail.
+     * {@link #write} and {@link #requestWrite} will throw NonWritableSourceException.
      * 
      * @return true if the source is writable.
      */
@@ -57,12 +57,22 @@ public interface BufferedSource extends Positionable, Swappable, Closeable {
     public boolean canGrow();
     
     /**
+     * Checks whether this source provides freely positionable random access.
+     * If the source is not seekable, methods like {@link position} or
+     * {@link size} will throw NonSeekableSourceException.
+     * 
+     * @return true if the source is seekable
+     */
+    public boolean canSeek();
+    
+    /**
      * Reads contents of this source to the buffer. Behaves like
      * {@link java.nio.channels.ReadableByteChannel#read(java.nio.ByteBuffer)}.
      * 
      * @param dst destination buffer
      * @return number of bytes read
-     * @throws IOException 
+     * @throws IOException if there was an reading error
+     * @throws NonReadableSourceException if the source is not readable
      */
     public int read(ByteBuffer dst) throws IOException;
     
@@ -72,7 +82,8 @@ public interface BufferedSource extends Positionable, Swappable, Closeable {
      * 
      * @param src source buffer
      * @return number of bytes written
-     * @throws IOException 
+     * @throws IOException if there was a writing error
+     * @throws NonWritableSourceException if the source is not writable
      */
     public int write(ByteBuffer src) throws IOException;
     
@@ -86,6 +97,7 @@ public interface BufferedSource extends Positionable, Swappable, Closeable {
      * @return prepared byte buffer
      * @throws IOException if there was an reading error
      * @throws EOFException if the required number of bytes cannot be aquired
+     * @throws NonReadableSourceException if the source is not readable
      */
     public ByteBuffer requestRead(int required) throws EOFException, IOException;
     
@@ -99,8 +111,9 @@ public interface BufferedSource extends Positionable, Swappable, Closeable {
      * 
      * @param required minimum number of bytes required
      * @return prepared byte buffer
-     * @throws IOException if there was an writing error
+     * @throws IOException if there was a writing error
      * @throws EOFException if the required number of bytes cannot be aquired
+     * @throws NonWritableSourceException if the source is not writable
      */
     public ByteBuffer requestWrite(int required) throws EOFException, IOException;
 }

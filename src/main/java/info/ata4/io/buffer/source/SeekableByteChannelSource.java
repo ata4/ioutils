@@ -59,6 +59,11 @@ public class SeekableByteChannelSource extends ByteChannelSource {
     }
     
     @Override
+    public boolean canSeek() {
+        return true;
+    }
+    
+    @Override
     public void fill() throws IOException {
         if (!canRead()) {
             return;
