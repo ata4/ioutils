@@ -10,6 +10,7 @@
 package info.ata4.io.buffer.source;
 
 import info.ata4.io.buffer.ByteBufferChannel;
+import info.ata4.log.LogUtils;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -18,12 +19,16 @@ import java.nio.channels.NonReadableChannelException;
 import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
 public class ByteChannelSource implements BufferedSource {
+    
+    private static final Logger L = LogUtils.getLogger();
     
     protected final ByteBuffer buf;
     private ReadableByteChannel chanIn;
@@ -51,9 +56,15 @@ public class ByteChannelSource implements BufferedSource {
         buf.limit(0);
         
         chanBuf = new ByteBufferChannel(buf);
+        
+        L.log(Level.FINEST, "init: readable: {0}, writable: {1}, growable: {2}",
+                new Object[]{canRead(), canWrite(), canGrow()});
     }
     
     public void markDirty() {
+        if (!dirty) {
+            L.finest("markDirty");
+        }
         dirty = true;
     }
     
@@ -83,6 +94,7 @@ public class ByteChannelSource implements BufferedSource {
 
     @Override
     public void order(ByteOrder order) {
+        L.log(Level.FINEST, "order: {0}", order);
         buf.order(order);
     }
     
@@ -117,9 +129,13 @@ public class ByteChannelSource implements BufferedSource {
         
         // clear limit
         buf.limit(buf.capacity());
+        
+        int start = buf.position();
 
         // fill buffer from channel
         while (chanIn.read(buf) > 0);
+        
+        L.log(Level.FINEST, "fill: {0} bytes read", buf.position() - start);
 
         // start from the beginning
         buf.flip();
@@ -134,8 +150,12 @@ public class ByteChannelSource implements BufferedSource {
         // stop here and start from the beginning
         buf.flip();
         
+        int start = buf.position();
+        
         // write buffer to channel
         while (chanOut.write(buf) > 0);
+        
+        L.log(Level.FINEST, "flush: {0} bytes written", buf.position() - start);
         
         // clear buffer
         buf.clear();
@@ -154,6 +174,8 @@ public class ByteChannelSource implements BufferedSource {
         
         // mark it as empty
         buf.limit(0);
+        
+        L.finest("clear");
     }
 
     @Override
@@ -166,9 +188,13 @@ public class ByteChannelSource implements BufferedSource {
         
         // check if buffer is empty
         if (n == -1) {
+            L.finest("read: buffer empty");
+            
             flush();
             
             if (dst.remaining() > buf.capacity()) {
+                L.finest("read: read buffer directly");
+                
                 // dst buffer larger than internal buffer, read directly
                 n = chanIn.read(dst);
             } else {
@@ -190,9 +216,13 @@ public class ByteChannelSource implements BufferedSource {
         
         // check if buffer is empty
         if (n == -1) {
+            L.finest("write: buffer empty");
+            
             flush();
             
             if (src.remaining() > buf.capacity()) {
+                L.finest("write: write buffer directly");
+                
                 // src buffer larger than internal buffer, write directly
                 n = chanOut.write(src);
             } else {
@@ -210,12 +240,19 @@ public class ByteChannelSource implements BufferedSource {
     private ByteBuffer request(int required, boolean write) throws EOFException, IOException {
         // check if additional bytes need to be buffered
         if (buf.remaining() < required) {
+            L.log(Level.FINEST, "request: need {0} more bytes for {1}",
+                new Object[]{
+                    required - buf.remaining(),
+                    write ? "writing" : "reading"
+                }
+            );
+            
             flush();
             fill();
-            
+
             // extend limit for writing
             if (write) {
-                buf.limit(Math.min(buf.capacity(), buf.position() + required));
+                buf.limit(buf.capacity());
             }
 
             // if there are still not enough bytes available, throw exception
@@ -252,5 +289,7 @@ public class ByteChannelSource implements BufferedSource {
         if (chanOut != null && chanOut.isOpen()) {
             chanOut.close();
         }
+        
+        L.finest("close");
     }
 }

@@ -9,6 +9,8 @@
  */
 package info.ata4.io.buffer.source;
 
+import info.ata4.log.LogUtils;
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.NonReadableChannelException;
@@ -16,12 +18,16 @@ import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
 public class SeekableByteChannelSource extends ByteChannelSource {
+    
+    private static final Logger L = LogUtils.getLogger();
     
     private static ReadableByteChannel checkRead(ReadableByteChannel chan) {
         try {
@@ -43,6 +49,7 @@ public class SeekableByteChannelSource extends ByteChannelSource {
     
     private final SeekableByteChannel chan;
     private long bufPos;
+    private boolean bufEOF;
 
     public SeekableByteChannelSource(ByteBuffer buffer, SeekableByteChannel chan) {
         // find out whether the channel is actually readable and/or writable in a
@@ -57,7 +64,12 @@ public class SeekableByteChannelSource extends ByteChannelSource {
             return;
         }
         bufPos = chan.position() - buf.remaining();
+        L.log(Level.FINEST, "fill: at pos {0}", bufPos);
+        
         super.fill();
+        
+        // if the buffer is empty after being filled, it's an EOF buffer
+        bufEOF = buf.limit() == 0;
     }
     
     @Override
@@ -65,19 +77,48 @@ public class SeekableByteChannelSource extends ByteChannelSource {
         if (!canWrite() || !isDirty()) {
             return;
         }
+        
+        L.log(Level.FINEST, "flush: at pos {0}", bufPos);
         chan.position(bufPos);
+        
         super.flush();
+        
+        bufEOF = false;
     }
-
+    
     @Override
     public long position() throws IOException {
         return bufPos + buf.position();
     }
+    
+    @Override
+    public int read(ByteBuffer dst) throws IOException {
+        // EOF buffers must not be read
+        if (bufEOF) {
+            throw new EOFException();
+        }
+        
+        return super.read(dst);
+    }
+    
+    @Override
+    public ByteBuffer requestRead(int required) throws EOFException, IOException {
+        // EOF buffers must not be read
+        if (bufEOF) {
+            throw new EOFException();
+        }
+        
+        return super.requestRead(required);
+    }
 
     @Override
     public void position(long newPos) throws IOException {
+        L.log(Level.FINEST, "postion: {0}", newPos);
+        
         // check if the new position is outside the buffered range
         if (newPos < bufPos + buf.position() || newPos > bufPos + buf.limit()) {
+            L.finest("postion: outside buffer");
+            
             flush();
             bufPos = newPos;
             chan.position(newPos);
