@@ -12,6 +12,8 @@ package info.ata4.io.buffer.source;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
+import java.nio.channels.NonReadableChannelException;
+import java.nio.channels.NonWritableChannelException;
 
 /**
  *
@@ -28,12 +30,20 @@ public class BufferedSourceChannel implements ByteChannel {
 
     @Override
     public int read(ByteBuffer dst) throws IOException {
-        return buf.read(dst);
+        try {
+            return buf.read(dst);
+        } catch (NonReadableSourceException ex) {
+            throw new NonReadableChannelException();
+        }
     }
 
     @Override
     public int write(ByteBuffer src) throws IOException {
-        return buf.write(src);
+        try {
+            return buf.write(src);
+        } catch (NonWritableSourceException ex) {
+            throw new NonWritableChannelException();
+        }
     }
     
     @Override
