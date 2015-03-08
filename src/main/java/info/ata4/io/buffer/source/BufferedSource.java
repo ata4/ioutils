@@ -65,6 +65,15 @@ public interface BufferedSource extends Positionable, Swappable, Closeable {
      */
     public boolean canSeek();
     
+    /**
+     * Flushes all pending bytes from the buffer to the data source, similar
+     * to {@link java.io.OutputStream#flush()}.
+     * 
+     * Has no effect if the buffer source is not writable. In fact, it may have
+     * no effect at all for some implementations.
+     * 
+     * @throws IOException if writing the pending data causes an error
+     */
     public void flush() throws IOException;
     
     /**
