@@ -12,6 +12,7 @@ package info.ata4.io.buffer.source;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.NonReadableChannelException;
 import java.nio.channels.NonWritableChannelException;
 
@@ -22,7 +23,7 @@ import java.nio.channels.NonWritableChannelException;
 public class BufferedSourceChannel implements ByteChannel {
     
     private final BufferedSource buf;
-    private boolean open;
+    private boolean closed;
     
     public BufferedSourceChannel(BufferedSource buf) {
         this.buf = buf;
@@ -30,6 +31,10 @@ public class BufferedSourceChannel implements ByteChannel {
 
     @Override
     public int read(ByteBuffer dst) throws IOException {
+        if (closed) {
+            throw new ClosedChannelException();
+        }
+        
         try {
             return buf.read(dst);
         } catch (NonReadableSourceException ex) {
@@ -39,6 +44,10 @@ public class BufferedSourceChannel implements ByteChannel {
 
     @Override
     public int write(ByteBuffer src) throws IOException {
+        if (closed) {
+            throw new ClosedChannelException();
+        }
+        
         try {
             return buf.write(src);
         } catch (NonWritableSourceException ex) {
@@ -48,12 +57,12 @@ public class BufferedSourceChannel implements ByteChannel {
     
     @Override
     public boolean isOpen() {
-        return open;
+        return !closed;
     }
 
     @Override
     public void close() throws IOException {
-        open = false;
+        closed = true;
         buf.flush();
     }
 }
