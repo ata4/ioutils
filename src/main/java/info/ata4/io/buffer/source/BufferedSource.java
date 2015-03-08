@@ -102,7 +102,7 @@ public interface BufferedSource extends Positionable, Swappable, Closeable {
      * Prepares the buffer for reading. The returned buffer is guaranteed to have
      * at least {@code required} remaining bytes, otherwise an EOFException is
      * thrown. Any changes done to the buffer are omitted if none of the writing
-     * method is called.
+     * methods are called.
      * 
      * @param required minimum number of bytes required
      * @return prepared byte buffer
