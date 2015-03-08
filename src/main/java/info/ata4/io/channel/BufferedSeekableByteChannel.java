@@ -1,5 +1,5 @@
 /*
- ** 2015 März 01
+ ** 2015 March 01
  **
  ** The author disclaims copyright to this source code. In place of
  ** a legal notice, here is a blessing:
@@ -18,14 +18,18 @@ import java.nio.channels.SeekableByteChannel;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class BufferedSeekableByteChannel extends ChannelProxy<SeekableByteChannel> implements SeekableByteChannel {
+public class BufferedSeekableByteChannel
+    extends BufferedChannel<SeekableByteChannel, SeekableByteChannelSource>
+    implements SeekableByteChannel {
     
-    private final SeekableByteChannelSource buf;
-
-    public BufferedSeekableByteChannel(SeekableByteChannel chan, int bufSize) {
-        super(chan);
-        ByteBuffer bb = ByteBuffer.allocateDirect(bufSize);
-        buf = new SeekableByteChannelSource(bb, chan);
+    public static final int DEFAULT_BUFFER_SIZE = 1 << 20; // 64 KiB
+    
+    public BufferedSeekableByteChannel(SeekableByteChannel chan, int bufferSize) {
+        super(chan, new SeekableByteChannelSource(ByteBuffer.allocateDirect(bufferSize), chan));
+    }
+    
+    public BufferedSeekableByteChannel(SeekableByteChannel chan) {
+        this(chan, DEFAULT_BUFFER_SIZE);
     }
 
     @Override
@@ -56,9 +60,7 @@ public class BufferedSeekableByteChannel extends ChannelProxy<SeekableByteChanne
 
     @Override
     public SeekableByteChannel truncate(long size) throws IOException {
-        buf.flush();
-        buf.clear();
-        chan.truncate(size);
+        buf.truncate(size);
         return this;
     }
 }

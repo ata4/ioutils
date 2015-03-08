@@ -9,7 +9,7 @@
  */
 package info.ata4.io.channel;
 
-import info.ata4.io.buffer.source.ByteChannelSource;
+import info.ata4.io.buffer.source.ReadableByteChannelSource;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
@@ -18,16 +18,14 @@ import java.nio.channels.ReadableByteChannel;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class BufferedReadableByteChannel extends ChannelProxy<ReadableByteChannel> implements ReadableByteChannel {
+public class BufferedReadableByteChannel
+    extends BufferedChannel<ReadableByteChannel, ReadableByteChannelSource>
+    implements ReadableByteChannel {
     
     public static final int DEFAULT_BUFFER_SIZE = 1 << 20; // 1 MiB
-    
-    private final ByteChannelSource buf;
 
     public BufferedReadableByteChannel(ReadableByteChannel in, int bufferSize) {
-        super(in);
-        ByteBuffer bb = ByteBuffer.allocateDirect(bufferSize);
-        buf = new ByteChannelSource(bb, in);
+        super(in, new ReadableByteChannelSource(ByteBuffer.allocateDirect(bufferSize), in));
     }
     
     public BufferedReadableByteChannel(ReadableByteChannel in) {

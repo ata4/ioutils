@@ -9,7 +9,7 @@
  */
 package info.ata4.io.channel;
 
-import info.ata4.io.buffer.source.ByteChannelSource;
+import info.ata4.io.buffer.source.WritableByteChannelSource;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
@@ -18,16 +18,14 @@ import java.nio.channels.WritableByteChannel;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class BufferedWritableByteChannel extends ChannelProxy<WritableByteChannel> implements WritableByteChannel {
+public class BufferedWritableByteChannel
+    extends BufferedChannel<WritableByteChannel, WritableByteChannelSource>
+    implements WritableByteChannel {
     
     public static final int DEFAULT_BUFFER_SIZE = 1 << 20; // 1 MiB
     
-    private final ByteChannelSource buf;
-
     public BufferedWritableByteChannel(WritableByteChannel out, int bufferSize) {
-        super(out);
-        ByteBuffer bb = ByteBuffer.allocateDirect(bufferSize);
-        buf = new ByteChannelSource(bb, out);
+        super(out, new WritableByteChannelSource(ByteBuffer.allocateDirect(bufferSize), out));
     }
     
     public BufferedWritableByteChannel(WritableByteChannel chan) {

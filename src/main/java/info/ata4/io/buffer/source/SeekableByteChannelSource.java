@@ -15,9 +15,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.NonReadableChannelException;
 import java.nio.channels.NonWritableChannelException;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,37 +23,91 @@ import java.util.logging.Logger;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class SeekableByteChannelSource extends ByteChannelSource {
+public class SeekableByteChannelSource extends ChannelSource<SeekableByteChannel> {
     
     private static final Logger L = LogUtils.getLogger();
     
-    private static ReadableByteChannel checkRead(ReadableByteChannel chan) {
-        try {
-            chan.read(ByteBuffer.allocate(0));
-            return chan;
-        } catch (NonReadableChannelException | IOException ex) {
-            return null;
-        }
-    }
-    
-    private static WritableByteChannel checkWrite(WritableByteChannel chan) {
-        try {
-            chan.write(ByteBuffer.allocate(0));
-            return chan;
-        } catch (NonWritableChannelException | IOException ex) {
-            return null;
-        }
-    }
-    
-    private final SeekableByteChannel chan;
-    private long bufPos;
-    private boolean bufEOF;
+    private final ReadableByteChannelSource bufIn;
+    private final WritableByteChannelSource bufOut;
+
+    private boolean write;
 
     public SeekableByteChannelSource(ByteBuffer buffer, SeekableByteChannel chan) {
+        super(buffer, chan);
+        
         // find out whether the channel is actually readable and/or writable in a
         // non-destructive way by using an empty buffer
-        super(buffer, checkRead(chan), checkWrite(chan));
-        this.chan = chan;
+        ReadableByteChannelSource bufInTmp = null;
+        try {
+            chan.read(ByteBuffer.allocate(0));
+            bufInTmp = new ReadableByteChannelSource(buffer, chan);
+        } catch (NonReadableChannelException | IOException ex) {}
+        bufIn = bufInTmp;
+        
+        WritableByteChannelSource bufOutTmp = null;
+        try {
+            chan.write(ByteBuffer.allocate(0));
+            bufOutTmp = new WritableByteChannelSource(buffer, chan);
+        } catch (NonWritableChannelException | IOException ex) {}
+        bufOut = bufOutTmp;
+        
+        // switch to write mode if there's no readable channel
+        write = bufIn == null;
+    }
+    
+    private void setRead() throws IOException {
+        if (!canRead()) {
+            throw new NonReadableSourceException();
+        }
+        
+        if (write) {
+            L.finest("setRead");
+            
+            // write pending bytes
+            flush();
+            
+            // clear write buffer
+            clear();
+            
+            write = false;
+        }
+    }
+    
+    private void setWrite() throws IOException {
+        if (!canWrite()) {
+            throw new NonWritableSourceException();
+        }
+        
+        if (!write) {
+            L.finest("setWrite");
+            
+            // correct channel position by the number of unread bytes
+            if (buf.hasRemaining()) {
+                chan.position(chan.position() - buf.remaining());
+            }
+            
+            // clear read buffer
+            clear();
+            
+            write = true;
+        }
+    }
+    
+    public void clear() {
+        L.finest("clear");
+        
+        // mark buffer as empty
+        buf.limit(0);
+    }
+    
+    @Override
+    public boolean canRead() {
+        return bufIn != null;
+    }
+    
+    @Override
+    public boolean canWrite() {
+        return bufOut != null;
     }
     
     @Override
@@ -64,78 +116,83 @@ public class SeekableByteChannelSource extends ByteChannelSource {
     }
     
     @Override
-    public void fill() throws IOException {
-        if (!canRead()) {
-            return;
-        }
-        bufPos = chan.position() - buf.remaining();
-        L.log(Level.FINEST, "fill: at pos {0}", bufPos);
-        
-        super.fill();
-        
-        // if the buffer is empty after being filled, it's an EOF buffer
-        bufEOF = buf.limit() == 0;
+    public boolean canGrow() {
+        return canWrite() && bufOut.canGrow();
     }
     
     @Override
     public void flush() throws IOException {
-        if (!canWrite() || !isDirty()) {
-            return;
+        if (canWrite() && write) {
+            bufOut.flush();
         }
-        
-        L.log(Level.FINEST, "flush: at pos {0}", bufPos);
-        chan.position(bufPos);
-        
-        super.flush();
-        
-        bufEOF = false;
     }
     
     @Override
     public long position() throws IOException {
-        return bufPos + buf.position();
+        return write ? chan.position() + buf.position() : chan.position() - buf.remaining();
     }
     
     @Override
     public int read(ByteBuffer dst) throws IOException {
-        // EOF buffers must not be read
-        if (bufEOF) {
-            throw new EOFException();
-        }
-        
-        return super.read(dst);
+        setRead();
+        return bufIn.read(dst);
+    }
+    
+    @Override
+    public int write(ByteBuffer src) throws IOException {
+        setWrite();
+        return bufOut.write(src);
     }
     
     @Override
     public ByteBuffer requestRead(int required) throws EOFException, IOException {
-        // EOF buffers must not be read
-        if (bufEOF) {
-            throw new EOFException();
-        }
-        
-        return super.requestRead(required);
+        setRead();
+        return bufIn.requestRead(required);
+    }
+    
+    @Override
+    public ByteBuffer requestWrite(int required) throws EOFException, IOException {
+        setWrite();
+        return bufOut.requestWrite(required);
     }
 
     @Override
     public void position(long newPos) throws IOException {
         L.log(Level.FINEST, "postion: {0}", newPos);
         
-        // check if the new position is outside the buffered range
-        if (newPos < bufPos + buf.position() || newPos > bufPos + buf.limit()) {
-            L.finest("postion: outside buffer");
-            
+        long pos = chan.position();
+        boolean clear = false;
+        
+        if (write) {
+            // in write mode, the buffer always needs to be cleared
+            clear = true;
+        } else {
+            // in read mode, the buffer position may be moved forward
+            if (newPos < pos + buf.position() || newPos > pos + buf.limit()) {
+                L.finest("postion: outside read buffer");
+                clear = true;
+            }
+        }
+        
+        if (clear) {
             flush();
-            bufPos = newPos;
-            chan.position(newPos);
+            pos = newPos;
+            chan.position(pos);
             clear();
         }
 
-        // use difference to bufPos as position for the buffer
-        buf.position((int) (newPos - bufPos));
+        // use difference between newPos and bufPos as position for the buffer
+        buf.position((int) (newPos - pos));
     }
 
     @Override
     public long size() throws IOException {
         return Math.max(chan.size(), position());
+    }
+    
+    public void truncate(long size) throws IOException {
+        flush();
+        clear();
+        chan.truncate(size);
     }
 }

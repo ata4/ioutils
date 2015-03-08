@@ -9,19 +9,24 @@
  */
 package info.ata4.io.channel;
 
+import info.ata4.io.buffer.source.BufferedSource;
 import java.io.IOException;
 import java.nio.channels.Channel;
 
 /**
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
+ * @param <C>
+ * @param <B>
  */
-public class ChannelProxy<T extends Channel> implements Channel {
+public abstract class BufferedChannel <C extends Channel, B extends BufferedSource> implements Channel {
     
-    protected final T chan;
+    protected final C chan;
+    protected final B buf;
     
-    public ChannelProxy(T chan) {
+    public BufferedChannel(C chan, B buf) {
         this.chan = chan;
+        this.buf = buf;
     }
 
     @Override
@@ -31,6 +36,7 @@ public class ChannelProxy<T extends Channel> implements Channel {
 
     @Override
     public void close() throws IOException {
+        buf.close();
         chan.close();
     }
 }

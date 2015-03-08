@@ -11,8 +11,8 @@ package info.ata4.io;
 
 import info.ata4.io.buffer.source.BufferedSource;
 import info.ata4.io.buffer.source.ByteBufferSource;
-import info.ata4.io.buffer.source.ByteChannelSource;
 import info.ata4.io.buffer.source.SeekableByteChannelSource;
+import info.ata4.io.buffer.source.WritableByteChannelSource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -35,7 +35,7 @@ public class DataWriters {
     
     public static DataWriter forWritableByteChannel(WritableByteChannel chan) throws IOException {
         ByteBuffer bb = ByteBuffer.allocateDirect(1 << 18);
-        BufferedSource buf = new ByteChannelSource(bb, chan); 
+        BufferedSource buf = new WritableByteChannelSource(bb, chan); 
         return new DataWriter(buf);
     }
     

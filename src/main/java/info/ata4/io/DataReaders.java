@@ -11,7 +11,7 @@ package info.ata4.io;
 
 import info.ata4.io.buffer.source.BufferedSource;
 import info.ata4.io.buffer.source.ByteBufferSource;
-import info.ata4.io.buffer.source.ByteChannelSource;
+import info.ata4.io.buffer.source.ReadableByteChannelSource;
 import info.ata4.io.buffer.source.SeekableByteChannelSource;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +35,7 @@ public class DataReaders {
     
     public static DataReader forReadableByteChannel(ReadableByteChannel chan) throws IOException {
         ByteBuffer bb = ByteBuffer.allocateDirect(1 << 18);
-        BufferedSource buf = new ByteChannelSource(bb, chan); 
+        BufferedSource buf = new ReadableByteChannelSource(bb, chan); 
         return new DataReader(buf);
     }
     
