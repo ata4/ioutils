@@ -9,12 +9,11 @@
  */
 package info.ata4.io.buffer.source;
 
+import info.ata4.io.channel.ChannelUtils;
 import info.ata4.log.LogUtils;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.NonReadableChannelException;
-import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.SeekableByteChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,22 +33,23 @@ public class SeekableByteChannelSource extends ChannelSource<SeekableByteChannel
 
     public SeekableByteChannelSource(ByteBuffer buffer, SeekableByteChannel chan) {
         super(buffer, chan);
+           
+        if (ChannelUtils.isReadable(chan)) {
+            bufIn = new ReadableByteChannelSource(buffer, chan);
+        } else {
+            bufIn = null;
+        }
         
-        // find out whether the channel is actually readable and/or writable in a
-        // non-destructive way by using an empty buffer
-        ReadableByteChannelSource bufInTmp = null;
-        try {
-            chan.read(ByteBuffer.allocate(0));
-            bufInTmp = new ReadableByteChannelSource(buffer, chan);
-        } catch (NonReadableChannelException | IOException ex) {}
-        bufIn = bufInTmp;
+        if (ChannelUtils.isWritable(chan)) {
+            bufOut = new WritableByteChannelSource(buffer, chan);
+        } else {
+            bufOut = null;
+        }
         
-        WritableByteChannelSource bufOutTmp = null;
-        try {
-            chan.write(ByteBuffer.allocate(0));
-            bufOutTmp = new WritableByteChannelSource(buffer, chan);
-        } catch (NonWritableChannelException | IOException ex) {}
-        bufOut = bufOutTmp;
+        // this shouldn't happen, but it's possible in theory
+        if (bufIn == null && bufOut == null) {
+            throw new IllegalArgumentException("Channel is neither readable, nor writable");
+        }
         
         // switch to write mode if there's no readable channel
         write = bufIn == null;

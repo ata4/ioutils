@@ -34,7 +34,8 @@ import java.util.List;
  */
 public class ByteBufferUtils {
     
-    private static final ByteBuffer EMPTY = ByteBuffer.allocate(0);
+    public static final ByteBuffer EMPTY = ByteBuffer.allocate(0);
+    
     private static final int DIRECT_THRESHOLD = 10240; // 10 KB
 
     private ByteBufferUtils() {
