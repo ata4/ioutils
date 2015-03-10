@@ -35,11 +35,11 @@ public class BufferedSourceChannel implements ByteChannel {
             throw new ClosedChannelException();
         }
         
-        try {
-            return buf.read(dst);
-        } catch (NonReadableSourceException ex) {
+        if (!buf.canRead()) {
             throw new NonReadableChannelException();
         }
+        
+        return buf.read(dst);
     }
 
     @Override
@@ -48,11 +48,11 @@ public class BufferedSourceChannel implements ByteChannel {
             throw new ClosedChannelException();
         }
         
-        try {
-            return buf.write(src);
-        } catch (NonWritableSourceException ex) {
+        if (!buf.canWrite()) {
             throw new NonWritableChannelException();
         }
+        
+        return buf.write(src);
     }
     
     @Override
