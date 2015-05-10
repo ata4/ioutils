@@ -142,6 +142,21 @@ public class DataWriter extends DataBridge implements DataOutput, StringOutput {
     public void writeStringNull(String str) throws IOException {
         writeStringNull(str, StandardCharsets.US_ASCII);
     }
+    
+    @Override
+    public void writeStringFixed(String str, int length, Charset charset) throws IOException {
+        byte[] raw = str.getBytes(charset);
+        writeBytes(raw);
+        int padding = length - raw.length;
+        for (int i = 0; i < padding; i++) {
+            writeUnsignedByte(0);
+        }
+    }
+    
+    @Override
+    public void writeStringFixed(String str, int length) throws IOException {
+        writeStringFixed(str, length, StandardCharsets.US_ASCII);
+    }
 
     @Override
     public void writeStringFixed(String str, Charset charset) throws IOException {

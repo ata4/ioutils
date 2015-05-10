@@ -17,6 +17,10 @@ import java.nio.charset.Charset;
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
 public interface StringOutput {
+    
+    void writeStringFixed(String str, int length, Charset charset) throws IOException;
+    
+    void writeStringFixed(String str, int length) throws IOException;
 
     void writeStringFixed(String str, Charset charset) throws IOException;
 
