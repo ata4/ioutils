@@ -168,7 +168,7 @@ public class SeekableByteChannelSource extends ChannelSource<SeekableByteChannel
             clear = true;
         } else {
             // in read mode, the buffer position may be moved forward
-            if (newPos < pos + buf.position() || newPos > pos + buf.limit()) {
+            if (newPos < pos + buf.position() || newPos > buf.limit()) {
                 L.finest("postion: outside read buffer");
                 clear = true;
             }
