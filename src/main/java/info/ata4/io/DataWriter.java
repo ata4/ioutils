@@ -20,6 +20,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.NullInputStream;
 
 /**
  * 
@@ -187,5 +189,21 @@ public class DataWriter extends DataBridge implements DataOutput, StringOutput {
     @Override
     public void writeStringPrefixed(String str, Class<? extends Number> prefixType) throws IOException {
         writeStringPrefixed(str, prefixType, StandardCharsets.US_ASCII);
+    }
+    
+    @Override
+    public void align(int align) throws IOException {
+        // avoid positioning and write null bytes, since it's pretty slow to
+        // flush the buffer every time after correcting the position
+        long pos = position();
+        long rem = pos % align;
+        if (rem != 0) {
+            int pad = (int) (align - rem);
+            while (pad > 0) {
+                int padWrite = Math.min(4096, pad);
+                writeBytes(new byte[padWrite]);
+                pad -= padWrite;
+            }
+        }
     }
 }
