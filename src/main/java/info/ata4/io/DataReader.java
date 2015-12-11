@@ -29,6 +29,8 @@ import org.apache.commons.lang3.ArrayUtils;
  */
 public class DataReader extends DataBridge implements DataInput, StringInput {
     
+    private static final BigInteger TWO_COMPL_REF = BigInteger.ONE.shiftLeft(Long.SIZE);
+    
     public DataReader(BufferedSource buf) {
         super(buf);
     }
@@ -119,13 +121,15 @@ public class DataReader extends DataBridge implements DataInput, StringInput {
     }
     
     @Override
-    public BigInteger readUnsignedLong() throws IOException {
-        byte[] raw = new byte[8];
-        readBytes(raw);
-        if (order() == ByteOrder.LITTLE_ENDIAN) {
-            ArrayUtils.reverse(raw);
+    public BigInteger readUnsignedLong() throws IOException {        
+        BigInteger v = BigInteger.valueOf(readLong());
+        
+        // convert to unsigned
+        if (v.compareTo(BigInteger.ZERO) < 0) {
+            v = v.add(TWO_COMPL_REF);
         }
-        return new BigInteger(raw);
+        
+        return v;
     }
     
     @Override
