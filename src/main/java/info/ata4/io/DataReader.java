@@ -17,11 +17,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.Channels;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * 
@@ -144,16 +142,18 @@ public class DataReader extends DataBridge implements DataInput, StringInput {
     
     @Override
     public String readStringFixed(int length, Charset charset) throws IOException {
+        // read raw string including padding
         byte[] raw = new byte[length];
         readBytes(raw);
         
-        for (length = 0; length < raw.length && raw[length] != 0; length++);
-        
-        if (length == 0) {
-            return "";
-        } else {
-            return new String(raw, 0, length, charset);
+        // find offset to the first null byte, which is also the length of the
+        // string
+        length = 0;
+        while (length < raw.length && raw[length] != 0) {
+            length++;
         }
+        
+        return new String(raw, 0, length, charset);
     }
     
     @Override
@@ -163,22 +163,14 @@ public class DataReader extends DataBridge implements DataInput, StringInput {
 
     @Override
     public String readStringNull(int limit, Charset charset) throws IOException {
-        ByteBuffer bb = ByteBuffer.allocate(limit);
-        
-        byte b;
-        while ((b = readByte()) != 0) {
-            if (bb.hasRemaining()) {
-                bb.put(b);
-            }
+        // read bytes until the first null byte
+        byte[] raw = new byte[limit];
+        int length = 0;
+        while (length < raw.length && (raw[length] = readByte()) != 0) {
+            length++;
         }
-        
-        bb.flip();
-        
-        if (!bb.hasRemaining()) {
-            return "";
-        } else {
-            return new String(bb.array(), 0, bb.limit(), charset);
-        }
+
+        return new String(raw, 0, length, charset);
     }
     
     @Override
